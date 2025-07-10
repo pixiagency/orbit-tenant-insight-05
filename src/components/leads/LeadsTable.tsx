@@ -44,22 +44,61 @@ import {
 } from 'lucide-react';
 
 interface Lead {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id?: string;
+  
+  // Basic Contact Information (from CRM spec)
+  first_name: string;
+  last_name: string;
   email: string;
-  phone: string;
-  company: string;
-  title: string;
-  status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted';
-  score: number;
-  source: string;
-  assignedTo: string;
-  createdDate: string;
-  createdAt: string;
-  lastActivity: string;
-  value: number;
-  notes: string;
+  phone?: string;
+  mobile_phone?: string;
+  job_title?: string;
+  department?: string;
+  
+  // Contact Status & Classification
+  lifecycle_stage: string;
+  contact_status: string;
+  lead_source: string;
+  
+  // Communication Preferences
+  email_opt_in: boolean;
+  phone_opt_in: boolean;
+  preferred_contact_method: string;
+  do_not_call: boolean;
+  
+  // Company Information (Optional)
+  company?: string;
+  website?: string;
+  industry?: string;
+  companySize?: string;
+  
+  // Address Information
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  
+  // Additional Information
+  notes?: string;
+  tags?: string[];
+  
+  // System fields (Auto-Generated)
+  contact_owner?: string;
+  created_date?: string;
+  modified_date?: string;
+  
+  // Legacy fields for compatibility
+  firstName?: string;
+  lastName?: string;
+  title?: string;
+  status?: string;
+  source?: string;
+  assignedTo?: string;
+  createdAt?: string;
+  lastActivity?: string;
+  value?: number;
+  score?: number;
 }
 
 interface LeadsTableProps {
@@ -198,12 +237,12 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                 </TableCell>
                 <TableCell className="w-80">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 truncate">
-                        {lead.firstName} {lead.lastName}
-                      </div>
-                      <div className="text-sm text-gray-500 truncate">{lead.title}</div>
-                    </div>
+                     <div className="flex-1 min-w-0">
+                       <div className="font-semibold text-gray-900 truncate">
+                         {lead.first_name || lead.firstName} {lead.last_name || lead.lastName}
+                       </div>
+                       <div className="text-sm text-gray-500 truncate">{lead.job_title || lead.title}</div>
+                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-2 flex-shrink-0">
@@ -254,28 +293,28 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
                 <TableCell>
                   <div className="font-medium">{lead.company}</div>
                 </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={getStatusColor(lead.status)}>
-                    {lead.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full w-fit ${getScoreColor(lead.score)}`}>
-                    <Star className="h-3 w-3" />
-                    <span className="text-xs font-medium">{lead.score}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{lead.source}</span>
-                </TableCell>
-                <TableCell>
-                  <span className="font-semibold text-green-600">
-                    ${lead.value.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{lead.assignedTo}</span>
-                </TableCell>
+                 <TableCell>
+                   <Badge variant="outline" className={getStatusColor(lead.contact_status || lead.status)}>
+                     {lead.contact_status || lead.status}
+                   </Badge>
+                 </TableCell>
+                 <TableCell>
+                   <div className={`flex items-center space-x-1 px-2 py-1 rounded-full w-fit ${getScoreColor(lead.score || 0)}`}>
+                     <Star className="h-3 w-3" />
+                     <span className="text-xs font-medium">{lead.score || 0}</span>
+                   </div>
+                 </TableCell>
+                 <TableCell>
+                   <span className="text-sm">{lead.lead_source || lead.source}</span>
+                 </TableCell>
+                 <TableCell>
+                   <span className="font-semibold text-green-600">
+                     ${(lead.value || 0).toLocaleString()}
+                   </span>
+                 </TableCell>
+                 <TableCell>
+                   <span className="text-sm">{lead.contact_owner || lead.assignedTo}</span>
+                 </TableCell>
               </TableRow>
             ))}
           </TableBody>

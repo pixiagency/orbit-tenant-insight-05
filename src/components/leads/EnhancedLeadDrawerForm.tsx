@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -20,11 +19,12 @@ import {
   Globe, 
   MapPin, 
   Star, 
-  DollarSign, 
+  Settings, 
   Calendar,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
+  Users
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CountrySelect } from '@/components/shared/CountrySelect';
@@ -32,26 +32,32 @@ import { CitySelect } from '@/components/shared/CitySelect';
 
 interface Lead {
   id?: string;
-  // Contact Information (Required)
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
   
-  // Company Information
+  // Basic Contact Information (from CRM spec)
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  mobile_phone?: string;
+  job_title?: string;
+  department?: string;
+  
+  // Contact Status & Classification
+  lifecycle_stage: string;
+  contact_status: string;
+  lead_source: string;
+  
+  // Communication Preferences
+  email_opt_in: boolean;
+  phone_opt_in: boolean;
+  preferred_contact_method: string;
+  do_not_call: boolean;
+  
+  // Company Information (Optional)
   company?: string;
-  jobTitle?: string;
   website?: string;
   industry?: string;
   companySize?: string;
-  
-  // Lead Details
-  source: string;
-  status: string;
-  leadScore?: number;
-  estimatedValue?: number;
-  assignedTo?: string;
-  priority?: string;
   
   // Address Information
   address?: string;
@@ -64,9 +70,10 @@ interface Lead {
   notes?: string;
   tags?: string[];
   
-  // System fields
-  createdAt?: string;
-  updatedAt?: string;
+  // System fields (Auto-Generated)
+  contact_owner?: string;
+  created_date?: string;
+  modified_date?: string;
 }
 
 interface EnhancedLeadDrawerFormProps {
@@ -100,44 +107,34 @@ interface CustomField {
   section?: string;
 }
 
-// Mock custom fields for demonstration - removed business-specific fields
-const MOCK_CUSTOM_FIELDS: CustomField[] = [
-  {
-    id: 'preferred_contact_method',
-    name: 'preferred_contact_method',
-    label: 'Preferred Contact Method',
-    type: 'select',
-    required: false,
-    section: 'contact',
-    options: ['Email', 'Phone', 'Text Message', 'Mail']
-  },
-  {
-    id: 'birthday',
-    name: 'birthday',
-    label: 'Birthday',
-    type: 'date',
-    required: false,
-    section: 'contact'
-  },
-  {
-    id: 'social_media',
-    name: 'social_media',
-    label: 'Social Media Profile',
-    type: 'url',
-    required: false,
-    section: 'additional',
-    helpText: 'LinkedIn, Twitter, etc.'
-  }
+// CRM Specification Constants
+const LIFECYCLE_STAGES = [
+  'Subscriber',
+  'Lead', 
+  'Marketing Qualified Lead',
+  'Sales Qualified Lead',
+  'Customer'
+];
+
+const CONTACT_STATUSES = [
+  'Active',
+  'Inactive', 
+  'Unqualified'
 ];
 
 const LEAD_SOURCES = [
-  'Website', 'Referral', 'Cold Call', 'Cold Email', 'Social Media', 
-  'Trade Show', 'Advertising', 'Partner', 'Content Marketing', 'SEO', 'Other'
+  'Website',
+  'Referral',
+  'Cold Call',
+  'Event',
+  'Social Media',
+  'Advertisement'
 ];
 
-const LEAD_STATUSES = [
-  'New', 'Contacted', 'Qualified', 'Proposal Sent', 'Negotiating', 
-  'Converted', 'Lost', 'Nurturing', 'Follow Up'
+const PREFERRED_CONTACT_METHODS = [
+  'Email',
+  'Phone',
+  'SMS'
 ];
 
 const INDUSTRIES = [
@@ -150,9 +147,7 @@ const COMPANY_SIZES = [
   '201-500 employees', '501-1000 employees', '1000+ employees'
 ];
 
-const PRIORITIES = ['Low', 'Medium', 'High', 'Urgent'];
-
-const ASSIGNEES = [
+const CONTACT_OWNERS = [
   'Sarah Johnson', 'Mike Chen', 'Emily Rodriguez', 'David Brown', 'Alex Thompson'
 ];
 
@@ -161,7 +156,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
   onClose,
   onSubmit,
   lead,
-  customFields = MOCK_CUSTOM_FIELDS
+  customFields = []
 }) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -169,28 +164,34 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
 
   const form = useForm<Lead>({
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: '',
+      mobile_phone: '',
+      job_title: '',
+      department: '',
+      lifecycle_stage: 'Lead',
+      contact_status: 'Active',
+      lead_source: 'Website',
+      email_opt_in: true,
+      phone_opt_in: true,
+      preferred_contact_method: 'Email',
+      do_not_call: false,
       company: '',
-      jobTitle: '',
       website: '',
       industry: '',
       companySize: '',
-      source: '',
-      status: 'New',
-      leadScore: 0,
-      estimatedValue: 0,
-      assignedTo: '',
-      priority: 'Medium',
       address: '',
       city: '',
       state: '',
       zipCode: '',
       country: '',
       notes: '',
-      tags: []
+      tags: [],
+      contact_owner: '',
+      created_date: new Date().toISOString().split('T')[0],
+      modified_date: new Date().toISOString().split('T')[0]
     }
   });
 
@@ -202,28 +203,34 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
       setTags(lead.tags || []);
     } else {
       reset({
-        firstName: '',
-        lastName: '',
+        first_name: '',
+        last_name: '',
         email: '',
         phone: '',
+        mobile_phone: '',
+        job_title: '',
+        department: '',
+        lifecycle_stage: 'Lead',
+        contact_status: 'Active',
+        lead_source: 'Website',
+        email_opt_in: true,
+        phone_opt_in: true,
+        preferred_contact_method: 'Email',
+        do_not_call: false,
         company: '',
-        jobTitle: '',
         website: '',
         industry: '',
         companySize: '',
-        source: '',
-        status: 'New',
-        leadScore: 0,
-        estimatedValue: 0,
-        assignedTo: '',
-        priority: 'Medium',
         address: '',
         city: '',
         state: '',
         zipCode: '',
         country: '',
         notes: '',
-        tags: []
+        tags: [],
+        contact_owner: '',
+        created_date: new Date().toISOString().split('T')[0],
+        modified_date: new Date().toISOString().split('T')[0]
       });
       setTags([]);
     }
@@ -234,26 +241,31 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
     const errors: string[] = [];
     
     // First name is always required
-    if (!data.firstName?.trim()) {
+    if (!data.first_name?.trim()) {
       errors.push('First name is required');
     }
     
-    // At least one contact method (email OR phone) is required
-    if (!data.email?.trim() && !data.phone?.trim()) {
-      errors.push('Either email or phone number is required');
+    // Last name is required
+    if (!data.last_name?.trim()) {
+      errors.push('Last name is required');
     }
     
-    // Email format validation
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    // Email is required and must be unique
+    if (!data.email?.trim()) {
+      errors.push('Email is required');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       errors.push('Please enter a valid email address');
     }
     
     // Phone format validation (basic)
     if (data.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(data.phone.replace(/[\s\-\(\)]/g, ''))) {
-      errors.push('Please enter a valid phone number');
+      errors.push('Please enter a valid business phone number');
     }
     
-    // Skip custom fields validation since they're removed from contacts
+    // Mobile phone format validation (basic)
+    if (data.mobile_phone && !/^[\+]?[1-9][\d]{0,15}$/.test(data.mobile_phone.replace(/[\s\-\(\)]/g, ''))) {
+      errors.push('Please enter a valid mobile phone number');
+    }
     
     return errors;
   };
@@ -269,8 +281,10 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
     
     setValidationErrors([]);
     data.tags = tags;
+    data.modified_date = new Date().toISOString().split('T')[0];
+    
     onSubmit(data);
-    toast.success(lead ? 'Lead updated successfully!' : 'Lead created successfully!');
+    toast.success(lead ? 'Contact updated successfully!' : 'Contact created successfully!');
     onClose();
   };
 
@@ -285,23 +299,14 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  // Simplified custom field rendering - removed to avoid complexity for contacts
-  const renderCustomField = (field: CustomField) => {
-    return null; // Removed custom fields for contacts
-  };
-
-  const getCustomFieldsBySection = (section: string) => {
-    return customFields.filter(field => field.section === section);
-  };
-
   return (
     <DrawerForm
       isOpen={isOpen}
       onClose={onClose}
       title={lead ? 'Edit Contact' : 'Add New Contact'}
-      description={lead ? 'Update the lead information below.' : 'Enter the lead information below.'}
+      description={lead ? 'Update the contact information below.' : 'Enter the contact information below.'}
       onSave={handleSubmit(onFormSubmit)}
-      saveText={lead ? 'Update Lead' : 'Create Lead'}
+      saveText={lead ? 'Update Contact' : 'Create Contact'}
     >
       <form className="space-y-6">
         {/* Validation Errors */}
@@ -318,29 +323,31 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
           </Alert>
         )}
 
-        {/* Contact Information */}
+        {/* Basic Contact Information */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
             <User className="h-4 w-4 mr-2" />
-            Contact Information
+            Basic Contact Information
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-sm font-medium">
+              <Label htmlFor="first_name" className="text-sm font-medium">
                 First Name <span className="text-red-500">*</span>
               </Label>
               <Input
-                {...register('firstName', { required: true })}
+                {...register('first_name', { required: true })}
                 placeholder="John"
                 className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
+              <Label htmlFor="last_name" className="text-sm font-medium">
+                Last Name <span className="text-red-500">*</span>
+              </Label>
               <Input
-                {...register('lastName')}
+                {...register('last_name', { required: true })}
                 placeholder="Smith"
                 className="bg-gray-50 dark:bg-gray-700"
               />
@@ -348,10 +355,10 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
-                Email <span className="text-amber-500 text-xs">(Email OR Phone required)</span>
+                Email <span className="text-red-500">*</span> <span className="text-xs text-gray-500">(Must be unique)</span>
               </Label>
               <Input
-                {...register('email')}
+                {...register('email', { required: true })}
                 type="email"
                 placeholder="john@example.com"
                 className="bg-gray-50 dark:bg-gray-700"
@@ -359,9 +366,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-medium">
-                Phone <span className="text-amber-500 text-xs">(Email OR Phone required)</span>
-              </Label>
+              <Label htmlFor="phone" className="text-sm font-medium">Business Phone</Label>
               <Input
                 {...register('phone')}
                 type="tel"
@@ -369,8 +374,163 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                 className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
-          </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="mobile_phone" className="text-sm font-medium">Mobile Phone</Label>
+              <Input
+                {...register('mobile_phone')}
+                type="tel"
+                placeholder="+1 (555) 987-6543"
+                className="bg-gray-50 dark:bg-gray-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="job_title" className="text-sm font-medium">Job Title</Label>
+              <Input
+                {...register('job_title')}
+                placeholder="CEO, Manager, Director"
+                className="bg-gray-50 dark:bg-gray-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department" className="text-sm font-medium">Department</Label>
+              <Input
+                {...register('department')}
+                placeholder="Sales, Marketing, IT"
+                className="bg-gray-50 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Contact Status & Classification */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Star className="h-4 w-4 mr-2" />
+            Contact Status & Classification
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="lifecycle_stage" className="text-sm font-medium">Lifecycle Stage</Label>
+              <Select onValueChange={(value) => setValue('lifecycle_stage', value)} defaultValue={watch('lifecycle_stage')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Select stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIFECYCLE_STAGES.map((stage) => (
+                    <SelectItem key={stage} value={stage}>
+                      {stage}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contact_status" className="text-sm font-medium">Contact Status</Label>
+              <Select onValueChange={(value) => setValue('contact_status', value)} defaultValue={watch('contact_status')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CONTACT_STATUSES.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      <Badge variant={status === 'Active' ? 'default' : status === 'Inactive' ? 'secondary' : 'destructive'}>
+                        {status}
+                      </Badge>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="lead_source" className="text-sm font-medium">Lead Source</Label>
+              <Select onValueChange={(value) => setValue('lead_source', value)} defaultValue={watch('lead_source')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Select source" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEAD_SOURCES.map((source) => (
+                    <SelectItem key={source} value={source}>
+                      {source}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Communication Preferences */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Mail className="h-4 w-4 mr-2" />
+            Communication Preferences
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="preferred_contact_method" className="text-sm font-medium">Preferred Contact Method</Label>
+              <Select onValueChange={(value) => setValue('preferred_contact_method', value)} defaultValue={watch('preferred_contact_method')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREFERRED_CONTACT_METHODS.map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="email_opt_in" className="text-sm font-medium">Email Permission</Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="email_opt_in"
+                    checked={watch('email_opt_in')}
+                    onCheckedChange={(checked) => setValue('email_opt_in', checked as boolean)}
+                  />
+                  <span className="text-sm text-gray-600">Permission to send emails</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="phone_opt_in" className="text-sm font-medium">Phone Permission</Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="phone_opt_in"
+                    checked={watch('phone_opt_in')}
+                    onCheckedChange={(checked) => setValue('phone_opt_in', checked as boolean)}
+                  />
+                  <span className="text-sm text-gray-600">Permission to call</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="do_not_call" className="text-sm font-medium">Do Not Call</Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="do_not_call"
+                    checked={watch('do_not_call')}
+                    onCheckedChange={(checked) => setValue('do_not_call', checked as boolean)}
+                  />
+                  <span className="text-sm text-red-600">Legal do-not-call flag</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <Separator />
@@ -388,15 +548,6 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
               <Input
                 {...register('company')}
                 placeholder="Acme Corporation"
-                className="bg-gray-50 dark:bg-gray-700"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="jobTitle" className="text-sm font-medium">Job Title</Label>
-              <Input
-                {...register('jobTitle')}
-                placeholder="CEO, Manager, Director"
                 className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
@@ -441,111 +592,6 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-
-        </div>
-
-        <Separator />
-
-        {/* Lead Details */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Star className="h-4 w-4 mr-2" />
-            Lead Details
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="source" className="text-sm font-medium">Lead Source</Label>
-              <Select onValueChange={(value) => setValue('source', value)} defaultValue={watch('source')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
-                  <SelectValue placeholder="Select source" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEAD_SOURCES.map((source) => (
-                    <SelectItem key={source} value={source}>
-                      {source}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status" className="text-sm font-medium">Status</Label>
-              <Select onValueChange={(value) => setValue('status', value)} defaultValue={watch('status')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEAD_STATUSES.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="priority" className="text-sm font-medium">Priority</Label>
-              <Select onValueChange={(value) => setValue('priority', value)} defaultValue={watch('priority')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIORITIES.map((priority) => (
-                    <SelectItem key={priority} value={priority}>
-                      <Badge variant={priority === 'Urgent' ? 'destructive' : priority === 'High' ? 'default' : 'secondary'}>
-                        {priority}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="assignedTo" className="text-sm font-medium">Assigned To</Label>
-              <Select onValueChange={(value) => setValue('assignedTo', value)} defaultValue={watch('assignedTo')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ASSIGNEES.map((assignee) => (
-                    <SelectItem key={assignee} value={assignee}>
-                      {assignee}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="leadScore" className="text-sm font-medium">Lead Score (0-100)</Label>
-              <Input
-                {...register('leadScore', { valueAsNumber: true })}
-                type="number"
-                min="0"
-                max="100"
-                placeholder="75"
-                className="bg-gray-50 dark:bg-gray-700"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="estimatedValue" className="text-sm font-medium">Estimated Value</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input
-                  {...register('estimatedValue', { valueAsNumber: true })}
-                  type="number"
-                  min="0"
-                  placeholder="50000"
-                  className="bg-gray-50 dark:bg-gray-700 pl-10"
-                />
-              </div>
             </div>
           </div>
         </div>
@@ -610,13 +656,56 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
 
         <Separator />
 
+        {/* System Fields */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Settings className="h-4 w-4 mr-2" />
+            System Fields
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_owner" className="text-sm font-medium">Contact Owner</Label>
+              <Select onValueChange={(value) => setValue('contact_owner', value)} defaultValue={watch('contact_owner')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Assign to sales rep" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CONTACT_OWNERS.map((owner) => (
+                    <SelectItem key={owner} value={owner}>
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4" />
+                        <span>{owner}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs text-gray-500">Created Date</Label>
+                  <div className="text-sm font-medium">{watch('created_date')}</div>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Modified Date</Label>
+                  <div className="text-sm font-medium">{watch('modified_date')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
         {/* Additional Information */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
             <Info className="h-4 w-4 mr-2" />
             Additional Information
           </h4>
-
 
           {/* Tags */}
           <div className="space-y-2">
@@ -655,7 +744,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
             <Textarea
               {...register('notes')}
               rows={4}
-              placeholder="Additional notes about this lead..."
+              placeholder="Additional notes about this contact..."
               className="bg-gray-50 dark:bg-gray-700"
             />
           </div>
