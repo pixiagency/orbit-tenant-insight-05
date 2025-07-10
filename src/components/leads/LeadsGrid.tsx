@@ -27,25 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-interface Lead {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  company: string;
-  title: string;
-  status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted';
-  score: number;
-  source: string;
-  assignedTo: string;
-  createdDate: string;
-  createdAt: string;
-  lastActivity: string;
-  value: number;
-  notes: string;
-}
+import { Lead } from '@/types/leads';
 
 interface LeadsGridProps {
   leads: Lead[];

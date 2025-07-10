@@ -29,52 +29,7 @@ import {
 import { toast } from 'sonner';
 import { CountrySelect } from '@/components/shared/CountrySelect';
 import { CitySelect } from '@/components/shared/CitySelect';
-
-interface Lead {
-  id?: string;
-  
-  // Basic Contact Information (from CRM spec)
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  mobile_phone?: string;
-  job_title?: string;
-  department?: string;
-  
-  // Contact Status & Classification
-  lifecycle_stage: string;
-  contact_status: string;
-  lead_source: string;
-  
-  // Communication Preferences
-  email_opt_in: boolean;
-  phone_opt_in: boolean;
-  preferred_contact_method: string;
-  do_not_call: boolean;
-  
-  // Company Information (Optional)
-  company?: string;
-  website?: string;
-  industry?: string;
-  companySize?: string;
-  
-  // Address Information
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  country?: string;
-  
-  // Additional Information
-  notes?: string;
-  tags?: string[];
-  
-  // System fields (Auto-Generated)
-  contact_owner?: string;
-  created_date?: string;
-  modified_date?: string;
-}
+import { Lead } from '@/types/leads';
 
 interface EnhancedLeadDrawerFormProps {
   isOpen: boolean;

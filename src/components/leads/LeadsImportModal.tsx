@@ -43,17 +43,16 @@ interface ImportResult {
 }
 
 const fieldMappings = {
-  'First Name': 'firstName',
-  'Last Name': 'lastName',
+  'First Name': 'first_name',
+  'Last Name': 'last_name',
   'Email': 'email',
   'Phone': 'phone',
+  'Mobile Phone': 'mobile_phone',
   'Company': 'company',
-  'Title': 'title',
-  'Status': 'status',
-  'Score': 'score',
-  'Source': 'source',
-  'Assigned To': 'assignedTo',
-  'Value': 'value',
+  'Job Title': 'job_title',
+  'Contact Status': 'contact_status',
+  'Lead Source': 'lead_source',
+  'Contact Owner': 'contact_owner',
   'Notes': 'notes'
 };
 

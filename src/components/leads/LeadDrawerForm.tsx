@@ -2,65 +2,7 @@
 import React from 'react';
 import { EnhancedLeadDrawerForm } from './EnhancedLeadDrawerForm';
 import { useCustomFields } from '../../hooks/useCustomFields';
-
-interface Lead {
-  id?: string;
-  
-  // Basic Contact Information (from CRM spec)
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  mobile_phone?: string;
-  job_title?: string;
-  department?: string;
-  
-  // Contact Status & Classification
-  lifecycle_stage: string;
-  contact_status: string;
-  lead_source: string;
-  
-  // Communication Preferences
-  email_opt_in: boolean;
-  phone_opt_in: boolean;
-  preferred_contact_method: string;
-  do_not_call: boolean;
-  
-  // Company Information (Optional)
-  company?: string;
-  website?: string;
-  industry?: string;
-  companySize?: string;
-  
-  // Address Information
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  country?: string;
-  
-  // Additional Information
-  notes?: string;
-  tags?: string[];
-  
-  // System fields (Auto-Generated)
-  contact_owner?: string;
-  created_date?: string;
-  modified_date?: string;
-  
-  // Legacy compatibility fields
-  firstName?: string;
-  lastName?: string;
-  title?: string;
-  source?: string;
-  status?: string;
-  assignedTo?: string;
-  createdAt?: string;
-  createdDate?: string;
-  lastActivity?: string;
-  value?: number;
-  score?: number;
-}
+import { Lead } from '@/types/leads';
 
 interface LeadDrawerFormProps {
   isOpen: boolean;

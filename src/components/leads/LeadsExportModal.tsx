@@ -20,25 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface Lead {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  company: string;
-  title: string;
-  status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted';
-  score: number;
-  source: string;
-  assignedTo: string;
-  createdDate: string;
-  createdAt: string;
-  lastActivity: string;
-  value: number;
-  notes: string;
-}
+import { Lead } from '@/types/leads';
 
 interface LeadsExportModalProps {
   isOpen: boolean;
@@ -56,33 +38,36 @@ export const LeadsExportModal: React.FC<LeadsExportModalProps> = ({
   const [exportType, setExportType] = useState<'csv' | 'excel' | 'pdf'>('csv');
   const [exportScope, setExportScope] = useState<'all' | 'selected' | 'filtered'>('all');
   const [selectedFields, setSelectedFields] = useState<string[]>([
-    'firstName',
-    'lastName',
+    'first_name',
+    'last_name',
     'email',
     'phone',
     'company',
-    'title',
-    'status',
-    'score',
-    'source',
-    'assignedTo',
-    'value'
+    'job_title',
+    'contact_status',
+    'lead_source',
+    'contact_owner'
   ]);
 
   const availableFields = [
-    { key: 'firstName', label: 'First Name' },
-    { key: 'lastName', label: 'Last Name' },
+    { key: 'first_name', label: 'First Name' },
+    { key: 'last_name', label: 'Last Name' },
     { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Phone' },
+    { key: 'mobile_phone', label: 'Mobile Phone' },
     { key: 'company', label: 'Company' },
-    { key: 'title', label: 'Title' },
-    { key: 'status', label: 'Status' },
-    { key: 'score', label: 'Score' },
-    { key: 'source', label: 'Source' },
-    { key: 'assignedTo', label: 'Assigned To' },
-    { key: 'value', label: 'Value' },
-    { key: 'createdDate', label: 'Created Date' },
-    { key: 'lastActivity', label: 'Last Activity' },
+    { key: 'job_title', label: 'Job Title' },
+    { key: 'department', label: 'Department' },
+    { key: 'lifecycle_stage', label: 'Lifecycle Stage' },
+    { key: 'contact_status', label: 'Contact Status' },
+    { key: 'lead_source', label: 'Lead Source' },
+    { key: 'preferred_contact_method', label: 'Preferred Contact Method' },
+    { key: 'city', label: 'City' },
+    { key: 'state', label: 'State' },
+    { key: 'country', label: 'Country' },
+    { key: 'contact_owner', label: 'Contact Owner' },
+    { key: 'created_date', label: 'Created Date' },
+    { key: 'modified_date', label: 'Modified Date' },
     { key: 'notes', label: 'Notes' }
   ];
 
