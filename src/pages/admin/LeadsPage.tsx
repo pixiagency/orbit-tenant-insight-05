@@ -19,23 +19,85 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from 'sonner';
 interface Lead {
   id: string;
-  firstName: string;
-  lastName: string;
+  
+  // Basic Contact Information (CRM spec)
+  first_name: string;
+  last_name: string;
   email: string;
-  phone: string;
-  company: string;
-  title: string;
-  status: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted';
-  score: number;
-  source: string;
-  assignedTo: string;
-  createdDate: string;
-  createdAt: string;
-  lastActivity: string;
-  value: number;
-  notes: string;
+  phone?: string;
+  mobile_phone?: string;
+  job_title?: string;
+  department?: string;
+  
+  // Contact Status & Classification
+  lifecycle_stage: string;
+  contact_status: string;
+  lead_source: string;
+  
+  // Communication Preferences
+  email_opt_in: boolean;
+  phone_opt_in: boolean;
+  preferred_contact_method: string;
+  do_not_call: boolean;
+  
+  // Company Information
+  company?: string;
+  website?: string;
+  industry?: string;
+  companySize?: string;
+  
+  // Address Information
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  
+  // Additional Information
+  notes?: string;
+  tags?: string[];
+  
+  // System fields
+  contact_owner?: string;
+  created_date?: string;
+  modified_date?: string;
+  
+  // Legacy fields for backward compatibility
+  firstName?: string;
+  lastName?: string;
+  title?: string;
+  status?: 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted';
+  score?: number;
+  source?: string;
+  assignedTo?: string;
+  createdDate?: string;
+  createdAt?: string;
+  lastActivity?: string;
+  value?: number;
 }
-const leadsData: Lead[] = [{
+
+// Transform legacy data to CRM format
+const transformLegacyLead = (legacyLead: any): Lead => ({
+  ...legacyLead,
+  first_name: legacyLead.firstName || legacyLead.first_name || '',
+  last_name: legacyLead.lastName || legacyLead.last_name || '',
+  job_title: legacyLead.title || legacyLead.job_title || '',
+  lifecycle_stage: legacyLead.status === 'qualified' ? 'Sales Qualified Lead' : 
+                  legacyLead.status === 'converted' ? 'Customer' : 'Lead',
+  contact_status: legacyLead.status === 'unqualified' ? 'Unqualified' : 'Active',
+  lead_source: legacyLead.source === 'Website Form' ? 'Website' : 
+               legacyLead.source === 'LinkedIn' ? 'Social Media' :
+               legacyLead.source === 'Trade Show' ? 'Event' : 
+               legacyLead.source || 'Website',
+  email_opt_in: true,
+  phone_opt_in: true,
+  preferred_contact_method: 'Email',
+  do_not_call: false,
+  contact_owner: legacyLead.assignedTo || legacyLead.contact_owner || '',
+  created_date: legacyLead.createdDate || legacyLead.created_date || new Date().toISOString().split('T')[0],
+  modified_date: legacyLead.createdDate || legacyLead.modified_date || new Date().toISOString().split('T')[0]
+});
+const rawLeadsData = [{
   id: '1',
   firstName: 'John',
   lastName: 'Smith',
@@ -971,9 +1033,12 @@ const leadsData: Lead[] = [{
   value: 45000,
   notes: 'Pest control services, route management'
 }];
+
+// Transform legacy data to CRM format
+const transformedLeadsData: Lead[] = rawLeadsData.map(transformLegacyLead);
 export const LeadsPage = () => {
   const navigate = useNavigate();
-  const [leads, setLeads] = useState<Lead[]>(leadsData);
+  const [leads, setLeads] = useState<Lead[]>(transformedLeadsData);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -1014,20 +1079,28 @@ export const LeadsPage = () => {
     ruleId?: string;
   }>>([]);
   const filteredLeads = leads.filter(lead => {
-    const fullName = `${lead.firstName} ${lead.lastName}`;
-    const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) || lead.email.toLowerCase().includes(searchTerm.toLowerCase()) || lead.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || lead.status === statusFilter;
-    const matchesSource = sourceFilter === 'all' || lead.source === sourceFilter;
-    const matchesAssignee = assigneeFilter === 'all' || lead.assignedTo === assigneeFilter;
-    const matchesScore = scoreFilter === 'all' || scoreFilter === 'hot' && lead.score >= 80 || scoreFilter === 'warm' && lead.score >= 60 && lead.score < 80 || scoreFilter === 'cold' && lead.score < 60;
+    const fullName = `${lead.first_name || lead.firstName} ${lead.last_name || lead.lastName}`;
+    const email = lead.email || '';
+    const company = lead.company || '';
+    const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || (lead.contact_status || lead.status) === statusFilter;
+    const matchesSource = sourceFilter === 'all' || (lead.lead_source || lead.source) === sourceFilter;
+    const matchesAssignee = assigneeFilter === 'all' || (lead.contact_owner || lead.assignedTo) === assigneeFilter;
+    const score = lead.score || 0;
+    const matchesScore = scoreFilter === 'all' || 
+                        (scoreFilter === 'hot' && score >= 80) ||
+                        (scoreFilter === 'warm' && score >= 60 && score < 80) ||
+                        (scoreFilter === 'cold' && score < 60);
     return matchesSearch && matchesStatus && matchesSource && matchesAssignee && matchesScore;
   });
   const leadStats = {
     total: leads.length,
-    new: leads.filter(l => l.status === 'new').length,
-    qualified: leads.filter(l => l.status === 'qualified').length,
-    converted: leads.filter(l => l.status === 'converted').length,
-    totalValue: leads.reduce((sum, lead) => sum + lead.value, 0)
+    new: leads.filter(l => (l.contact_status || l.status) === 'new').length,
+    qualified: leads.filter(l => (l.contact_status || l.status) === 'qualified').length,
+    converted: leads.filter(l => (l.contact_status || l.status) === 'converted').length,
+    totalValue: leads.reduce((sum, lead) => sum + (lead.value || 0), 0)
   };
   const handleAddLead = () => {
     setSelectedLead(null);
