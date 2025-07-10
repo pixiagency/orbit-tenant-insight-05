@@ -65,8 +65,9 @@ interface Opportunity {
   assignedTo: string;
   source: string;
   description?: string;
-  budget?: number;
-  timeline?: string;
+  notes?: string;
+  pipeline: string;
+  city?: string;
   createdAt: string;
   lastActivity: string;
 }
@@ -86,8 +87,9 @@ const opportunitiesData: Opportunity[] = [
     assignedTo: 'Sarah Johnson',
     source: 'Website',
     description: 'Large-scale CRM implementation for enterprise client',
-    budget: 150000,
-    timeline: '3-6 months',
+    notes: 'Key decision maker confirmed. Budget approved.',
+    pipeline: 'sales',
+    city: 'New York',
     createdAt: '2024-01-15T10:30:00Z',
     lastActivity: '2024-01-18'
   },
@@ -105,8 +107,9 @@ const opportunitiesData: Opportunity[] = [
     assignedTo: 'Mike Chen',
     source: 'LinkedIn',
     description: 'Growth platform for emerging startup',
-    budget: 80000,
-    timeline: '1-3 months',
+    notes: 'Demo scheduled for next week.',
+    pipeline: 'sales',
+    city: 'San Francisco',
     createdAt: '2024-01-18T14:20:00Z',
     lastActivity: '2024-01-18'
   },
@@ -124,7 +127,9 @@ const opportunitiesData: Opportunity[] = [
     assignedTo: 'Emily Rodriguez',
     source: 'Trade Show',
     description: 'Manufacturing automation solution',
-    timeline: '6-12 months',
+    notes: 'Technical requirements gathering in progress.',
+    pipeline: 'sales',
+    city: 'Chicago',
     createdAt: '2024-01-12T09:15:00Z',
     lastActivity: '2024-01-17'
   },
@@ -142,6 +147,9 @@ const opportunitiesData: Opportunity[] = [
     assignedTo: 'David Brown',
     source: 'Referral',
     description: 'Comprehensive financial services platform',
+    notes: 'Contract signed and implementation started.',
+    pipeline: 'sales',
+    city: 'Boston',
     createdAt: '2024-01-08T16:45:00Z',
     lastActivity: '2024-01-16'
   },
@@ -159,15 +167,58 @@ const opportunitiesData: Opportunity[] = [
     assignedTo: 'Sarah Johnson',
     source: 'Cold Call',
     description: 'Analytics platform for retail chain',
-    timeline: 'Not defined',
+    notes: 'Initial contact made, follow-up scheduled.',
+    pipeline: 'sales',
+    city: 'Los Angeles',
     createdAt: '2024-01-10T11:30:00Z',
     lastActivity: '2024-01-14'
+  },
+  {
+    id: '6',
+    name: 'Healthcare Management System',
+    company: 'HealthTech Solutions',
+    contact: 'Dr. Sarah Williams',
+    email: 'sarah.williams@healthtech.com',
+    phone: '+1 (555) 789-0123',
+    stage: 'qualification',
+    value: 180000,
+    probability: 55,
+    expectedCloseDate: '2024-03-05',
+    assignedTo: 'Mike Chen',
+    source: 'Website',
+    description: 'Complete healthcare management system',
+    notes: 'Compliance requirements discussion scheduled.',
+    pipeline: 'sales',
+    city: 'Seattle',
+    createdAt: '2024-01-05T08:15:00Z',
+    lastActivity: '2024-01-15'
+  },
+  {
+    id: '7',
+    name: 'E-commerce Platform Upgrade',
+    company: 'Online Retail Inc',
+    contact: 'James Thompson',
+    email: 'james.t@onlineretail.com',
+    phone: '+1 (555) 345-6789',
+    stage: 'proposal',
+    value: 65000,
+    probability: 70,
+    expectedCloseDate: '2024-02-20',
+    assignedTo: 'Emily Rodriguez',
+    source: 'Referral',
+    description: 'E-commerce platform modernization',
+    notes: 'Technical proposal submitted, waiting for feedback.',
+    pipeline: 'sales',
+    city: 'Miami',
+    createdAt: '2024-01-12T13:45:00Z',
+    lastActivity: '2024-01-17'
   }
 ];
 
 export const OpportunitiesPage = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>(opportunitiesData);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPipeline, setSelectedPipeline] = useState('sales');
   const [stageFilter, setStageFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
@@ -394,6 +445,16 @@ export const OpportunitiesPage = () => {
               <CardDescription>Filter and search your opportunities</CardDescription>
             </div>
             <div className="flex items-center space-x-2">
+              <Select value={selectedPipeline} onValueChange={setSelectedPipeline}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Select Pipeline" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800">
+                  <SelectItem value="sales">Sales Pipeline</SelectItem>
+                  <SelectItem value="marketing">Marketing Pipeline</SelectItem>
+                  <SelectItem value="partnerships">Partnership Pipeline</SelectItem>
+                </SelectContent>
+              </Select>
               <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
                 <Filter className="h-4 w-4 mr-2" />
                 Advanced Filters

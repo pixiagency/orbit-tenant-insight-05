@@ -89,7 +89,8 @@ const LEAD_SOURCES = [
 const PREFERRED_CONTACT_METHODS = [
   'Email',
   'Phone',
-  'SMS'
+  'SMS',
+  'WhatsApp'
 ];
 
 const INDUSTRIES = [
@@ -369,23 +370,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
             Contact Status & Classification
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="lifecycle_stage" className="text-sm font-medium">Lifecycle Stage</Label>
-              <Select onValueChange={(value) => setValue('lifecycle_stage', value)} defaultValue={watch('lifecycle_stage')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
-                  <SelectValue placeholder="Select stage" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LIFECYCLE_STAGES.map((stage) => (
-                    <SelectItem key={stage} value={stage}>
-                      {stage}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="contact_status" className="text-sm font-medium">Contact Status</Label>
               <Select onValueChange={(value) => setValue('contact_status', value)} defaultValue={watch('contact_status')}>
@@ -419,6 +404,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
+
           </div>
         </div>
 
@@ -438,7 +424,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                 <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select method" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800">
                   {PREFERRED_CONTACT_METHODS.map((method) => (
                     <SelectItem key={method} value={method}>
                       {method}
@@ -447,41 +433,37 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="email_opt_in" className="text-sm font-medium">Email Permission</Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="email_opt_in"
-                    checked={watch('email_opt_in')}
-                    onCheckedChange={(checked) => setValue('email_opt_in', checked as boolean)}
-                  />
-                  <span className="text-sm text-gray-600">Permission to send emails</span>
-                </div>
+          {/* Communication Permissions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-green-700 dark:text-green-400">Email Permissions</Label>
+              <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <Checkbox
+                  checked={watch('email_opt_in')}
+                  onCheckedChange={(checked) => setValue('email_opt_in', checked as boolean)}
+                />
+                <Label className="text-sm cursor-pointer">Permission to send emails</Label>
               </div>
+            </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="phone_opt_in" className="text-sm font-medium">Phone Permission</Label>
-                <div className="flex items-center space-x-2">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-blue-700 dark:text-blue-400">Phone Permissions</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <Checkbox
-                    id="phone_opt_in"
                     checked={watch('phone_opt_in')}
                     onCheckedChange={(checked) => setValue('phone_opt_in', checked as boolean)}
                   />
-                  <span className="text-sm text-gray-600">Permission to call</span>
+                  <Label className="text-sm cursor-pointer">Permission to call</Label>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="do_not_call" className="text-sm font-medium">Do Not Call</Label>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <Checkbox
-                    id="do_not_call"
                     checked={watch('do_not_call')}
                     onCheckedChange={(checked) => setValue('do_not_call', checked as boolean)}
                   />
-                  <span className="text-sm text-red-600">Legal do-not-call flag</span>
+                  <Label className="text-sm cursor-pointer text-red-700 dark:text-red-400">Do Not Call (Legal flag)</Label>
                 </div>
               </div>
             </div>
