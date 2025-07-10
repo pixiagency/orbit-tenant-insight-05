@@ -1,0 +1,318 @@
+/* Import Arabic font */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217.2 32.6% 17.5%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors;
+    font-feature-settings: "kern" 1, "liga" 1;
+    /* Prevent body from being locked by overlays */
+    overflow: auto !important;
+    pointer-events: auto !important;
+  }
+  
+  html {
+    @apply transition-colors;
+    /* Ensure html element doesn't get locked */
+    overflow: auto !important;
+    pointer-events: auto !important;
+  }
+
+  /* Prevent overlay locking issues */
+  [data-radix-overlay] {
+    pointer-events: auto !important;
+  }
+
+  /* Ensure dropdowns don't interfere with other interactions */
+  [data-radix-dropdown-menu-content] {
+    z-index: 60 !important;
+  }
+
+  /* Prevent multiple overlays from stacking incorrectly */
+  [data-radix-dialog-overlay],
+  [data-radix-alert-dialog-overlay] {
+    z-index: 50 !important;
+  }
+
+  /* Arabic font support */
+  .font-arabic {
+    font-family: 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  [dir="ltr"] {
+    text-align: left;
+  }
+
+  /* RTL Checkbox positioning - Fixed */
+  [dir="rtl"] .checkbox-container {
+    @apply flex-row-reverse;
+  }
+
+  [dir="rtl"] .checkbox-container label {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+
+  /* Enhanced RTL checkbox spacing */
+  [dir="rtl"] .flex.items-center.space-x-2 {
+    @apply space-x-reverse;
+  }
+
+  [dir="rtl"] .flex.items-center.space-x-3 {
+    @apply space-x-reverse;
+  }
+
+  /* RTL Icon spacing - Enhanced */
+  [dir="rtl"] .icon-text {
+    @apply flex-row-reverse;
+  }
+
+  [dir="rtl"] .icon-text svg {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* RTL Button icon spacing - Enhanced */
+  [dir="rtl"] .btn-icon {
+    @apply flex-row-reverse;
+  }
+
+  [dir="rtl"] .btn-icon svg {
+    margin-left: 0.5rem;
+    margin-right: 0;
+  }
+
+  /* RTL Sidebar icon spacing */
+  [dir="rtl"] .nav-item .nav-icon,
+  [dir="rtl"] .sidebar-icon {
+    margin-left: 0.75rem;
+    margin-right: 0;
+  }
+
+  /* RTL Badge positioning - Fixed to avoid circular dependency */
+  [dir="rtl"] .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  [dir="rtl"] .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  /* RTL Pagination spacing */
+  [dir="rtl"] .pagination-item {
+    @apply flex-row-reverse;
+  }
+
+  /* RTL Table positioning */
+  [dir="rtl"] table {
+    direction: rtl;
+  }
+
+  [dir="rtl"] .table-actions {
+    @apply flex-row-reverse;
+  }
+
+  /* RTL Form elements */
+  [dir="rtl"] .form-group {
+    @apply text-right;
+  }
+
+  [dir="rtl"] .form-checkbox {
+    @apply flex-row-reverse;
+  }
+
+  [dir="rtl"] input[type="text"],
+  [dir="rtl"] input[type="email"],
+  [dir="rtl"] input[type="number"],
+  [dir="rtl"] textarea,
+  [dir="rtl"] select {
+    text-align: right;
+  }
+
+  /* RTL Dropdown menus */
+  [dir="rtl"] .dropdown-content {
+    right: 0;
+    left: auto;
+  }
+
+  /* RTL Tabs */
+  [dir="rtl"] .tabs-list {
+    @apply flex-row-reverse;
+  }
+
+  /* RTL Cards and modals */
+  [dir="rtl"] .card-actions {
+    @apply flex-row-reverse;
+  }
+
+  /* RTL Flex utilities fix */
+  [dir="rtl"] .flex-row-reverse {
+    flex-direction: row;
+  }
+
+  [dir="rtl"] .flex-row {
+    flex-direction: row-reverse;
+  }
+
+  /* RTL Margin and padding fixes - Using CSS properties to avoid circular dependencies */
+  [dir="rtl"] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+  [dir="rtl"] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+  [dir="rtl"] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+  [dir="rtl"] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+  [dir="rtl"] .ml-4 { margin-left: 0; margin-right: 1rem; }
+  [dir="rtl"] .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+  [dir="rtl"] .pl-2 { padding-left: 0; padding-right: 0.5rem; }
+  [dir="rtl"] .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+  [dir="rtl"] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+  [dir="rtl"] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+  [dir="rtl"] .pl-4 { padding-left: 0; padding-right: 1rem; }
+  [dir="rtl"] .pr-4 { padding-right: 0; padding-left: 1rem; }
+  [dir="rtl"] .pl-8 { padding-left: 0; padding-right: 2rem; }
+  [dir="rtl"] .pr-8 { padding-right: 0; padding-left: 2rem; }
+
+  /* RTL Border fixes */
+  [dir="rtl"] .border-r-2 { border-right-width: 0; border-left-width: 2px; }
+  [dir="rtl"] .border-l-2 { border-left-width: 0; border-right-width: 2px; }
+
+  /* RTL Text alignment */
+  [dir="rtl"] .text-left { text-align: right; }
+  [dir="rtl"] .text-right { text-align: left; }
+}
+
+/* Dark mode improvements - using proper color mappings instead of circular dependencies */
+@layer components {
+  .dark .bg-gray-50 {
+    @apply bg-gray-900;
+  }
+
+  .dark .bg-white {
+    @apply bg-gray-800;
+  }
+
+  .dark .text-gray-900 {
+    @apply text-gray-100;
+  }
+
+  .dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+
+  .dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+
+  .dark .border-gray-200 {
+    @apply border-gray-700;
+  }
+
+  .dark .border-gray-300 {
+    @apply border-gray-600;
+  }
+
+  .dark .hover\:bg-gray-50:hover {
+    @apply bg-gray-800;
+  }
+
+  .dark .hover\:bg-gray-100:hover {
+    @apply bg-gray-700;
+  }
+}

@@ -1,0 +1,658 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Plus, 
+  Filter, 
+  Search, 
+  Briefcase,
+  TrendingUp,
+  DollarSign,
+  Star,
+  Grid3X3,
+  List,
+  Trash2,
+  Mail,
+  Phone,
+  MessageSquare,
+  Download,
+  Upload,
+  UserPlus,
+  X
+} from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ModernKPICard } from '../../components/shared/ModernKPICard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { OpportunityForm } from '../../components/opportunities/OpportunityForm';
+import { OpportunityTable } from '../../components/opportunities/OpportunityTable';
+import { OpportunityKanbanView } from '../../components/opportunities/OpportunityKanbanView';
+import { OpportunityFilters } from '../../components/opportunities/OpportunityFilters';
+import { OpportunityAdvancedFilters } from '../../components/opportunities/OpportunityAdvancedFilters';
+import { OpportunityDetailsModal } from '../../components/opportunities/OpportunityDetailsModal';
+import { OpportunityImportModal } from '../../components/opportunities/OpportunityImportModal';
+import { OpportunityExportModal } from '../../components/opportunities/OpportunityExportModal';
+import { FilterDrawer } from '../../components/shared/FilterDrawer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+
+interface Opportunity {
+  id: string;
+  name: string;
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  stage: string;
+  value: number;
+  probability: number;
+  expectedCloseDate: string;
+  assignedTo: string;
+  source: string;
+  description?: string;
+  budget?: number;
+  timeline?: string;
+  createdAt: string;
+  lastActivity: string;
+}
+
+const opportunitiesData: Opportunity[] = [
+  {
+    id: '1',
+    name: 'Enterprise CRM Implementation',
+    company: 'TechCorp Inc.',
+    contact: 'John Smith',
+    email: 'john.smith@techcorp.com',
+    phone: '+1 (555) 123-4567',
+    stage: 'negotiation',
+    value: 125000,
+    probability: 75,
+    expectedCloseDate: '2024-02-15',
+    assignedTo: 'Sarah Johnson',
+    source: 'Website',
+    description: 'Large-scale CRM implementation for enterprise client',
+    budget: 150000,
+    timeline: '3-6 months',
+    createdAt: '2024-01-15T10:30:00Z',
+    lastActivity: '2024-01-18'
+  },
+  {
+    id: '2',
+    name: 'Startup Growth Platform',
+    company: 'StartupXYZ',
+    contact: 'Emily Davis',
+    email: 'emily.davis@startup.com',
+    phone: '+1 (555) 987-6543',
+    stage: 'proposal',
+    value: 75000,
+    probability: 60,
+    expectedCloseDate: '2024-02-28',
+    assignedTo: 'Mike Chen',
+    source: 'LinkedIn',
+    description: 'Growth platform for emerging startup',
+    budget: 80000,
+    timeline: '1-3 months',
+    createdAt: '2024-01-18T14:20:00Z',
+    lastActivity: '2024-01-18'
+  },
+  {
+    id: '3',
+    name: 'Manufacturing Automation',
+    company: 'Manufacturing Ltd',
+    contact: 'Robert Wilson',
+    email: 'r.wilson@manufacturing.com',
+    phone: '+1 (555) 456-7890',
+    stage: 'qualification',
+    value: 95000,
+    probability: 45,
+    expectedCloseDate: '2024-03-10',
+    assignedTo: 'Emily Rodriguez',
+    source: 'Trade Show',
+    description: 'Manufacturing automation solution',
+    timeline: '6-12 months',
+    createdAt: '2024-01-12T09:15:00Z',
+    lastActivity: '2024-01-17'
+  },
+  {
+    id: '4',
+    name: 'Financial Services Solution',
+    company: 'Finance Corp',
+    contact: 'Lisa Anderson',
+    email: 'lisa.a@finance.com',
+    phone: '+1 (555) 321-0987',
+    stage: 'closed-won',
+    value: 200000,
+    probability: 100,
+    expectedCloseDate: '2024-01-20',
+    assignedTo: 'David Brown',
+    source: 'Referral',
+    description: 'Comprehensive financial services platform',
+    createdAt: '2024-01-08T16:45:00Z',
+    lastActivity: '2024-01-16'
+  },
+  {
+    id: '5',
+    name: 'Retail Analytics Platform',
+    company: 'Retail Solutions',
+    contact: 'Michael Johnson',
+    email: 'mjohnson@retail.com',
+    phone: '+1 (555) 654-3210',
+    stage: 'prospecting',
+    value: 45000,
+    probability: 25,
+    expectedCloseDate: '2024-04-15',
+    assignedTo: 'Sarah Johnson',
+    source: 'Cold Call',
+    description: 'Analytics platform for retail chain',
+    timeline: 'Not defined',
+    createdAt: '2024-01-10T11:30:00Z',
+    lastActivity: '2024-01-14'
+  }
+];
+
+export const OpportunitiesPage = () => {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(opportunitiesData);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stageFilter, setStageFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [showOpportunityForm, setShowOpportunityForm] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedOpportunities, setSelectedOpportunities] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(3);
+  const [selectedOpportunityForDetails, setSelectedOpportunityForDetails] = useState<Opportunity | null>(null);
+  const [showOpportunityDetails, setShowOpportunityDetails] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
+    valueRange: { min: '', max: '' },
+    probabilityRange: { min: '', max: '' },
+    assignedTo: 'all',
+    source: 'all',
+    stage: 'all',
+    operator: 'AND' as 'AND' | 'OR',
+    textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals',
+    filterRules: [] as any[]
+  });
+  const [appliedFilters, setAppliedFilters] = useState<Array<{id: string, label: string, type: string, ruleId?: string}>>([]);
+  const [filters, setFilters] = useState({
+    stage: 'all',
+    assignedTo: 'all',
+    source: 'all',
+    dateRange: 'all',
+    valueRange: 'all',
+    probability: 'all'
+  });
+
+  const filteredOpportunities = opportunities.filter(opportunity => {
+    const matchesSearch = opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         opportunity.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         opportunity.contact.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStage = stageFilter === 'all' || opportunity.stage === stageFilter;
+    const matchesSource = sourceFilter === 'all' || opportunity.source === sourceFilter;
+    const matchesAssignee = assigneeFilter === 'all' || opportunity.assignedTo === assigneeFilter;
+
+    return matchesSearch && matchesStage && matchesSource && matchesAssignee;
+  });
+
+  const opportunityStats = {
+    total: opportunities.length,
+    totalValue: opportunities.reduce((sum, opp) => sum + opp.value, 0),
+    averageProbability: Math.round(opportunities.reduce((sum, opp) => sum + opp.probability, 0) / opportunities.length),
+    wonThisMonth: opportunities.filter(opp => opp.stage === 'closed-won').length
+  };
+
+  const handleAddOpportunity = () => {
+    setSelectedOpportunity(null);
+    setShowOpportunityForm(true);
+  };
+
+  const handleEditOpportunity = (opportunity: Opportunity) => {
+    setSelectedOpportunity(opportunity);
+    setShowOpportunityForm(true);
+  };
+
+  const handleSaveOpportunity = (opportunityData: any) => {
+    if (selectedOpportunity) {
+      // Edit existing opportunity
+      setOpportunities(prev => prev.map(opp => 
+        opp.id === selectedOpportunity.id 
+          ? { ...opp, ...opportunityData, id: opp.id }
+          : opp
+      ));
+      toast.success('Opportunity updated successfully');
+    } else {
+      // Add new opportunity
+      const newOpportunity: Opportunity = {
+        ...opportunityData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        lastActivity: new Date().toISOString().split('T')[0]
+      };
+      setOpportunities(prev => [...prev, newOpportunity]);
+      toast.success('Opportunity created successfully');
+    }
+    setShowOpportunityForm(false);
+    setSelectedOpportunity(null);
+  };
+
+  const handleDeleteOpportunity = (opportunityId: string) => {
+    setOpportunities(prev => prev.filter(opp => opp.id !== opportunityId));
+    toast.success('Opportunity deleted successfully');
+  };
+
+  const handleSelectOpportunity = (opportunityId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOpportunities(prev => [...prev, opportunityId]);
+    } else {
+      setSelectedOpportunities(prev => prev.filter(id => id !== opportunityId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedOpportunities(filteredOpportunities.map(opp => opp.id));
+    } else {
+      setSelectedOpportunities([]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    setOpportunities(prev => prev.filter(opp => !selectedOpportunities.includes(opp.id)));
+    setSelectedOpportunities([]);
+    setShowBulkDeleteDialog(false);
+    toast.success(`${selectedOpportunities.length} opportunities deleted successfully`);
+  };
+
+  const handleImportOpportunities = (importedOpportunities: Opportunity[]) => {
+    setOpportunities(prev => [...prev, ...importedOpportunities]);
+    setShowImportModal(false);
+  };
+
+  const handleStageChange = (opportunityId: string, newStage: string) => {
+    setOpportunities(prev => prev.map(opp => 
+      opp.id === opportunityId 
+        ? { ...opp, stage: newStage }
+        : opp
+    ));
+  };
+
+  const handleCardClick = (opportunity: Opportunity) => {
+    setSelectedOpportunityForDetails(opportunity);
+    setShowOpportunityDetails(true);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStageFilter('all');
+    setSourceFilter('all');
+    setAssigneeFilter('all');
+    setAdvancedFilters({
+      dateRange: { from: undefined, to: undefined },
+      valueRange: { min: '', max: '' },
+      probabilityRange: { min: '', max: '' },
+      assignedTo: 'all',
+      source: 'all',
+      stage: 'all',
+      operator: 'AND' as 'AND' | 'OR',
+      textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals',
+      filterRules: []
+    });
+    setAppliedFilters([]);
+    setFilters({
+      stage: 'all',
+      assignedTo: 'all',
+      source: 'all',
+      dateRange: 'all',
+      valueRange: 'all',
+      probability: 'all'
+    });
+  };
+
+  return (
+    <div className="p-6 space-y-6 bg-gray-50 min-h-full">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Opportunities Management</h1>
+          <p className="text-gray-600 mt-1">Track and manage your sales opportunities</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAddOpportunity}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Opportunity
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ModernKPICard
+          title="Total Opportunities"
+          value={opportunityStats.total.toString()}
+          icon={Briefcase}
+          change={{ value: "+12 this month", trend: "up" }}
+          gradient="from-blue-500 to-blue-600"
+        />
+        <ModernKPICard
+          title="Pipeline Value"
+          value={`$${(opportunityStats.totalValue / 1000).toFixed(0)}K`}
+          icon={DollarSign}
+          change={{ value: "Strong pipeline", trend: "up" }}
+          gradient="from-green-500 to-green-600"
+        />
+        <ModernKPICard
+          title="Avg. Probability"
+          value={`${opportunityStats.averageProbability}%`}
+          icon={TrendingUp}
+          change={{ value: "Good prospects", trend: "up" }}
+          gradient="from-yellow-500 to-yellow-600"
+        />
+        <ModernKPICard
+          title="Won This Month"
+          value={opportunityStats.wonThisMonth.toString()}
+          icon={Star}
+          change={{ value: "Great results!", trend: "up" }}
+          gradient="from-purple-500 to-purple-600"
+        />
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Opportunity Filters</CardTitle>
+              <CardDescription>Filter and search your opportunities</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
+                <Filter className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+              <Button variant="outline" size="sm" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search opportunities..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Select value={stageFilter} onValueChange={setStageFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                <SelectItem value="prospecting">Prospecting</SelectItem>
+                <SelectItem value="qualification">Qualification</SelectItem>
+                <SelectItem value="proposal">Proposal</SelectItem>
+                <SelectItem value="negotiation">Negotiation</SelectItem>
+                <SelectItem value="closed-won">Closed Won</SelectItem>
+                <SelectItem value="closed-lost">Closed Lost</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Sources" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="Website">Website</SelectItem>
+                <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                <SelectItem value="Referral">Referral</SelectItem>
+                <SelectItem value="Trade Show">Trade Show</SelectItem>
+                <SelectItem value="Cold Call">Cold Call</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Assignees" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+                <SelectItem value="Mike Chen">Mike Chen</SelectItem>
+                <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
+                <SelectItem value="David Brown">David Brown</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Applied Filters Tags */}
+      {appliedFilters.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium text-sm">Applied Filters</h3>
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Clear All
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {appliedFilters.map((filter) => (
+                <Badge key={filter.id} variant="secondary" className="px-3 py-1">
+                  {filter.label}
+                  <button
+                    onClick={() => {/* Remove filter logic */}}
+                    className="ml-2 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Advanced Filters Drawer */}
+      <FilterDrawer
+        isOpen={showAdvancedFilters}
+        onClose={() => setShowAdvancedFilters(false)}
+        title="Advanced Opportunity Filters"
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        onApplyFilters={() => {
+          console.log('Applying advanced filters:', advancedFilters);
+          setAppliedFilters([
+            { id: 'test', label: 'Advanced filters applied', type: 'advanced' }
+          ]);
+          setShowAdvancedFilters(false);
+        }}
+      >
+        <OpportunityAdvancedFilters
+          isOpen={true}
+          onClose={() => {}}
+          filters={advancedFilters}
+          onFiltersChange={setAdvancedFilters}
+          onApplyFilters={() => {}}
+          onClearFilters={() => {}}
+        />
+      </FilterDrawer>
+
+      {/* Main Content */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Opportunity Pipeline ({filteredOpportunities.length})</CardTitle>
+              <CardDescription>Manage and track your sales opportunities</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* Bulk Actions */}
+              {selectedOpportunities.length > 0 && (
+                <div className="flex items-center space-x-2 mr-4">
+                  <Badge variant="secondary">{selectedOpportunities.length} selected</Badge>
+                  <Button size="sm" variant="outline">
+                    <Mail className="h-4 w-4 mr-1" />
+                    Email
+                  </Button>
+                  <Button size="sm" variant="outline">
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Assign
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setShowBulkDeleteDialog(true)}>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              )}
+
+              {/* View Toggle */}
+              <div className="flex border rounded-lg">
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  className="rounded-r-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('kanban')}
+                  className="rounded-l-none"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {viewMode === 'table' ? (
+            <OpportunityTable
+              opportunities={filteredOpportunities.slice((currentPage - 1) * pageSize, currentPage * pageSize)}
+              selectedOpportunities={selectedOpportunities}
+              onSelectOpportunity={handleSelectOpportunity}
+              onSelectAll={handleSelectAll}
+              onEdit={handleEditOpportunity}
+              onDelete={handleDeleteOpportunity}
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredOpportunities.length / pageSize)}
+              pageSize={pageSize}
+              totalItems={filteredOpportunities.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newPageSize) => {
+                setPageSize(newPageSize);
+                setCurrentPage(1); // Reset to first page when changing page size
+              }}
+            />
+          ) : (
+            <OpportunityKanbanView
+              opportunities={filteredOpportunities}
+              onStageChange={handleStageChange}
+              onCardClick={handleCardClick}
+            />
+          )}
+
+          {filteredOpportunities.length === 0 && (
+            <div className="text-center py-12">
+              <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No opportunities found matching your filters</p>
+              <Button onClick={clearFilters} variant="outline" className="mt-2">
+                Clear Filters
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Opportunity Form */}
+      <OpportunityForm
+        isOpen={showOpportunityForm}
+        opportunity={selectedOpportunity}
+        onClose={() => {
+          setShowOpportunityForm(false);
+          setSelectedOpportunity(null);
+        }}
+        onSave={handleSaveOpportunity}
+      />
+
+      {/* Opportunity Details Modal */}
+      <OpportunityDetailsModal
+        isOpen={showOpportunityDetails}
+        onClose={() => {
+          setShowOpportunityDetails(false);
+          setSelectedOpportunityForDetails(null);
+        }}
+        opportunity={selectedOpportunityForDetails}
+      />
+
+      {/* Import Modal */}
+      <OpportunityImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportOpportunities}
+      />
+
+      {/* Export Modal */}
+      <OpportunityExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        opportunities={filteredOpportunities}
+        selectedOpportunities={selectedOpportunities}
+      />
+
+      {/* Bulk Delete Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Opportunities</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedOpportunities.length} selected opportunity(ies)? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
