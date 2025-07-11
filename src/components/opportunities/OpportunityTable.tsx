@@ -108,25 +108,27 @@ export const OpportunityTable = ({
     <div className="space-y-4">
       {/* Header with entries selector and pagination */}
       <div className="flex items-center justify-between bg-white px-4 py-3 border-b">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700 font-medium">Show</span>
-          <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
-            <SelectTrigger className="w-20 h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-          <span className="text-sm text-gray-700 font-medium">entries</span>
-        </div>
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700 font-medium">Show</span>
+            <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
+              <SelectTrigger className="w-20 h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-gray-700 font-medium">entries</span>
+          </div>
           <div className="text-sm text-gray-600">
             Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} records
           </div>
+        </div>
+        <div className="flex items-center space-x-6">
           {/* Top Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center space-x-1">

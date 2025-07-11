@@ -317,7 +317,7 @@ const DealsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="h-4 w-4 mr-2" />
           Add Deal
         </Button>
@@ -381,7 +381,7 @@ const DealsPage = () => {
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Stages" />
               </SelectTrigger>
               <SelectContent>
@@ -395,7 +395,7 @@ const DealsPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Sources" />
               </SelectTrigger>
               <SelectContent>
@@ -406,7 +406,7 @@ const DealsPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Assignees" />
               </SelectTrigger>
               <SelectContent>
@@ -484,6 +484,9 @@ const DealsPage = () => {
                   </Select>
                   <span className="text-sm text-muted-foreground">entries</span>
                 </div>
+                <span className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredDeals.length)} of {filteredDeals.length} records
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Button 

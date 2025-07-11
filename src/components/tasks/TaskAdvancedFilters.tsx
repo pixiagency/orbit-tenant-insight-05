@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, X } from 'lucide-react';
+import { CalendarIcon, X, Plus } from 'lucide-react';
 
 interface TaskAdvancedFiltersProps {
   isOpen: boolean;
@@ -40,6 +40,8 @@ export const TaskAdvancedFilters: React.FC<TaskAdvancedFiltersProps> = ({
   onApplyFilters,
   onClearFilters
 }) => {
+  const [showFilterFields, setShowFilterFields] = useState(false);
+
   if (!isOpen) return null;
 
   const handleDateRangeChange = (type: 'from' | 'to', date: Date | undefined) => {
@@ -62,20 +64,62 @@ export const TaskAdvancedFilters: React.FC<TaskAdvancedFiltersProps> = ({
     });
   };
 
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={handleClickOutside}>
       <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg" onClick={(e) => e.stopPropagation()}>
         <Card className="h-full border-0 rounded-none">
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
-              <CardTitle>Advanced Filters</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <X className="h-4 w-4" />
+                Advanced Task Filters
+              </CardTitle>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6 overflow-y-auto">
-            {/* Created Date Range */}
+            {/* Saved Filters */}
+            <div className="space-y-2">
+              <Label className="font-semibold">Saved Filters</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select saved filter..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  <SelectItem value="my-tasks">My Tasks</SelectItem>
+                  <SelectItem value="overdue">Overdue Tasks</SelectItem>
+                  <SelectItem value="high-priority">High Priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filter Rules */}
+            <div className="space-y-2">
+              <Label className="font-semibold">Filter Rules</Label>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setShowFilterFields(!showFilterFields)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Filter Rule
+              </Button>
+            </div>
+
+            {/* Filter Options */}
+            {(showFilterFields || filters.dateRange.from || filters.dueDateRange.from || filters.priorityFilter !== 'all' || filters.assignedTo !== 'all' || filters.status !== 'all' || filters.lastActivity !== 'all') && (
+              <div className="space-y-4">
+                <Label className="font-semibold">Filter Options</Label>
+
+                {/* Created Date Range */}
             <div className="space-y-2">
               <Label>Created Date Range</Label>
               <div className="flex space-x-2">
@@ -241,16 +285,25 @@ export const TaskAdvancedFilters: React.FC<TaskAdvancedFiltersProps> = ({
                   <SelectItem value="OR">OR (any condition can match)</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+                </div>
+              </div>
+            )}
 
-            {/* Action Buttons */}
-            <div className="flex space-x-2 pt-4">
-              <Button onClick={onApplyFilters} className="flex-1">
-                Apply Filters
+            {/* Save Current Filter */}
+            <div className="pt-4 border-t">
+              <Button variant="outline" className="w-full mb-4">
+                Save Current Filter
               </Button>
-              <Button variant="outline" onClick={onClearFilters} className="flex-1">
-                Clear All
-              </Button>
+              
+              {/* Action Buttons */}
+              <div className="flex space-x-2">
+                <Button onClick={onApplyFilters} className="flex-1">
+                  Apply Filters
+                </Button>
+                <Button variant="outline" onClick={onClearFilters} className="flex-1">
+                  Clear All
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

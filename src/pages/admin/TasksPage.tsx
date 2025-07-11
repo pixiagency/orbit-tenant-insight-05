@@ -309,7 +309,7 @@ const TasksPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
           <Plus className="h-4 w-4 mr-2" />
           Add Task
         </Button>
@@ -373,7 +373,7 @@ const TasksPage = () => {
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -385,7 +385,7 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
@@ -397,7 +397,7 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Assignees" />
               </SelectTrigger>
               <SelectContent>
@@ -475,6 +475,9 @@ const TasksPage = () => {
                   </Select>
                   <span className="text-sm text-muted-foreground">entries</span>
                 </div>
+                <span className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTasks.length)} of {filteredTasks.length} records
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Button 

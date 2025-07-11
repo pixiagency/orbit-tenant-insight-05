@@ -40,7 +40,9 @@ import {
   Mail, 
   Eye,
   TrendingUp,
-  Star 
+  Star,
+  List,
+  Grid3X3
 } from 'lucide-react';
 import { Lead } from '@/types/leads';
 
@@ -52,6 +54,8 @@ interface LeadsTableProps {
   selectedLeads: string[];
   onSelectLead: (leadId: string) => void;
   onSelectAll: (checked: boolean) => void;
+  viewMode?: string;
+  setViewMode?: (mode: string) => void;
 }
 
 export const LeadsTable: React.FC<LeadsTableProps> = ({
@@ -61,7 +65,9 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
   onConvertLead,
   selectedLeads,
   onSelectLead,
-  onSelectAll
+  onSelectAll,
+  viewMode = 'table',
+  setViewMode = () => {}
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -113,38 +119,56 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
           </Select>
           <span className="text-sm text-gray-700 font-medium">entries</span>
         </div>
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4">
           <div className="text-sm text-gray-600">
             Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, leads.length)} of {leads.length} records
           </div>
-          {/* Top Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center space-x-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="h-8 px-3 text-sm"
-              >
-                Previous
-              </Button>
-              <div className="flex items-center space-x-1">
-                <span className="text-sm text-gray-600">Page</span>
-                <span className="text-sm font-medium text-gray-900">{currentPage}</span>
-                <span className="text-sm text-gray-600">of {totalPages}</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="h-8 px-3 text-sm"
-              >
-                Next
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant={viewMode === 'table' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant={viewMode === 'grid' ? 'default' : 'outline'} 
+              size="sm" 
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center space-x-1">
+            {/* Top Pagination */}
+            {totalPages > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 px-3 text-sm"
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center space-x-1">
+                  <span className="text-sm text-gray-600">Page</span>
+                  <span className="text-sm font-medium text-gray-900">{currentPage}</span>
+                  <span className="text-sm text-gray-600">of {totalPages}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-8 px-3 text-sm"
+                >
+                  Next
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
