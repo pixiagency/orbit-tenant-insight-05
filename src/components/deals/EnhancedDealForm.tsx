@@ -324,7 +324,7 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal h-12 px-4 border-gray-300 hover:border-gray-400",
             !value && "text-muted-foreground"
           )}
         >
@@ -346,71 +346,91 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full max-w-7xl overflow-y-auto animate-fade-in">
+      <SheetContent className="w-full max-w-6xl overflow-y-auto animate-fade-in">
         <SheetHeader>
-          <SheetTitle>Deal Management Form</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-2xl font-bold text-gray-900">Deal Management Form</SheetTitle>
+          <SheetDescription className="text-gray-600">
             Complete deal information with advanced tracking and management
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 bg-muted p-1 rounded-lg">
-              <TabsTrigger value="essentials" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Essentials</TabsTrigger>
-              <TabsTrigger value="qualification" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Qualification</TabsTrigger>
-              <TabsTrigger value="products" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Products</TabsTrigger>
-              <TabsTrigger value="financial" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Financial</TabsTrigger>
-              <TabsTrigger value="intelligence" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Intelligence</TabsTrigger>
-              <TabsTrigger value="collaboration" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Collaboration</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-6 bg-muted p-1 rounded-lg h-12">
+              <TabsTrigger value="essentials" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Essentials
+              </TabsTrigger>
+              <TabsTrigger value="qualification" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Qualification
+              </TabsTrigger>
+              <TabsTrigger value="products" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Products
+              </TabsTrigger>
+              <TabsTrigger value="financial" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Financial
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Intelligence
+              </TabsTrigger>
+              <TabsTrigger value="collaboration" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm">
+                Collaboration
+              </TabsTrigger>
             </TabsList>
 
             {/* Essential Deal Information */}
-            <TabsContent value="essentials" className="space-y-6 animate-fade-in">
-              <Card className="border-0 shadow-lg">
+            <TabsContent value="essentials" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
                 <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
                   <CardTitle className="text-xl font-semibold text-gray-900">Essential Deal Information</CardTitle>
                   <CardDescription className="text-gray-600">Core required fields for the deal</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6 p-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="dealName" className="text-sm font-medium text-gray-700">Deal Name *</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="dealName" className="text-sm font-semibold text-gray-700">
+                        Deal Name <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="dealName"
                         value={formData.dealName}
                         onChange={(e) => handleInputChange('dealName', e.target.value)}
                         placeholder="Enter deal name"
                         maxLength={255}
-                        className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="dealValue" className="text-sm font-medium text-gray-700">Deal Value *</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="dealValue" className="text-sm font-semibold text-gray-700">
+                        Deal Value <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="dealValue"
                         type="number"
                         value={formData.dealValue}
                         onChange={(e) => handleInputChange('dealValue', Number(e.target.value))}
                         placeholder="0.00"
-                        className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-gray-700">Close Date *</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">
+                        Close Date <span className="text-red-500">*</span>
+                      </Label>
                       <DatePicker
                         value={formData.closeDate}
                         onChange={(date) => handleInputChange('closeDate', date)}
                         placeholder="Select close date"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="stage" className="text-sm font-medium text-gray-700">Stage *</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="stage" className="text-sm font-semibold text-gray-700">
+                        Stage <span className="text-red-500">*</span>
+                      </Label>
                       <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
-                        <SelectTrigger className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select stage" />
                         </SelectTrigger>
                         <SelectContent>
@@ -425,10 +445,12 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="owner" className="text-sm font-medium text-gray-700">Owner *</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="owner" className="text-sm font-semibold text-gray-700">
+                      Owner <span className="text-red-500">*</span>
+                    </Label>
                     <Select value={formData.owner} onValueChange={(value) => handleInputChange('owner', value)}>
-                      <SelectTrigger className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                      <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                         <SelectValue placeholder="Select owner" />
                       </SelectTrigger>
                       <SelectContent>
@@ -441,37 +463,42 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact and Account Information</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Contact and Account Information</CardTitle>
+                  <CardDescription className="text-gray-600">Related contacts and account details</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="primaryAccount">Primary Account *</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="primaryAccount" className="text-sm font-semibold text-gray-700">
+                        Primary Account <span className="text-red-500">*</span>
+                      </Label>
                       <Input
                         id="primaryAccount"
                         value={formData.primaryAccount}
                         onChange={(e) => handleInputChange('primaryAccount', e.target.value)}
                         placeholder="Select or enter account"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="primaryContact">Primary Contact</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="primaryContact" className="text-sm font-semibold text-gray-700">Primary Contact</Label>
                       <Input
                         id="primaryContact"
                         value={formData.primaryContact}
                         onChange={(e) => handleInputChange('primaryContact', e.target.value)}
                         placeholder="Select or enter contact"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="leadSource">Lead Source</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="leadSource" className="text-sm font-semibold text-gray-700">Lead Source</Label>
                       <Select value={formData.leadSource} onValueChange={(value) => handleInputChange('leadSource', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select lead source" />
                         </SelectTrigger>
                         <SelectContent>
@@ -484,10 +511,10 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="contactRole">Contact Role</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="contactRole" className="text-sm font-semibold text-gray-700">Contact Role</Label>
                       <Select value={formData.contactRole} onValueChange={(value) => handleInputChange('contactRole', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select contact role" />
                         </SelectTrigger>
                         <SelectContent>
@@ -503,16 +530,17 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Extended Deal Information</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Extended Deal Information</CardTitle>
+                  <CardDescription className="text-gray-600">Additional deal details and timeline</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="dealType">Deal Type</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="dealType" className="text-sm font-semibold text-gray-700">Deal Type</Label>
                       <Select value={formData.dealType} onValueChange={(value) => handleInputChange('dealType', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select deal type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -523,60 +551,63 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="nextSteps">Next Steps</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="nextSteps" className="text-sm font-semibold text-gray-700">Next Steps</Label>
                       <Input
                         id="nextSteps"
                         value={formData.nextSteps}
                         onChange={(e) => handleInputChange('nextSteps', e.target.value)}
                         placeholder="Immediate actions required"
                         maxLength={255}
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="description">Description</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="description" className="text-sm font-semibold text-gray-700">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       placeholder="Detailed opportunity description"
-                      className="min-h-20"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="decisionCriteria">Decision Criteria</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="decisionCriteria" className="text-sm font-semibold text-gray-700">Decision Criteria</Label>
                     <Textarea
                       id="decisionCriteria"
                       value={formData.decisionCriteria}
                       onChange={(e) => handleInputChange('decisionCriteria', e.target.value)}
                       placeholder="Customer's evaluation criteria"
-                      className="min-h-20"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                     <Checkbox
                       id="budgetAuthority"
                       checked={formData.budgetAuthority}
                       onCheckedChange={(checked) => handleInputChange('budgetAuthority', checked)}
                     />
-                    <Label htmlFor="budgetAuthority">Budget Authority Confirmed</Label>
+                    <Label htmlFor="budgetAuthority" className="text-sm font-semibold text-gray-700">
+                      Budget Authority Confirmed
+                    </Label>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Timeline Start</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Timeline Start</Label>
                       <DatePicker
                         value={formData.timelineStart}
                         onChange={(date) => handleInputChange('timelineStart', date)}
                         placeholder="Select start date"
                       />
                     </div>
-                    <div>
-                      <Label>Timeline End</Label>
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Timeline End</Label>
                       <DatePicker
                         value={formData.timelineEnd}
                         onChange={(date) => handleInputChange('timelineEnd', date)}
@@ -588,118 +619,130 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
               </Card>
             </TabsContent>
 
-            {/* Lead Qualification Framework */}
-            <TabsContent value="qualification" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>BANT/MEDDIC Qualification</CardTitle>
-                  <CardDescription>Lead qualification framework</CardDescription>
+            {/* Qualification Tab */}
+            <TabsContent value="qualification" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Lead Qualification (BANT/MEDDIC)</CardTitle>
+                  <CardDescription className="text-gray-600">Budget, Authority, Need, Timeline assessment</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                         <Checkbox
                           id="budgetConfirmed"
                           checked={formData.budgetConfirmed}
                           onCheckedChange={(checked) => handleInputChange('budgetConfirmed', checked)}
                         />
-                        <Label htmlFor="budgetConfirmed">Budget Confirmed</Label>
+                        <Label htmlFor="budgetConfirmed" className="text-sm font-semibold text-gray-700">
+                          Budget Confirmed
+                        </Label>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                         <Checkbox
                           id="authorityIdentified"
                           checked={formData.authorityIdentified}
                           onCheckedChange={(checked) => handleInputChange('authorityIdentified', checked)}
                         />
-                        <Label htmlFor="authorityIdentified">Authority Identified</Label>
+                        <Label htmlFor="authorityIdentified" className="text-sm font-semibold text-gray-700">
+                          Authority Identified
+                        </Label>
                       </div>
-                      <div className="flex items-center space-x-2">
+                    </div>
+                    <div className="space-y-6">
+                      <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                         <Checkbox
                           id="needEstablished"
                           checked={formData.needEstablished}
                           onCheckedChange={(checked) => handleInputChange('needEstablished', checked)}
                         />
-                        <Label htmlFor="needEstablished">Need Established</Label>
+                        <Label htmlFor="needEstablished" className="text-sm font-semibold text-gray-700">
+                          Need Established
+                        </Label>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                         <Checkbox
                           id="timelineDefined"
                           checked={formData.timelineDefined}
                           onCheckedChange={(checked) => handleInputChange('timelineDefined', checked)}
                         />
-                        <Label htmlFor="timelineDefined">Timeline Defined</Label>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="economicBuyer">Economic Buyer</Label>
-                        <Input
-                          id="economicBuyer"
-                          value={formData.economicBuyer}
-                          onChange={(e) => handleInputChange('economicBuyer', e.target.value)}
-                          placeholder="Final decision authority"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="champion">Champion</Label>
-                        <Input
-                          id="champion"
-                          value={formData.champion}
-                          onChange={(e) => handleInputChange('champion', e.target.value)}
-                          placeholder="Internal advocate"
-                        />
+                        <Label htmlFor="timelineDefined" className="text-sm font-semibold text-gray-700">
+                          Timeline Defined
+                        </Label>
                       </div>
                     </div>
                   </div>
 
-                  <Separator />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="economicBuyer" className="text-sm font-semibold text-gray-700">Economic Buyer</Label>
+                      <Input
+                        id="economicBuyer"
+                        value={formData.economicBuyer}
+                        onChange={(e) => handleInputChange('economicBuyer', e.target.value)}
+                        placeholder="Who controls the budget?"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="champion" className="text-sm font-semibold text-gray-700">Champion</Label>
+                      <Input
+                        id="champion"
+                        value={formData.champion}
+                        onChange={(e) => handleInputChange('champion', e.target.value)}
+                        placeholder="Internal advocate"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
-                  <div>
-                    <Label htmlFor="decisionProcess">Decision Process</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="decisionProcess" className="text-sm font-semibold text-gray-700">Decision Process</Label>
                     <Textarea
                       id="decisionProcess"
                       value={formData.decisionProcess}
                       onChange={(e) => handleInputChange('decisionProcess', e.target.value)}
-                      placeholder="How decisions are made"
-                      className="min-h-20"
+                      placeholder="How will the decision be made?"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Business Impact Assessment</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Business Impact Assessment</CardTitle>
+                  <CardDescription className="text-gray-600">Understanding customer pain points and success metrics</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="roiExpectations">ROI Expectations</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="roiExpectations" className="text-sm font-semibold text-gray-700">ROI Expectations</Label>
                     <Textarea
                       id="roiExpectations"
                       value={formData.roiExpectations}
                       onChange={(e) => handleInputChange('roiExpectations', e.target.value)}
                       placeholder="Expected return on investment"
-                      className="min-h-20"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="successMetrics">Success Metrics</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="successMetrics" className="text-sm font-semibold text-gray-700">Success Metrics</Label>
                     <Textarea
                       id="successMetrics"
                       value={formData.successMetrics}
                       onChange={(e) => handleInputChange('successMetrics', e.target.value)}
-                      placeholder="How success will be measured"
-                      className="min-h-20"
+                      placeholder="How will success be measured?"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="implementationRisk">Implementation Risk</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="implementationRisk" className="text-sm font-semibold text-gray-700">Implementation Risk</Label>
                       <Select value={formData.implementationRisk} onValueChange={(value) => handleInputChange('implementationRisk', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select risk level" />
                         </SelectTrigger>
                         <SelectContent>
@@ -709,10 +752,10 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="technicalComplexity">Technical Complexity</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="technicalComplexity" className="text-sm font-semibold text-gray-700">Technical Complexity</Label>
                       <Select value={formData.technicalComplexity} onValueChange={(value) => handleInputChange('technicalComplexity', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select complexity" />
                         </SelectTrigger>
                         <SelectContent>
@@ -727,70 +770,72 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
               </Card>
             </TabsContent>
 
-            {/* Products and Services */}
-            <TabsContent value="products" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Deal Line Items</CardTitle>
-                      <CardDescription>Products and services being sold</CardDescription>
-                    </div>
-                    <Button onClick={addLineItem} size="sm">
+            {/* Products Tab */}
+            <TabsContent value="products" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-cyan-50 to-blue-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900 flex items-center justify-between">
+                    Products and Services
+                    <Button onClick={addLineItem} className="bg-blue-600 hover:bg-blue-700">
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Line Item
+                      Add Product
                     </Button>
-                  </div>
+                  </CardTitle>
+                  <CardDescription className="text-gray-600">Configure products and pricing</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-8">
                   {formData.lineItems.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No line items added yet. Click "Add Line Item" to get started.
+                    <div className="text-center py-12 text-gray-500">
+                      <p className="text-lg mb-4">No products added yet</p>
+                      <Button onClick={addLineItem} variant="outline" className="h-12 px-8">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Product
+                      </Button>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {formData.lineItems.map((item, index) => (
-                        <Card key={item.id} className="border-l-4 border-l-primary">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-sm">Line Item #{index + 1}</CardTitle>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => removeLineItem(item.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                        <Card key={item.id} className="border-2 border-gray-200">
+                          <CardHeader className="bg-gray-50 border-b flex flex-row items-center justify-between">
+                            <CardTitle className="text-lg">Product {index + 1}</CardTitle>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeLineItem(item.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </CardHeader>
-                          <CardContent className="pt-0">
-                            <div className="grid grid-cols-3 gap-4">
-                              <div>
-                                <Label>Product/Service Name *</Label>
+                          <CardContent className="p-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Product Name</Label>
                                 <Input
                                   value={item.productName}
                                   onChange={(e) => updateLineItem(item.id, 'productName', e.target.value)}
-                                  placeholder="Product name"
+                                  placeholder="Enter product name"
+                                  className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <Label>Product Code/SKU</Label>
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Product Code</Label>
                                 <Input
                                   value={item.productCode}
                                   onChange={(e) => updateLineItem(item.id, 'productCode', e.target.value)}
-                                  placeholder="SKU"
+                                  placeholder="SKU/Code"
+                                  className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <Label>Category</Label>
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Category</Label>
                                 <Select value={item.category} onValueChange={(value) => updateLineItem(item.id, 'category', value)}>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                     <SelectValue placeholder="Select category" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="hardware">Hardware</SelectItem>
                                     <SelectItem value="software">Software</SelectItem>
+                                    <SelectItem value="hardware">Hardware</SelectItem>
                                     <SelectItem value="services">Services</SelectItem>
                                     <SelectItem value="support">Support</SelectItem>
                                   </SelectContent>
@@ -798,68 +843,44 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-4 gap-4 mt-4">
-                              <div>
-                                <Label>Quantity</Label>
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Quantity</Label>
                                 <Input
                                   type="number"
                                   value={item.quantity}
                                   onChange={(e) => updateLineItem(item.id, 'quantity', Number(e.target.value))}
                                   min="1"
+                                  className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <Label>Unit Price</Label>
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Unit Price</Label>
                                 <Input
                                   type="number"
                                   value={item.unitPrice}
                                   onChange={(e) => updateLineItem(item.id, 'unitPrice', Number(e.target.value))}
                                   placeholder="0.00"
+                                  className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <Label>Discount %</Label>
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Discount %</Label>
                                 <Input
                                   type="number"
                                   value={item.discountPercentage}
                                   onChange={(e) => updateLineItem(item.id, 'discountPercentage', Number(e.target.value))}
-                                  placeholder="0"
+                                  min="0"
                                   max="100"
+                                  placeholder="0"
+                                  className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                               </div>
-                              <div>
-                                <Label>Line Total</Label>
-                                <Input
-                                  type="number"
-                                  value={(item.quantity * item.unitPrice * (1 - item.discountPercentage / 100)).toFixed(2)}
-                                  readOnly
-                                  className="bg-muted"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              <div>
-                                <Label>License Type</Label>
-                                <Select value={item.licenseType} onValueChange={(value) => updateLineItem(item.id, 'licenseType', value)}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select license type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="perpetual">Perpetual</SelectItem>
-                                    <SelectItem value="subscription">Subscription</SelectItem>
-                                    <SelectItem value="usage-based">Usage-based</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label>Subscription Duration (months)</Label>
-                                <Input
-                                  type="number"
-                                  value={item.subscriptionDuration}
-                                  onChange={(e) => updateLineItem(item.id, 'subscriptionDuration', Number(e.target.value))}
-                                  min="1"
-                                />
+                              <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-gray-700">Line Total</Label>
+                                <div className="h-12 px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-base font-semibold">
+                                  ${(item.quantity * item.unitPrice * (1 - item.discountPercentage / 100)).toFixed(2)}
+                                </div>
                               </div>
                             </div>
                           </CardContent>
@@ -870,22 +891,23 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Service Details</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Service Details</CardTitle>
+                  <CardDescription className="text-gray-600">Implementation and support information</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Service Start Date</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Service Start Date</Label>
                       <DatePicker
                         value={formData.serviceStartDate}
                         onChange={(date) => handleInputChange('serviceStartDate', date)}
                         placeholder="Select start date"
                       />
                     </div>
-                    <div>
-                      <Label>Service End Date</Label>
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Service End Date</Label>
                       <DatePicker
                         value={formData.serviceEndDate}
                         onChange={(date) => handleInputChange('serviceEndDate', date)}
@@ -894,11 +916,11 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="billingFrequency">Billing Frequency</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="billingFrequency" className="text-sm font-semibold text-gray-700">Billing Frequency</Label>
                       <Select value={formData.billingFrequency} onValueChange={(value) => handleInputChange('billingFrequency', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select frequency" />
                         </SelectTrigger>
                         <SelectContent>
@@ -909,10 +931,10 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="supportLevel">Support Level</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="supportLevel" className="text-sm font-semibold text-gray-700">Support Level</Label>
                       <Select value={formData.supportLevel} onValueChange={(value) => handleInputChange('supportLevel', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select support level" />
                         </SelectTrigger>
                         <SelectContent>
@@ -925,178 +947,208 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="implementationTimeline">Implementation Timeline (days)</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="implementationTimeline" className="text-sm font-semibold text-gray-700">Implementation Timeline (weeks)</Label>
                       <Input
                         id="implementationTimeline"
                         type="number"
                         value={formData.implementationTimeline}
                         onChange={(e) => handleInputChange('implementationTimeline', Number(e.target.value))}
+                        min="0"
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="professionalServices">Professional Services Cost</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="professionalServices" className="text-sm font-semibold text-gray-700">Professional Services ($)</Label>
                       <Input
                         id="professionalServices"
                         type="number"
                         value={formData.professionalServices}
                         onChange={(e) => handleInputChange('professionalServices', Number(e.target.value))}
+                        min="0"
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                     <Checkbox
                       id="trainingIncluded"
                       checked={formData.trainingIncluded}
                       onCheckedChange={(checked) => handleInputChange('trainingIncluded', checked)}
                     />
-                    <Label htmlFor="trainingIncluded">Training Package Included</Label>
+                    <Label htmlFor="trainingIncluded" className="text-sm font-semibold text-gray-700">
+                      Training Included
+                    </Label>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Financial and Forecasting */}
-            <TabsContent value="financial" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue Tracking</CardTitle>
-                  <CardDescription>Financial metrics and calculations</CardDescription>
+            {/* Financial Tab */}
+            <TabsContent value="financial" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Financial Overview</CardTitle>
+                  <CardDescription className="text-gray-600">Revenue breakdown and financial terms</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="totalContractValue">Total Contract Value</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="totalContractValue" className="text-sm font-semibold text-gray-700">Total Contract Value</Label>
                       <Input
                         id="totalContractValue"
                         type="number"
                         value={formData.totalContractValue}
                         onChange={(e) => handleInputChange('totalContractValue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="annualContractValue">Annual Contract Value</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="annualContractValue" className="text-sm font-semibold text-gray-700">Annual Contract Value</Label>
                       <Input
                         id="annualContractValue"
                         type="number"
                         value={formData.annualContractValue}
                         onChange={(e) => handleInputChange('annualContractValue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="oneTimeRevenue">One-time Revenue</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="marginPercentage" className="text-sm font-semibold text-gray-700">Margin %</Label>
+                      <Input
+                        id="marginPercentage"
+                        type="number"
+                        value={formData.marginPercentage}
+                        onChange={(e) => handleInputChange('marginPercentage', Number(e.target.value))}
+                        min="0"
+                        max="100"
+                        placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="oneTimeRevenue" className="text-sm font-semibold text-gray-700">One-time Revenue</Label>
                       <Input
                         id="oneTimeRevenue"
                         type="number"
                         value={formData.oneTimeRevenue}
                         onChange={(e) => handleInputChange('oneTimeRevenue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="recurringRevenue">Recurring Revenue</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="recurringRevenue" className="text-sm font-semibold text-gray-700">Recurring Revenue</Label>
                       <Input
                         id="recurringRevenue"
                         type="number"
                         value={formData.recurringRevenue}
                         onChange={(e) => handleInputChange('recurringRevenue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="commissionAmount">Commission Amount</Label>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="totalDiscount" className="text-sm font-semibold text-gray-700">Total Discount</Label>
+                      <Input
+                        id="totalDiscount"
+                        type="number"
+                        value={formData.totalDiscount}
+                        onChange={(e) => handleInputChange('totalDiscount', Number(e.target.value))}
+                        placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="commissionAmount" className="text-sm font-semibold text-gray-700">Commission Amount</Label>
                       <Input
                         id="commissionAmount"
                         type="number"
                         value={formData.commissionAmount}
                         onChange={(e) => handleInputChange('commissionAmount', Number(e.target.value))}
                         placeholder="0.00"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="marginPercentage">Margin Percentage</Label>
-                      <Input
-                        id="marginPercentage"
-                        type="number"
-                        value={formData.marginPercentage}
-                        onChange={(e) => handleInputChange('marginPercentage', Number(e.target.value))}
-                        placeholder="0"
-                        max="100"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Forecasting</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Forecasting</CardTitle>
+                  <CardDescription className="text-gray-600">Revenue forecasting and probability</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="forecastCategory">Forecast Category</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="forecastCategory" className="text-sm font-semibold text-gray-700">Forecast Category</Label>
                       <Select value={formData.forecastCategory} onValueChange={(value) => handleInputChange('forecastCategory', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pipeline">Pipeline</SelectItem>
-                          <SelectItem value="best-case">Best Case</SelectItem>
                           <SelectItem value="commit">Commit</SelectItem>
-                          <SelectItem value="closed">Closed</SelectItem>
+                          <SelectItem value="best-case">Best Case</SelectItem>
+                          <SelectItem value="pipeline">Pipeline</SelectItem>
+                          <SelectItem value="omitted">Omitted</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="confidenceLevel">Confidence Level</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="confidenceLevel" className="text-sm font-semibold text-gray-700">Confidence Level</Label>
                       <Select value={formData.confidenceLevel} onValueChange={(value) => handleInputChange('confidenceLevel', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select confidence" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="high">High (80-100%)</SelectItem>
+                          <SelectItem value="medium">Medium (50-79%)</SelectItem>
+                          <SelectItem value="low">Low (0-49%)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="weightedAmount">Weighted Amount</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="weightedAmount" className="text-sm font-semibold text-gray-700">Weighted Amount</Label>
                       <Input
                         id="weightedAmount"
                         type="number"
                         value={formData.weightedAmount}
                         onChange={(e) => handleInputChange('weightedAmount', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="expectedRevenue">Expected Revenue</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="expectedRevenue" className="text-sm font-semibold text-gray-700">Expected Revenue</Label>
                       <Input
                         id="expectedRevenue"
                         type="number"
                         value={formData.expectedRevenue}
                         onChange={(e) => handleInputChange('expectedRevenue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label>Forecast Date</Label>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-700">Forecast Date</Label>
                     <DatePicker
                       value={formData.forecastDate}
                       onChange={(date) => handleInputChange('forecastDate', date)}
@@ -1106,56 +1158,59 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financial Terms</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Financial Terms</CardTitle>
+                  <CardDescription className="text-gray-600">Contract terms and payment details</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="paymentTerms">Payment Terms</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="paymentTerms" className="text-sm font-semibold text-gray-700">Payment Terms</Label>
                       <Select value={formData.paymentTerms} onValueChange={(value) => handleInputChange('paymentTerms', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select payment terms" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="net-30">Net 30</SelectItem>
                           <SelectItem value="net-60">Net 60</SelectItem>
                           <SelectItem value="net-90">Net 90</SelectItem>
-                          <SelectItem value="upon-delivery">Upon Delivery</SelectItem>
-                          <SelectItem value="advance-payment">Advance Payment</SelectItem>
+                          <SelectItem value="upfront">Upfront</SelectItem>
+                          <SelectItem value="installments">Installments</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="contractLength">Contract Length (months)</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="contractLength" className="text-sm font-semibold text-gray-700">Contract Length (months)</Label>
                       <Input
                         id="contractLength"
                         type="number"
                         value={formData.contractLength}
                         onChange={(e) => handleInputChange('contractLength', Number(e.target.value))}
-                        placeholder="0"
+                        min="1"
+                        placeholder="12"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="currency">Currency</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="currency" className="text-sm font-semibold text-gray-700">Currency</Label>
                       <Select value={formData.currency} onValueChange={(value) => handleInputChange('currency', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select currency" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="GBP">GBP</SelectItem>
-                          <SelectItem value="CAD">CAD</SelectItem>
+                          <SelectItem value="USD">USD - US Dollar</SelectItem>
+                          <SelectItem value="EUR">EUR - Euro</SelectItem>
+                          <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                          <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="exchangeRate">Exchange Rate</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="exchangeRate" className="text-sm font-semibold text-gray-700">Exchange Rate</Label>
                       <Input
                         id="exchangeRate"
                         type="number"
@@ -1163,158 +1218,251 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                         value={formData.exchangeRate}
                         onChange={(e) => handleInputChange('exchangeRate', Number(e.target.value))}
                         placeholder="1.0000"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="renewalTerms">Renewal Terms</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="renewalTerms" className="text-sm font-semibold text-gray-700">Renewal Terms</Label>
                     <Textarea
                       id="renewalTerms"
                       value={formData.renewalTerms}
                       onChange={(e) => handleInputChange('renewalTerms', e.target.value)}
-                      placeholder="Renewal conditions and terms"
-                      className="min-h-20"
+                      placeholder="Contract renewal conditions"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            {/* Deal Intelligence */}
-            <TabsContent value="intelligence" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Deal Intelligence Scores</CardTitle>
-                  <CardDescription>AI-powered insights and scoring</CardDescription>
+            {/* Intelligence Tab */}
+            <TabsContent value="intelligence" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Deal Intelligence Scores</CardTitle>
+                  <CardDescription className="text-gray-600">AI-powered deal scoring and analytics</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="dealScore">Deal Score (0-100)</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="dealScore" className="text-sm font-semibold text-gray-700">Overall Deal Score (0-100)</Label>
                       <Input
                         id="dealScore"
                         type="number"
-                        value={formData.dealScore}
-                        onChange={(e) => handleInputChange('dealScore', Number(e.target.value))}
                         min="0"
                         max="100"
+                        value={formData.dealScore}
+                        onChange={(e) => handleInputChange('dealScore', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="engagementScore">Engagement Score (0-100)</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="engagementScore" className="text-sm font-semibold text-gray-700">Engagement Score (0-100)</Label>
                       <Input
                         id="engagementScore"
                         type="number"
-                        value={formData.engagementScore}
-                        onChange={(e) => handleInputChange('engagementScore', Number(e.target.value))}
                         min="0"
                         max="100"
+                        value={formData.engagementScore}
+                        onChange={(e) => handleInputChange('engagementScore', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="fitScore">Fit Score (0-100)</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="fitScore" className="text-sm font-semibold text-gray-700">Fit Score (0-100)</Label>
                       <Input
                         id="fitScore"
                         type="number"
-                        value={formData.fitScore}
-                        onChange={(e) => handleInputChange('fitScore', Number(e.target.value))}
                         min="0"
                         max="100"
+                        value={formData.fitScore}
+                        onChange={(e) => handleInputChange('fitScore', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="velocityScore">Velocity Score (0-100)</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="velocityScore" className="text-sm font-semibold text-gray-700">Velocity Score (0-100)</Label>
                       <Input
                         id="velocityScore"
                         type="number"
-                        value={formData.velocityScore}
-                        onChange={(e) => handleInputChange('velocityScore', Number(e.target.value))}
                         min="0"
                         max="100"
+                        value={formData.velocityScore}
+                        onChange={(e) => handleInputChange('velocityScore', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="riskScore">Risk Score (0-100)</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="riskScore" className="text-sm font-semibold text-gray-700">Risk Score (0-100)</Label>
                       <Input
                         id="riskScore"
                         type="number"
-                        value={formData.riskScore}
-                        onChange={(e) => handleInputChange('riskScore', Number(e.target.value))}
                         min="0"
                         max="100"
+                        value={formData.riskScore}
+                        onChange={(e) => handleInputChange('riskScore', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Activity Tracking</CardTitle>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Sales Process Management</CardTitle>
+                  <CardDescription className="text-gray-600">Stage progression and timeline tracking</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Last Activity Date</Label>
-                      <DatePicker
-                        value={formData.lastActivityDate}
-                        onChange={(date) => handleInputChange('lastActivityDate', date)}
-                        placeholder="Select last activity date"
-                      />
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="salesStage" className="text-sm font-semibold text-gray-700">Current Sales Stage</Label>
+                      <Select value={formData.salesStage} onValueChange={(value) => handleInputChange('salesStage', value)}>
+                        <SelectTrigger className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                          <SelectValue placeholder="Select sales stage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="lead">Lead</SelectItem>
+                          <SelectItem value="qualified">Qualified</SelectItem>
+                          <SelectItem value="demo">Demo</SelectItem>
+                          <SelectItem value="proposal">Proposal</SelectItem>
+                          <SelectItem value="negotiation">Negotiation</SelectItem>
+                          <SelectItem value="contract">Contract</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div>
-                      <Label>Next Activity Date</Label>
-                      <DatePicker
-                        value={formData.nextActivityDate}
-                        onChange={(date) => handleInputChange('nextActivityDate', date)}
-                        placeholder="Select next activity date"
+                    <div className="space-y-3">
+                      <Label htmlFor="stageProbability" className="text-sm font-semibold text-gray-700">Stage Probability (%)</Label>
+                      <Input
+                        id="stageProbability"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.stageProbability}
+                        onChange={(e) => handleInputChange('stageProbability', Number(e.target.value))}
+                        placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="activityCount">Activity Count</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="stageDuration" className="text-sm font-semibold text-gray-700">Stage Duration (days)</Label>
                       <Input
-                        id="activityCount"
+                        id="stageDuration"
                         type="number"
-                        value={formData.activityCount}
-                        onChange={(e) => handleInputChange('activityCount', Number(e.target.value))}
                         min="0"
+                        value={formData.stageDuration}
+                        onChange={(e) => handleInputChange('stageDuration', Number(e.target.value))}
                         placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="emailInteractions">Email Interactions</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="previousStage" className="text-sm font-semibold text-gray-700">Previous Stage</Label>
                       <Input
-                        id="emailInteractions"
-                        type="number"
-                        value={formData.emailInteractions}
-                        onChange={(e) => handleInputChange('emailInteractions', Number(e.target.value))}
-                        min="0"
-                        placeholder="0"
+                        id="previousStage"
+                        value={formData.previousStage}
+                        onChange={(e) => handleInputChange('previousStage', e.target.value)}
+                        placeholder="Previous stage name"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="daysSinceLastActivity">Days Since Last Activity</Label>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-gray-700">Stage Entry Date</Label>
+                    <DatePicker
+                      value={formData.stageEntryDate}
+                      onChange={(date) => handleInputChange('stageEntryDate', date)}
+                      placeholder="Select entry date"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="stageExitCriteria" className="text-sm font-semibold text-gray-700">Stage Exit Criteria</Label>
+                    <Textarea
+                      id="stageExitCriteria"
+                      value={formData.stageExitCriteria}
+                      onChange={(e) => handleInputChange('stageExitCriteria', e.target.value)}
+                      placeholder="What needs to happen to move to next stage?"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-rose-50 to-pink-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Activity Tracking</CardTitle>
+                  <CardDescription className="text-gray-600">Engagement and activity metrics</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 p-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Last Activity Date</Label>
+                      <DatePicker
+                        value={formData.lastActivityDate}
+                        onChange={(date) => handleInputChange('lastActivityDate', date)}
+                        placeholder="Select last activity"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="daysSinceLastActivity" className="text-sm font-semibold text-gray-700">Days Since Last Activity</Label>
                       <Input
                         id="daysSinceLastActivity"
                         type="number"
+                        min="0"
                         value={formData.daysSinceLastActivity}
                         onChange={(e) => handleInputChange('daysSinceLastActivity', Number(e.target.value))}
-                        min="0"
                         placeholder="0"
-                        readOnly
-                        className="bg-muted"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-gray-700">Next Activity Date</Label>
+                      <DatePicker
+                        value={formData.nextActivityDate}
+                        onChange={(date) => handleInputChange('nextActivityDate', date)}
+                        placeholder="Select next activity"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="activityCount" className="text-sm font-semibold text-gray-700">Total Activity Count</Label>
+                      <Input
+                        id="activityCount"
+                        type="number"
+                        min="0"
+                        value={formData.activityCount}
+                        onChange={(e) => handleInputChange('activityCount', Number(e.target.value))}
+                        placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="emailInteractions" className="text-sm font-semibold text-gray-700">Email Interactions</Label>
+                      <Input
+                        id="emailInteractions"
+                        type="number"
+                        min="0"
+                        value={formData.emailInteractions}
+                        onChange={(e) => handleInputChange('emailInteractions', Number(e.target.value))}
+                        placeholder="0"
+                        className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -1322,73 +1470,81 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
               </Card>
             </TabsContent>
 
-            {/* Collaboration */}
-            <TabsContent value="collaboration" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Deal Team & Collaboration</CardTitle>
-                  <CardDescription>Team members and stakeholder management</CardDescription>
+            {/* Collaboration Tab */}
+            <TabsContent value="collaboration" className="space-y-8 mt-6 animate-fade-in">
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-sky-50 to-blue-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Deal Team & Collaboration</CardTitle>
+                  <CardDescription className="text-gray-600">Team members and stakeholder information</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="teamRoles">Team Roles</Label>
+                <CardContent className="space-y-8 p-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="teamRoles" className="text-sm font-semibold text-gray-700">Team Roles</Label>
                     <Textarea
                       id="teamRoles"
                       value={formData.teamRoles}
                       onChange={(e) => handleInputChange('teamRoles', e.target.value)}
-                      placeholder="Specific roles for each team member"
-                      className="min-h-20"
+                      placeholder="Define team member roles and responsibilities"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="stakeholderMap">Stakeholder Map</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="stakeholderMap" className="text-sm font-semibold text-gray-700">Stakeholder Map</Label>
                     <Textarea
                       id="stakeholderMap"
                       value={formData.stakeholderMap}
                       onChange={(e) => handleInputChange('stakeholderMap', e.target.value)}
-                      placeholder="Visual representation of decision makers and influencers"
-                      className="min-h-24"
+                      placeholder="Map of key stakeholders and their influence"
+                      className="min-h-24 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
+                </CardContent>
+              </Card>
 
-                  <div>
-                    <Label htmlFor="internalNotes">Internal Notes</Label>
+              <Card className="border shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-lime-50 to-green-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Notes & Documentation</CardTitle>
+                  <CardDescription className="text-gray-600">Internal and customer-facing notes</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 p-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="internalNotes" className="text-sm font-semibold text-gray-700">Internal Notes</Label>
                     <Textarea
                       id="internalNotes"
                       value={formData.internalNotes}
                       onChange={(e) => handleInputChange('internalNotes', e.target.value)}
-                      placeholder="Team-only observations and notes"
-                      className="min-h-24"
+                      placeholder="Internal team notes and observations"
+                      className="min-h-32 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="customerFacingNotes">Customer-Facing Notes</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="customerFacingNotes" className="text-sm font-semibold text-gray-700">Customer-Facing Notes</Label>
                     <Textarea
                       id="customerFacingNotes"
                       value={formData.customerFacingNotes}
                       onChange={(e) => handleInputChange('customerFacingNotes', e.target.value)}
-                      placeholder="Shareable updates and communications"
-                      className="min-h-24"
+                      placeholder="Notes that can be shared with the customer"
+                      className="min-h-32 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
 
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-8 border-t bg-gray-50 -mx-6 px-6 py-4 rounded-b-lg">
-            <Button variant="outline" onClick={onClose} className="px-6 py-2 hover:bg-gray-100">
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 px-6 py-2 animate-pulse">
-              <Save className="h-4 w-4 mr-2" />
-              Save Deal
-            </Button>
-          </div>
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4 pt-8 mt-8 border-t bg-gray-50 -mx-6 px-8 py-6">
+              <Button variant="outline" onClick={onClose} className="px-8 py-3 h-12 text-base hover:bg-gray-100">
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 px-8 py-3 h-12 text-base">
+                <Save className="h-4 w-4 mr-2" />
+                Save Deal
+              </Button>
+            </div>
+          </Tabs>
         </div>
       </SheetContent>
     </Sheet>
