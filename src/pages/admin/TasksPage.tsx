@@ -55,7 +55,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { EnhancedTaskForm } from '../../components/tasks/EnhancedTaskForm';
+import { TaskForm } from '../../components/tasks/TaskForm';
 
 import { toast } from 'sonner';
 
@@ -536,7 +536,7 @@ const TasksPage = () => {
       />
 
       {/* Task Form */}
-      <EnhancedTaskForm
+      <TaskForm
         isOpen={isDrawerOpen}
         onClose={() => {
           setIsDrawerOpen(false);

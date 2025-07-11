@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Bell
+  Bell,
+  CheckSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -49,6 +50,7 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Leads', url: '/admin/leads', icon: Target, badge: '12' },
   { title: 'Contacts', url: '/admin/contacts', icon: Users },
   { title: 'Deals', url: '/admin/deals', icon: FileText, badge: '5' },
+  { title: 'Tasks', url: '/admin/tasks', icon: CheckSquare, badge: '3' },
   { title: 'Calendar', url: '/admin/calendar', icon: Calendar },
   { title: 'Calls', url: '/admin/calls', icon: Phone },
   { title: 'Import/Export', url: '/admin/import-export', icon: FileText },
