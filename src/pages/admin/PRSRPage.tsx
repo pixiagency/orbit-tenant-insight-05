@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ModernDashboardLayout } from '../../components/layout/ModernDashboardLayout';
+import { ComprehensiveDashboardLayout } from '../../components/layout/ComprehensiveDashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -92,7 +92,7 @@ export const PRSRPage: React.FC = () => {
   ];
 
   return (
-    <ModernDashboardLayout>
+    <ComprehensiveDashboardLayout>
       <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -303,6 +303,6 @@ export const PRSRPage: React.FC = () => {
         onSubmit={handleSavePRSR} 
         prsr={selectedPRSR} 
       />
-    </ModernDashboardLayout>
+    </ComprehensiveDashboardLayout>
   );
 };
