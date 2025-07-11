@@ -33,7 +33,8 @@ import {
   Shield,
   FileSpreadsheet,
   Code,
-  Globe
+  Globe,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +76,7 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Automation', url: '/admin/automation', icon: Workflow },
   { title: 'Forms', url: '/admin/forms', icon: FormInput },
   { title: 'Products / Services', url: '/admin/products', icon: Package },
+  { title: 'PR / SR', url: '/admin/pr-sr', icon: Megaphone },
   { title: 'AI Assistant', url: '/admin/ai-assistant', icon: Bot },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Notifications', url: '/admin/notifications', icon: Bell },
