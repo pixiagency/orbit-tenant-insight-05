@@ -51,6 +51,7 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Deals', url: '/admin/deals', icon: FileText, badge: '5' },
   { title: 'Calendar', url: '/admin/calendar', icon: Calendar },
   { title: 'Calls', url: '/admin/calls', icon: Phone },
+  { title: 'Import/Export', url: '/admin/import-export', icon: FileText },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];

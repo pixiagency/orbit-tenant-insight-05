@@ -30,6 +30,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { LeadsImportPage } from './pages/admin/LeadsImportPage';
 import DealsPage from "./pages/admin/DealsPage";
 import TasksPage from "./pages/admin/TasksPage";
+import ImportExportPage from "./pages/admin/ImportExportPage";
 import CalendarPage from "./pages/admin/CalendarPage";
 import { InboxPage } from "./pages/admin/InboxPage";
 import { CallLogsPage } from "./pages/admin/CallLogsPage";
@@ -125,8 +126,8 @@ const App = () => {
                           <Route path="leads/import" element={<LeadsImportPage />} />
                           <Route path="opportunities" element={<OpportunitiesPage />} />
                           <Route path="deals" element={<DealsPage />} />
-                          
                           <Route path="tasks" element={<TasksPage />} />
+                          <Route path="import-export" element={<ImportExportPage />} />
                           <Route path="calendar" element={<CalendarPage />} />
                           <Route path="inbox" element={<InboxPage />} />
                           <Route path="calls" element={<CallLogsPage />} />

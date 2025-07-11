@@ -175,14 +175,14 @@ const DealsPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Deals</h1>
-          <p className="text-muted-foreground mt-1">Manage your sales pipeline</p>
+          <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
+          <p className="text-gray-600 mt-1">Manage your sales pipeline</p>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)}>
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
           Add Deal
         </Button>
@@ -216,20 +216,70 @@ const DealsPage = () => {
         />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4 flex-1">
-          <Button
-            variant="outline"
-            onClick={() => setShowAdvancedFilters(true)}
-            className="whitespace-nowrap"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Advanced Filters
-          </Button>
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Deal Filters</CardTitle>
+              <CardDescription>Filter and search your deals</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
+                <Filter className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="lg:col-span-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input placeholder="Search deals..." className="pl-10" />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                <SelectItem value="prospecting">Prospecting</SelectItem>
+                <SelectItem value="qualification">Qualification</SelectItem>
+                <SelectItem value="proposal">Proposal</SelectItem>
+                <SelectItem value="negotiation">Negotiation</SelectItem>
+                <SelectItem value="closed-won">Closed Won</SelectItem>
+                <SelectItem value="closed-lost">Closed Lost</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="All Sources" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="website">Website</SelectItem>
+                <SelectItem value="referral">Referral</SelectItem>
+                <SelectItem value="trade-show">Trade Show</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="All Assignees" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="sarah">Sarah Johnson</SelectItem>
+                <SelectItem value="mike">Mike Chen</SelectItem>
+                <SelectItem value="emily">Emily Rodriguez</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           {selectedDeals.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
               <span className="text-sm text-muted-foreground">
                 {selectedDeals.length} selected
               </span>
@@ -251,15 +301,8 @@ const DealsPage = () => {
               </Button>
             </div>
           )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setIsDrawerOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Deal
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Table */}
       <Card>

@@ -55,7 +55,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { EnhancedTaskForm } from '../../components/tasks/EnhancedTaskForm';
-import { FilterDrawer } from '../../components/shared/FilterDrawer';
+
 import { toast } from 'sonner';
 
 interface Task {
@@ -179,14 +179,14 @@ const TasksPage = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-muted-foreground mt-1">Manage your team's tasks and activities</p>
+          <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
+          <p className="text-gray-600 mt-1">Manage your team's tasks and activities</p>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)}>
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
           Add Task
         </Button>
@@ -220,20 +220,69 @@ const TasksPage = () => {
         />
       </div>
 
-      {/* Filters and Actions */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4 flex-1">
-          <Button
-            variant="outline"
-            onClick={() => setShowAdvancedFilters(true)}
-            className="whitespace-nowrap"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Advanced Filters
-          </Button>
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Task Filters</CardTitle>
+              <CardDescription>Filter and search your tasks</CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
+                <Filter className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="lg:col-span-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input placeholder="Search tasks..." className="pl-10" />
+              </div>
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Priorities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger>
+                <SelectValue placeholder="All Assignees" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="sarah">Sarah Johnson</SelectItem>
+                <SelectItem value="mike">Mike Chen</SelectItem>
+                <SelectItem value="emily">Emily Rodriguez</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           {selectedTasks.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
               <span className="text-sm text-muted-foreground">
                 {selectedTasks.length} selected
               </span>
@@ -255,15 +304,8 @@ const TasksPage = () => {
               </Button>
             </div>
           )}
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button onClick={() => setIsDrawerOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Table */}
       <Card>
