@@ -28,9 +28,8 @@ import NotFound from "./pages/NotFound";
 import { UsersManagementPage } from "./pages/superadmin/UsersManagementPage";
 import { AuthPage } from "./pages/AuthPage";
 import { LeadsImportPage } from './pages/admin/LeadsImportPage';
-import { DealsPage } from "./pages/admin/DealsPage";
-
-import { TasksPage } from "./pages/admin/TasksPage";
+import DealsPage from "./pages/admin/DealsPage";
+import TasksPage from "./pages/admin/TasksPage";
 import CalendarPage from "./pages/admin/CalendarPage";
 import { InboxPage } from "./pages/admin/InboxPage";
 import { CallLogsPage } from "./pages/admin/CallLogsPage";

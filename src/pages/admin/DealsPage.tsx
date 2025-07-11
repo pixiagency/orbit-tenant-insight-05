@@ -21,7 +21,9 @@ import {
   Upload,
   Users,
   Star,
-  Target
+  Target,
+  Mail,
+  Phone
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,8 +64,8 @@ interface Deal {
   value: number;
   stage: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
   probability: number;
-  expectedCloseDate: string;
-  owner: string;
+  closeDate: string;
+  assignedTo: string;
   source: string;
   description: string;
   lastActivity: string;
@@ -78,8 +80,8 @@ const dealsData: Deal[] = [
     value: 150000,
     stage: 'negotiation',
     probability: 80,
-    expectedCloseDate: '2024-02-15',
-    owner: 'Sarah Johnson',
+    closeDate: '2024-02-15',
+    assignedTo: 'Sarah Johnson',
     source: 'Website',
     description: 'Annual enterprise software license renewal',
     lastActivity: '2024-01-28'
@@ -92,8 +94,8 @@ const dealsData: Deal[] = [
     value: 85000,
     stage: 'proposal',
     probability: 65,
-    expectedCloseDate: '2024-03-01',
-    owner: 'Mike Chen',
+    closeDate: '2024-03-01',
+    assignedTo: 'Mike Chen',
     source: 'Referral',
     description: 'Complete cloud infrastructure migration',
     lastActivity: '2024-01-29'
@@ -106,82 +108,69 @@ const dealsData: Deal[] = [
     value: 45000,
     stage: 'qualification',
     probability: 40,
-    expectedCloseDate: '2024-03-15',
-    owner: 'Emily Rodriguez',
+    closeDate: '2024-03-15',
+    assignedTo: 'Emily Rodriguez',
     source: 'Trade Show',
     description: 'Strategic consulting for digital transformation',
     lastActivity: '2024-01-30'
   }
 ];
 
-export const DealsPage: React.FC = () => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStage, setFilterStage] = useState('all');
-  const [filterOwner, setFilterOwner] = useState('all');
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [dealToDelete, setDealToDelete] = useState<Deal | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+const DealsPage = () => {
+  const [deals, setDeals] = useState<Deal[]>(dealsData);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [dealToDelete, setDealToDelete] = useState<string | null>(null);
+  const [selectedDeals, setSelectedDeals] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // KPI Calculations
-  const totalDeals = dealsData.length;
-  const totalValue = dealsData.reduce((sum, deal) => sum + deal.value, 0);
-  const wonDeals = dealsData.filter(deal => deal.stage === 'closed-won').length;
-  const avgDealSize = totalDeals > 0 ? totalValue / totalDeals : 0;
-
-  // Filtered data
-  const filteredDeals = dealsData.filter(deal => {
-    const matchesSearch = deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         deal.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         deal.contact.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStage = filterStage === 'all' || deal.stage === filterStage;
-    const matchesOwner = filterOwner === 'all' || deal.owner === filterOwner;
-    
-    return matchesSearch && matchesStage && matchesOwner;
+  const filteredDeals = deals.filter(deal => {
+    const matchesStatus = statusFilter === 'all' || deal.stage === statusFilter;
+    return matchesStatus;
   });
 
-  const handleAddDeal = () => {
-    setSelectedDeal(null);
-    setIsFormOpen(true);
+  // Pagination
+  const totalPages = Math.ceil(filteredDeals.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedDeals = filteredDeals.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleSelectDeal = (dealId: string) => {
+    setSelectedDeals(prev =>
+      prev.includes(dealId)
+        ? prev.filter(id => id !== dealId)
+        : [...prev, dealId]
+    );
+  };
+
+  const handleSelectAllDeals = () => {
+    if (selectedDeals.length === paginatedDeals.length) {
+      setSelectedDeals([]);
+    } else {
+      setSelectedDeals(paginatedDeals.map(deal => deal.id));
+    }
   };
 
   const handleEditDeal = (deal: Deal) => {
-    setSelectedDeal(deal);
-    setIsFormOpen(true);
+    setEditingDeal(deal);
+    setIsDrawerOpen(true);
   };
 
-  const handleDeleteDeal = (deal: Deal) => {
-    setDealToDelete(deal);
-    setIsDeleteDialogOpen(true);
+  const handleDeleteDeal = (dealId: string) => {
+    setDealToDelete(dealId);
+    setDeleteModalOpen(true);
   };
 
   const confirmDelete = () => {
     if (dealToDelete) {
-      toast.success(`Deal "${dealToDelete.title}" deleted successfully`);
-      setIsDeleteDialogOpen(false);
+      setDeals(prev => prev.filter(deal => deal.id !== dealToDelete));
+      toast.success('Deal deleted successfully');
+      setDeleteModalOpen(false);
       setDealToDelete(null);
     }
-  };
-
-  const handleFormSubmit = (dealData: any) => {
-    if (selectedDeal) {
-      toast.success('Deal updated successfully');
-    } else {
-      toast.success('New deal created successfully');
-    }
-    setIsFormOpen(false);
-    setSelectedDeal(null);
-  };
-
-  const handleExport = () => {
-    toast.success('Deals exported successfully');
-  };
-
-  const handleImport = () => {
-    toast.success('Deals imported successfully');
   };
 
   return (
@@ -189,359 +178,170 @@ export const DealsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Deals Management</h1>
-          <p className="text-muted-foreground mt-1">Track and nurture your sales opportunities</p>
+          <h1 className="text-3xl font-bold tracking-tight">Deals</h1>
+          <p className="text-muted-foreground mt-1">Manage your sales pipeline</p>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" onClick={handleImport}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import
-          </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button onClick={handleAddDeal} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            New Deal
-          </Button>
-        </div>
+        <Button onClick={() => setIsDrawerOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Deal
+        </Button>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Total Deals</p>
-                <p className="text-2xl font-bold text-blue-900">{totalDeals}</p>
-                <p className="text-xs text-blue-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  +8 this week
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
-                <Handshake className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-green-50 border-green-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Pipeline Value</p>
-                <p className="text-2xl font-bold text-green-900">${(totalValue / 1000).toFixed(0)}K</p>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <Star className="h-3 w-3 mr-1" />
-                  High quality deals
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-purple-50 border-purple-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Won Deals</p>
-                <p className="text-2xl font-bold text-purple-900">{wonDeals}</p>
-                <p className="text-xs text-purple-600 flex items-center mt-1">
-                  <Target className="h-3 w-3 mr-1" />
-                  Great results!
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-lg bg-purple-600 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-orange-50 border-orange-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Avg Deal Size</p>
-                <p className="text-2xl font-bold text-orange-900">${(avgDealSize / 1000).toFixed(0)}K</p>
-                <p className="text-xs text-orange-600 flex items-center mt-1">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  Strong pipeline
-                </p>
-              </div>
-              <div className="h-12 w-12 rounded-lg bg-orange-600 flex items-center justify-center">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <ModernKPICard
+          title="Total Deals"
+          value={deals.length.toString()}
+          change={{ value: "+12%", trend: "up" }}
+          icon={Handshake}
+        />
+        <ModernKPICard
+          title="Pipeline Value"
+          value={`$${Math.round(deals.reduce((sum, deal) => sum + deal.value, 0) / 1000)}K`}
+          change={{ value: "+18%", trend: "up" }}
+          icon={DollarSign}
+        />
+        <ModernKPICard
+          title="Won Deals"
+          value={deals.filter(d => d.stage === 'closed-won').length.toString()}
+          change={{ value: "+25%", trend: "up" }}
+          icon={Target}
+        />
+        <ModernKPICard
+          title="Avg Deal Size"
+          value={`$${Math.round(deals.reduce((sum, deal) => sum + deal.value, 0) / deals.length / 1000)}K`}
+          change={{ value: "+8%", trend: "up" }}
+          icon={TrendingUp}
+        />
       </div>
 
-      {/* Deal Filters */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold">Deal Filters</h2>
-          <p className="text-sm text-muted-foreground">Filter and search your deals</p>
+      {/* Filters and Actions */}
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4 flex-1">
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvancedFilters(true)}
+            className="whitespace-nowrap"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Advanced Filters
+          </Button>
+          
+          {selectedDeals.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {selectedDeals.length} selected
+              </span>
+              <Button variant="outline" size="sm">
+                <Mail className="h-4 w-4 mr-2" />
+                Send Email
+              </Button>
+              <Button variant="outline" size="sm">
+                <Phone className="h-4 w-4 mr-2" />
+                Make Call
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          )}
         </div>
         
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search deals..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full sm:w-64"
-                />
-              </div>
-              
-              <Select value={filterStage} onValueChange={setFilterStage}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="prospecting">Prospecting</SelectItem>
-                  <SelectItem value="qualification">Qualification</SelectItem>
-                  <SelectItem value="proposal">Proposal</SelectItem>
-                  <SelectItem value="negotiation">Negotiation</SelectItem>
-                  <SelectItem value="closed-won">Closed Won</SelectItem>
-                  <SelectItem value="closed-lost">Closed Lost</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={filterOwner} onValueChange={setFilterOwner}>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="All Sources" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sources</SelectItem>
-                  <SelectItem value="website">Website</SelectItem>
-                  <SelectItem value="referral">Referral</SelectItem>
-                  <SelectItem value="trade-show">Trade Show</SelectItem>
-                  <SelectItem value="cold-outreach">Cold Outreach</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="All Assignees" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Assignees</SelectItem>
-                  <SelectItem value="sarah">Sarah Johnson</SelectItem>
-                  <SelectItem value="mike">Mike Chen</SelectItem>
-                  <SelectItem value="emily">Emily Rodriguez</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select>
-                <SelectTrigger className="w-full sm:w-40">
-                  <SelectValue placeholder="All Scores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Scores</SelectItem>
-                  <SelectItem value="high">High (80-100)</SelectItem>
-                  <SelectItem value="medium">Medium (50-79)</SelectItem>
-                  <SelectItem value="low">Low (0-49)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Advanced Filters
-              </Button>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setIsDrawerOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Deal
+          </Button>
         </div>
       </div>
 
-      {/* Advanced Filters */}
-      {showFilters && (
-        <div className="bg-white p-6 rounded-lg border">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dateRange">Date Range</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
-                  <SelectItem value="month">This Month</SelectItem>
-                  <SelectItem value="quarter">This Quarter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="valueRange">Value Range</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Any value" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0-10k">$0 - $10K</SelectItem>
-                  <SelectItem value="10k-50k">$10K - $50K</SelectItem>
-                  <SelectItem value="50k-100k">$50K - $100K</SelectItem>
-                  <SelectItem value="100k+">$100K+</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="source">Source</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="All sources" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="website">Website</SelectItem>
-                  <SelectItem value="referral">Referral</SelectItem>
-                  <SelectItem value="trade-show">Trade Show</SelectItem>
-                  <SelectItem value="cold-outreach">Cold Outreach</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-end">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowFilters(false)}
-                className="w-full"
-              >
-                Clear Filters
-              </Button>
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Show</span>
+                  <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="text-sm text-muted-foreground">entries</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+          <DealTable
+            deals={paginatedDeals}
+            onEdit={handleEditDeal}
+            onDelete={handleDeleteDeal}
+            selectedDeals={selectedDeals}
+            onSelectDeal={handleSelectDeal}
+            onSelectAllDeals={handleSelectAllDeals}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Advanced Filters Modal */}
+      {showAdvancedFilters && (
+        <FilterDrawer
+          isOpen={showAdvancedFilters}
+          onClose={() => setShowAdvancedFilters(false)}
+          title="Advanced Filters"
+        />
       )}
 
-      {/* Deals Table */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Deals ({filteredDeals.length})</h2>
-            <p className="text-sm text-muted-foreground">Manage and track your sales deals</p>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span>Show</span>
-              <Select defaultValue="10">
-                <SelectTrigger className="w-16 h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>entries</span>
-            </div>
-            
-            <div className="flex items-center border rounded-md">
-              <Button 
-                variant={viewMode === 'table' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setViewMode('table')}
-                className="rounded-r-none"
-              >
-                <FileText className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="rounded-l-none"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg border">
-          <DealTable
-            deals={filteredDeals}
-            onEdit={handleEditDeal}
-            onDelete={(dealId) => {
-              const deal = filteredDeals.find(d => d.id === dealId);
-              if (deal) handleDeleteDeal(deal);
-            }}
-            searchTerm=""
-            onSearchChange={() => {}}
-            stageFilter="all"
-            onStageFilterChange={() => {}}
-          />
-          
-          {/* Pagination */}
-          <div className="flex items-center justify-between px-6 py-4 border-t">
-            <div className="text-sm text-muted-foreground">
-              Showing 1 to {Math.min(10, filteredDeals.length)} of {filteredDeals.length} records
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" disabled>
-                Previous
-              </Button>
-              <div className="flex items-center space-x-1">
-                <span className="text-sm">Page</span>
-                <span className="font-medium">1</span>
-                <span className="text-sm">of</span>
-                <span className="font-medium">6</span>
-              </div>
-              <Button variant="outline" size="sm">
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Deal Form Modal */}
-      {/* <DealDrawerForm
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setSelectedDeal(null);
-        }}
-        onSubmit={handleFormSubmit}
-        deal={selectedDeal}
-      /> */}
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Deal</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{dealToDelete?.title}"? This action cannot be undone.
+              Are you sure you want to delete this deal? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
 };
+
+export default DealsPage;
