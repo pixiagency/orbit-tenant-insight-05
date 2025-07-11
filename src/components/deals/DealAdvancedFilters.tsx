@@ -84,8 +84,8 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 z-50" onClick={handleClickOutside}>
       <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg" onClick={(e) => e.stopPropagation()}>
-        <Card className="h-full border-0 rounded-none">
-          <CardHeader className="border-b">
+        <Card className="h-full border-0 rounded-none flex flex-col">
+          <CardHeader className="border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <X className="h-4 w-4" />
@@ -96,7 +96,7 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-6 space-y-6 overflow-y-auto">
+          <CardContent className="p-6 space-y-6 overflow-y-auto flex-1 min-h-0">
             {/* Saved Filters */}
             <div className="space-y-2">
               <Label className="font-semibold">Saved Filters</Label>
@@ -125,10 +125,9 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
               </Button>
             </div>
 
-            {/* Filter Options - Only show when "Add Filter Rule" is clicked */}
-            {!showFilterFields && (filters.dateRange.from || filters.valueRange.min || filters.probabilityRange.min || filters.assignedTo !== 'all' || filters.source !== 'all' || filters.stage !== 'all' || filters.lastActivity !== 'all') && (
-              <div className="space-y-4">
-                <Label className="font-semibold">Filter Options</Label>
+            {/* Filter Options - Always visible */}
+            <div className="space-y-4">
+              <Label className="font-semibold">Filter Options</Label>
 
                 {/* Created Date Range */}
             <div className="space-y-2">
@@ -288,22 +287,7 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
                 </Select>
               </div>
             </div>
-
-            {/* Logic Operator */}
-            <div className="space-y-2">
-              <Label>Logic Operator</Label>
-              <Select value={filters.operator} onValueChange={(value) => onFiltersChange({ ...filters, operator: value as 'AND' | 'OR' })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  <SelectItem value="AND">AND (all conditions must match)</SelectItem>
-                  <SelectItem value="OR">OR (any condition can match)</SelectItem>
-                </SelectContent>
-              </Select>
-                </div>
-              </div>
-            )}
+          </div>
 
             {/* Add Filter Rule Fields */}
             {showFilterFields && (
@@ -350,7 +334,7 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
             )}
 
             {/* Save Current Filter */}
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t flex-shrink-0">
               <Button variant="outline" className="w-full mb-4">
                 Save Current Filter
               </Button>
