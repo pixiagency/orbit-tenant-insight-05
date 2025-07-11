@@ -65,10 +65,8 @@ export const ComprehensiveDashboardLayout: React.FC<ComprehensiveDashboardLayout
           onLanguageChange={handleLanguageChange}
           currentLanguage={currentLanguage}
         />
-        <main className="flex-1 overflow-y-auto bg-background">
-          <div className={`${isRTL ? 'rtl' : 'ltr'} h-full`}>
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto bg-background p-6">
+          {children}
         </main>
       </div>
     </div>
