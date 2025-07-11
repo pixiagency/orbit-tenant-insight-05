@@ -54,13 +54,14 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'overdue';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: string;
+  priority: string;
   assignedTo: string;
   dueDate: string;
-  createdDate: string;
-  category: string;
   relatedTo: string;
+  relatedType: string;
+  createdAt: string;
+  completedAt?: string;
 }
 
 const tasksData: Task[] = [
@@ -72,9 +73,9 @@ const tasksData: Task[] = [
     priority: 'high',
     assignedTo: 'Sarah Johnson',
     dueDate: '2024-02-15',
-    createdDate: '2024-01-15',
-    category: 'Sales',
-    relatedTo: 'TechCorp Deal'
+    relatedTo: 'TechCorp Deal',
+    relatedType: 'deal',
+    createdAt: '2024-01-15T10:30:00Z'
   },
   {
     id: '2',
@@ -84,9 +85,9 @@ const tasksData: Task[] = [
     priority: 'medium',
     assignedTo: 'Mike Chen',
     dueDate: '2024-02-28',
-    createdDate: '2024-01-20',
-    category: 'Reporting',
-    relatedTo: 'Q1 Review'
+    relatedTo: 'Q1 Review',
+    relatedType: 'project',
+    createdAt: '2024-01-20T14:20:00Z'
   },
   {
     id: '3',
@@ -96,45 +97,10 @@ const tasksData: Task[] = [
     priority: 'low',
     assignedTo: 'Emily Rodriguez',
     dueDate: '2024-02-10',
-    createdDate: '2024-01-25',
-    category: 'Administration',
-    relatedTo: 'CRM Maintenance'
-  },
-  {
-    id: '4',
-    title: 'Client presentation prep',
-    description: 'Create presentation for ABC Corp meeting',
-    status: 'overdue',
-    priority: 'urgent',
-    assignedTo: 'David Brown',
-    dueDate: '2024-02-05',
-    createdDate: '2024-01-30',
-    category: 'Sales',
-    relatedTo: 'ABC Corp Deal'
-  },
-  {
-    id: '5',
-    title: 'Schedule team meeting',
-    description: 'Organize monthly team sync and send calendar invites',
-    status: 'pending',
-    priority: 'medium',
-    assignedTo: 'Lisa Park',
-    dueDate: '2024-02-20',
-    createdDate: '2024-02-01',
-    category: 'Management',
-    relatedTo: 'Team Coordination'
-  },
-  {
-    id: '6',
-    title: 'Review contract terms',
-    description: 'Legal review of new partnership agreement',
-    status: 'in-progress',
-    priority: 'high',
-    assignedTo: 'Jennifer Lee',
-    dueDate: '2024-02-18',
-    createdDate: '2024-02-02',
-    category: 'Legal',
-    relatedTo: 'Partnership Deal'
+    relatedTo: 'CRM Maintenance',
+    relatedType: 'system',
+    createdAt: '2024-01-25T11:45:00Z',
+    completedAt: '2024-02-08T16:30:00Z'
   }
 ];
 
@@ -159,7 +125,7 @@ export const TasksPage: React.FC = () => {
   const filteredTasks = tasksData.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.category.toLowerCase().includes(searchTerm.toLowerCase());
+                         task.relatedType.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
     const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
     const matchesAssignee = filterAssignee === 'all' || task.assignedTo === filterAssignee;
@@ -387,8 +353,17 @@ export const TasksPage: React.FC = () => {
         <TaskTable
           tasks={filteredTasks}
           onEdit={handleEditTask}
-          onDelete={handleDeleteTask}
-          onView={(task) => console.log('View task:', task)}
+          onDelete={(taskId) => {
+            const task = filteredTasks.find(t => t.id === taskId);
+            if (task) handleDeleteTask(task);
+          }}
+          onStatusChange={() => {}}
+          searchTerm=""
+          onSearchChange={() => {}}
+          statusFilter="all"
+          onStatusFilterChange={() => {}}
+          priorityFilter="all"
+          onPriorityFilterChange={() => {}}
         />
       </div>
 
@@ -399,7 +374,7 @@ export const TasksPage: React.FC = () => {
           setIsFormOpen(false);
           setSelectedTask(null);
         }}
-        onSubmit={handleFormSubmit}
+        onSave={handleFormSubmit}
         task={selectedTask}
       />
 

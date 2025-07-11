@@ -62,8 +62,7 @@ interface Deal {
   expectedCloseDate: string;
   owner: string;
   source: string;
-  description?: string;
-  createdDate: string;
+  description: string;
   lastActivity: string;
 }
 
@@ -80,7 +79,6 @@ const dealsData: Deal[] = [
     owner: 'Sarah Johnson',
     source: 'Website',
     description: 'Annual enterprise software license renewal',
-    createdDate: '2024-01-10',
     lastActivity: '2024-01-28'
   },
   {
@@ -95,7 +93,6 @@ const dealsData: Deal[] = [
     owner: 'Mike Chen',
     source: 'Referral',
     description: 'Complete cloud infrastructure migration',
-    createdDate: '2024-01-15',
     lastActivity: '2024-01-29'
   },
   {
@@ -110,7 +107,6 @@ const dealsData: Deal[] = [
     owner: 'Emily Rodriguez',
     source: 'Trade Show',
     description: 'Strategic consulting for digital transformation',
-    createdDate: '2024-01-20',
     lastActivity: '2024-01-30'
   }
 ];
@@ -360,13 +356,19 @@ export const DealsPage: React.FC = () => {
         <DealTable
           deals={filteredDeals}
           onEdit={handleEditDeal}
-          onDelete={handleDeleteDeal}
-          onView={(deal) => console.log('View deal:', deal)}
+          onDelete={(dealId) => {
+            const deal = filteredDeals.find(d => d.id === dealId);
+            if (deal) handleDeleteDeal(deal);
+          }}
+          searchTerm=""
+          onSearchChange={() => {}}
+          stageFilter="all"
+          onStageFilterChange={() => {}}
         />
       </div>
 
       {/* Deal Form Modal */}
-      <DealDrawerForm
+      {/* <DealDrawerForm
         isOpen={isFormOpen}
         onClose={() => {
           setIsFormOpen(false);
@@ -374,7 +376,7 @@ export const DealsPage: React.FC = () => {
         }}
         onSubmit={handleFormSubmit}
         deal={selectedDeal}
-      />
+      /> */}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
