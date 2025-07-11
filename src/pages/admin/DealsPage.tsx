@@ -23,7 +23,8 @@ import {
   Star,
   Target,
   Mail,
-  Phone
+  Phone,
+  X
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -316,13 +317,18 @@ const DealsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Advanced Filters Modal */}
       {showAdvancedFilters && (
-        <FilterDrawer
-          isOpen={showAdvancedFilters}
-          onClose={() => setShowAdvancedFilters(false)}
-          title="Advanced Filters"
-        />
+        <div className="fixed inset-0 bg-black/50 z-50">
+          <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Advanced Filters</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">Advanced filtering options will be available here.</p>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation */}

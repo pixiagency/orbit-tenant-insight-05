@@ -24,7 +24,8 @@ import {
   Star,
   Target,
   Mail,
-  Phone
+  Phone,
+  X
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -196,34 +197,26 @@ const TasksPage = () => {
         <ModernKPICard
           title="Total Tasks"
           value={tasks.length.toString()}
-          change="+15%"
-          trend="up"
-          icon={<Calendar className="h-6 w-6" />}
-          color="blue"
+          change={{ value: "+15%", trend: "up" }}
+          icon={Calendar}
         />
         <ModernKPICard
           title="Completed"
           value={tasks.filter(t => t.status === 'completed').length.toString()}
-          change="+22%"
-          trend="up"
-          icon={<CheckCircle className="h-6 w-6" />}
-          color="green"
+          change={{ value: "+22%", trend: "up" }}
+          icon={CheckCircle}
         />
         <ModernKPICard
           title="In Progress"
           value={tasks.filter(t => t.status === 'in-progress').length.toString()}
-          change="+8%"
-          trend="up"
-          icon={<Clock className="h-6 w-6" />}
-          color="orange"
+          change={{ value: "+8%", trend: "up" }}
+          icon={Clock}
         />
         <ModernKPICard
           title="Overdue"
           value={tasks.filter(t => t.status === 'overdue').length.toString()}
-          change="-12%"
-          trend="down"
-          icon={<AlertCircle className="h-6 w-6" />}
-          color="red"
+          change={{ value: "-12%", trend: "down" }}
+          icon={AlertCircle}
         />
       </div>
 
@@ -329,15 +322,18 @@ const TasksPage = () => {
         </CardContent>
       </Card>
 
-      {/* Advanced Filters Modal */}
       {showAdvancedFilters && (
-        <FilterDrawer
-          isOpen={showAdvancedFilters}
-          onClose={() => setShowAdvancedFilters(false)}
-          title="Advanced Filters"
-          onApply={() => setShowAdvancedFilters(false)}
-          onClear={() => setShowAdvancedFilters(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 z-50">
+          <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Advanced Filters</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">Advanced filtering options will be available here.</p>
+          </div>
+        </div>
       )}
 
       {/* Task Form */}
