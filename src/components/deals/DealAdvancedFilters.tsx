@@ -125,8 +125,8 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
               </Button>
             </div>
 
-            {/* Filter Options */}
-            {(showFilterFields || filters.dateRange.from || filters.valueRange.min || filters.probabilityRange.min || filters.assignedTo !== 'all' || filters.source !== 'all' || filters.stage !== 'all' || filters.lastActivity !== 'all') && (
+            {/* Filter Options - Only show when "Add Filter Rule" is clicked */}
+            {!showFilterFields && (filters.dateRange.from || filters.valueRange.min || filters.probabilityRange.min || filters.assignedTo !== 'all' || filters.source !== 'all' || filters.stage !== 'all' || filters.lastActivity !== 'all') && (
               <div className="space-y-4">
                 <Label className="font-semibold">Filter Options</Label>
 
@@ -301,6 +301,50 @@ export const DealAdvancedFilters: React.FC<DealAdvancedFiltersProps> = ({
                   <SelectItem value="OR">OR (any condition can match)</SelectItem>
                 </SelectContent>
               </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Add Filter Rule Fields */}
+            {showFilterFields && (
+              <div className="space-y-4 border rounded-lg p-4">
+                <Label className="font-semibold">Filter Rules</Label>
+                
+                <div className="space-y-3">
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select field" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="stage">Deal Stage</SelectItem>
+                      <SelectItem value="value">Deal Value</SelectItem>
+                      <SelectItem value="probability">Probability</SelectItem>
+                      <SelectItem value="source">Lead Source</SelectItem>
+                      <SelectItem value="assignedTo">Assigned To</SelectItem>
+                      <SelectItem value="createdDate">Created Date</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Equals" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="equals">Equals</SelectItem>
+                      <SelectItem value="contains">Contains</SelectItem>
+                      <SelectItem value="not_equals">Not equals</SelectItem>
+                      <SelectItem value="greater_than">Greater than</SelectItem>
+                      <SelectItem value="less_than">Less than</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Input placeholder="Enter value" />
+                  
+                  <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" onClick={() => setShowFilterFields(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

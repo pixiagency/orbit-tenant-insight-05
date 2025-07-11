@@ -289,6 +289,49 @@ export const TaskAdvancedFilters: React.FC<TaskAdvancedFiltersProps> = ({
               </div>
             )}
 
+            {/* Add Filter Rule Fields */}
+            {showFilterFields && (
+              <div className="space-y-4 border rounded-lg p-4">
+                <Label className="font-semibold">Filter Rules</Label>
+                
+                <div className="space-y-3">
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select field" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="status">Task Status</SelectItem>
+                      <SelectItem value="priority">Priority</SelectItem>
+                      <SelectItem value="assignedTo">Assigned To</SelectItem>
+                      <SelectItem value="dueDate">Due Date</SelectItem>
+                      <SelectItem value="createdDate">Created Date</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Equals" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="equals">Equals</SelectItem>
+                      <SelectItem value="contains">Contains</SelectItem>
+                      <SelectItem value="not_equals">Not equals</SelectItem>
+                      <SelectItem value="greater_than">Greater than</SelectItem>
+                      <SelectItem value="less_than">Less than</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Input placeholder="Enter value" />
+                  
+                  <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" onClick={() => setShowFilterFields(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Save Current Filter */}
             <div className="pt-4 border-t">
               <Button variant="outline" className="w-full mb-4">
