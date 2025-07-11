@@ -123,22 +123,6 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
           <div className="text-sm text-gray-600">
             Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, leads.length)} of {leads.length} records
           </div>
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant={viewMode === 'table' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => setViewMode('table')}
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant={viewMode === 'grid' ? 'default' : 'outline'} 
-              size="sm" 
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-          </div>
           <div className="flex items-center space-x-1">
             {/* Top Pagination */}
             {totalPages > 1 && (
