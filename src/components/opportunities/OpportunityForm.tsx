@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, DollarSign, User, Building2 } from 'lucide-react';
+import { Calendar, DollarSign, User, Building2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,16 +35,25 @@ interface Opportunity {
   competitorInfo?: string;
   decisionMakers?: string;
   budget?: number;
-    timeline?: string;
-    painPoints?: string;
-    proposalSent?: boolean;
-    contractSent?: boolean;
-    country?: string;
-    city?: string;
-    pipeline?: string;
-    notes?: string;
+  timeline?: string;
+  painPoints?: string;
+  proposalSent?: boolean;
+  contractSent?: boolean;
+  country?: string;
+  city?: string;
+  pipeline?: string;
+  notes?: string;
+  products?: ProductItem[];
   createdAt: string;
   lastActivity: string;
+}
+
+interface ProductItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  total: number;
 }
 
 interface OpportunityFormProps {
@@ -84,8 +93,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     country: '',
     city: '',
     pipeline: 'sales',
-    notes: ''
+    notes: '',
+    products: []
   });
+
+  const [products, setProducts] = useState<ProductItem[]>([
+    { id: '1', name: '', price: 0, quantity: 1, total: 0 }
+  ]);
 
   useEffect(() => {
     if (opportunity) {
@@ -113,8 +127,10 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         country: opportunity.country || '',
         city: opportunity.city || '',
         pipeline: opportunity.pipeline || 'sales',
-        notes: opportunity.notes || ''
+        notes: opportunity.notes || '',
+        products: opportunity.products || []
       });
+      setProducts(opportunity.products || [{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
     } else {
       setFormData({
         name: '',
@@ -140,8 +156,10 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         country: '',
         city: '',
         pipeline: 'sales',
-        notes: ''
+        notes: '',
+        products: []
       });
+      setProducts([{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
     }
   }, [opportunity, isOpen]);
 
@@ -160,10 +178,11 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       email: contact.email || '',
       phone: contact.phone || '',
       company: contact.company || prev.company,
-      // Auto-fill additional fields based on contact
-      name: prev.name || `${contact.company || 'Opportunity'} - ${contact.firstName} ${contact.lastName}`,
+      country: contact.country || prev.country,
       city: contact.city || prev.city,
-      source: contact.source || prev.source
+      source: contact.source || prev.source,
+      // Auto-fill opportunity name if not set
+      name: prev.name || `${contact.company || 'Opportunity'} - ${contact.firstName} ${contact.lastName}`
     }));
   };
 
@@ -172,7 +191,8 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       ...formData,
       value: parseFloat(formData.value) || 0,
       probability: parseInt(formData.probability) || 0,
-      budget: parseFloat(formData.budget) || undefined
+      budget: parseFloat(formData.budget) || undefined,
+      products
     });
   };
 
@@ -299,8 +319,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                 <SelectContent>
                   <SelectItem value="sales">Sales Pipeline</SelectItem>
                   <SelectItem value="marketing">Marketing Pipeline</SelectItem>
-                  <SelectItem value="support">Support Pipeline</SelectItem>
-                  <SelectItem value="enterprise">Enterprise Pipeline</SelectItem>
+                  <SelectItem value="customer-success">Customer Success Pipeline</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -312,12 +331,36 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="prospecting">Prospecting</SelectItem>
-                  <SelectItem value="qualification">Qualification</SelectItem>
-                  <SelectItem value="proposal">Proposal</SelectItem>
-                  <SelectItem value="negotiation">Negotiation</SelectItem>
-                  <SelectItem value="closed-won">Closed Won</SelectItem>
-                  <SelectItem value="closed-lost">Closed Lost</SelectItem>
+                  {formData.pipeline === 'sales' && (
+                    <>
+                      <SelectItem value="prospecting">Prospecting</SelectItem>
+                      <SelectItem value="qualification">Qualification</SelectItem>
+                      <SelectItem value="proposal">Proposal</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                      <SelectItem value="closed-won">Closed Won</SelectItem>
+                      <SelectItem value="closed-lost">Closed Lost</SelectItem>
+                    </>
+                  )}
+                  {formData.pipeline === 'marketing' && (
+                    <>
+                      <SelectItem value="lead-qualification">Lead Qualification</SelectItem>
+                      <SelectItem value="nurturing">Nurturing</SelectItem>
+                      <SelectItem value="content-creation">Content Creation</SelectItem>
+                      <SelectItem value="proposal-review">Proposal Review</SelectItem>
+                      <SelectItem value="closed-won">Closed Won</SelectItem>
+                      <SelectItem value="closed-lost">Closed Lost</SelectItem>
+                    </>
+                  )}
+                  {formData.pipeline === 'customer-success' && (
+                    <>
+                      <SelectItem value="requirements-gathering">Requirements Gathering</SelectItem>
+                      <SelectItem value="implementation">Implementation</SelectItem>
+                      <SelectItem value="delivery">Delivery</SelectItem>
+                      <SelectItem value="monitoring">Monitoring</SelectItem>
+                      <SelectItem value="closed-won">Closed Won</SelectItem>
+                      <SelectItem value="closed-lost">Closed Lost</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -382,6 +425,111 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           </div>
         </div>
 
+
+        {/* Products/Services */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Products/Services</h3>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const newProduct = {
+                  id: Date.now().toString(),
+                  name: '',
+                  price: 0,
+                  quantity: 1,
+                  total: 0
+                };
+                setProducts([...products, newProduct]);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
+          </div>
+          
+          {products.map((product, index) => (
+            <div key={product.id} className="grid grid-cols-5 gap-4 p-4 border rounded-lg">
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor={`product-name-${index}`}>Product/Service Name</Label>
+                <Input
+                  id={`product-name-${index}`}
+                  value={product.name}
+                  onChange={(e) => {
+                    const updatedProducts = products.map((p, i) =>
+                      i === index ? { ...p, name: e.target.value } : p
+                    );
+                    setProducts(updatedProducts);
+                  }}
+                  placeholder="Enter product name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor={`product-price-${index}`}>Price ($)</Label>
+                <Input
+                  id={`product-price-${index}`}
+                  type="number"
+                  value={product.price}
+                  onChange={(e) => {
+                    const price = parseFloat(e.target.value) || 0;
+                    const updatedProducts = products.map((p, i) =>
+                      i === index ? { ...p, price, total: price * p.quantity } : p
+                    );
+                    setProducts(updatedProducts);
+                  }}
+                  placeholder="0.00"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor={`product-quantity-${index}`}>Quantity</Label>
+                <Input
+                  id={`product-quantity-${index}`}
+                  type="number"
+                  min="1"
+                  value={product.quantity}
+                  onChange={(e) => {
+                    const quantity = parseInt(e.target.value) || 1;
+                    const updatedProducts = products.map((p, i) =>
+                      i === index ? { ...p, quantity, total: p.price * quantity } : p
+                    );
+                    setProducts(updatedProducts);
+                  }}
+                />
+              </div>
+              
+              <div className="flex items-end space-x-2">
+                <div className="space-y-2 flex-1">
+                  <Label>Total</Label>
+                  <div className="h-10 px-3 border rounded-md bg-gray-50 flex items-center">
+                    ${(product.price * product.quantity).toFixed(2)}
+                  </div>
+                </div>
+                {products.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setProducts(products.filter((_, i) => i !== index));
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+          
+          <div className="text-right">
+            <div className="text-lg font-semibold">
+              Total: ${products.reduce((sum, product) => sum + (product.price * product.quantity), 0).toFixed(2)}
+            </div>
+          </div>
+        </div>
 
         {/* Notes & Description */}
         <div className="space-y-4">

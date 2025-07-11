@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,9 +15,20 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
-  Flag
+  Flag,
+  Download,
+  Upload,
+  Eye
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { TaskTable } from '../../components/tasks/TaskTable';
 import {
@@ -27,6 +37,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { EnhancedTaskForm } from '../../components/tasks/EnhancedTaskForm';
+import { toast } from 'sonner';
 
 interface Task {
   id: string;
@@ -49,10 +71,10 @@ const tasksData: Task[] = [
     status: 'pending',
     priority: 'high',
     assignedTo: 'Sarah Johnson',
-    dueDate: '2024-01-20',
+    dueDate: '2024-02-15',
     createdDate: '2024-01-15',
     category: 'Sales',
-    relatedTo: 'TechCorp Inc.'
+    relatedTo: 'TechCorp Deal'
   },
   {
     id: '2',
@@ -61,191 +83,343 @@ const tasksData: Task[] = [
     status: 'in-progress',
     priority: 'medium',
     assignedTo: 'Mike Chen',
-    dueDate: '2024-01-25',
-    createdDate: '2024-01-10',
+    dueDate: '2024-02-28',
+    createdDate: '2024-01-20',
     category: 'Reporting',
-    relatedTo: 'Internal'
+    relatedTo: 'Q1 Review'
   },
   {
     id: '3',
-    title: 'Send contract to Emily Davis',
-    description: 'Finalize and send signed contract for review',
+    title: 'Update CRM system',
+    description: 'Import new leads and update contact information',
     status: 'completed',
-    priority: 'medium',
-    assignedTo: 'David Brown',
-    dueDate: '2024-01-18',
-    createdDate: '2024-01-12',
-    category: 'Legal',
-    relatedTo: 'Global Industries'
+    priority: 'low',
+    assignedTo: 'Emily Rodriguez',
+    dueDate: '2024-02-10',
+    createdDate: '2024-01-25',
+    category: 'Administration',
+    relatedTo: 'CRM Maintenance'
   },
   {
     id: '4',
-    title: 'Update CRM database',
-    description: 'Import new leads from trade show and update contact information',
+    title: 'Client presentation prep',
+    description: 'Create presentation for ABC Corp meeting',
     status: 'overdue',
     priority: 'urgent',
-    assignedTo: 'Emily Rodriguez',
-    dueDate: '2024-01-17',
-    createdDate: '2024-01-08',
-    category: 'Data Management',
-    relatedTo: 'Multiple Leads'
+    assignedTo: 'David Brown',
+    dueDate: '2024-02-05',
+    createdDate: '2024-01-30',
+    category: 'Sales',
+    relatedTo: 'ABC Corp Deal'
   },
   {
     id: '5',
-    title: 'Schedule demo meeting',
-    description: 'Coordinate demo session with prospect and technical team',
+    title: 'Schedule team meeting',
+    description: 'Organize monthly team sync and send calendar invites',
     status: 'pending',
+    priority: 'medium',
+    assignedTo: 'Lisa Park',
+    dueDate: '2024-02-20',
+    createdDate: '2024-02-01',
+    category: 'Management',
+    relatedTo: 'Team Coordination'
+  },
+  {
+    id: '6',
+    title: 'Review contract terms',
+    description: 'Legal review of new partnership agreement',
+    status: 'in-progress',
     priority: 'high',
-    assignedTo: 'Sarah Johnson',
-    dueDate: '2024-01-22',
-    createdDate: '2024-01-16',
-    category: 'Sales',
-    relatedTo: 'Innovation Labs'
+    assignedTo: 'Jennifer Lee',
+    dueDate: '2024-02-18',
+    createdDate: '2024-02-02',
+    category: 'Legal',
+    relatedTo: 'Partnership Deal'
   }
 ];
 
-export const TasksPage = () => {
+export const TasksPage: React.FC = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPriority, setFilterPriority] = useState('all');
+  const [filterAssignee, setFilterAssignee] = useState('all');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'in-progress': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'completed': return 'bg-green-100 text-green-700 border-green-200';
-      case 'overdue': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
+  // KPI Calculations
+  const totalTasks = tasksData.length;
+  const completedTasks = tasksData.filter(task => task.status === 'completed').length;
+  const overdueTasks = tasksData.filter(task => task.status === 'overdue').length;
+  const pendingTasks = tasksData.filter(task => task.status === 'pending').length;
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'low': return 'bg-gray-100 text-gray-600';
-      case 'medium': return 'bg-blue-100 text-blue-600';
-      case 'high': return 'bg-orange-100 text-orange-600';
-      case 'urgent': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return <Flag className="h-3 w-3" />;
-      case 'high': return <AlertCircle className="h-3 w-3" />;
-      default: return null;
-    }
-  };
-
+  // Filtered data
   const filteredTasks = tasksData.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.relatedTo.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+                         task.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
+    const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
+    const matchesAssignee = filterAssignee === 'all' || task.assignedTo === filterAssignee;
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
 
-  const taskStats = {
-    total: tasksData.length,
-    pending: tasksData.filter(t => t.status === 'pending').length,
-    inProgress: tasksData.filter(t => t.status === 'in-progress').length,
-    completed: tasksData.filter(t => t.status === 'completed').length,
-    overdue: tasksData.filter(t => t.status === 'overdue').length
+  const handleAddTask = () => {
+    setSelectedTask(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsFormOpen(true);
+  };
+
+  const handleDeleteTask = (task: Task) => {
+    setTaskToDelete(task);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (taskToDelete) {
+      toast.success(`Task "${taskToDelete.title}" deleted successfully`);
+      setIsDeleteDialogOpen(false);
+      setTaskToDelete(null);
+    }
+  };
+
+  const handleFormSubmit = (taskData: any) => {
+    if (selectedTask) {
+      toast.success('Task updated successfully');
+    } else {
+      toast.success('New task created successfully');
+    }
+    setIsFormOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleExport = () => {
+    toast.success('Tasks exported successfully');
+  };
+
+  const handleImport = () => {
+    toast.success('Tasks imported successfully');
   };
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-full">
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tasks Management</h1>
-          <p className="text-gray-600 mt-1">Organize and track your team's tasks and activities</p>
+          <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
+          <p className="text-gray-500 mt-1">Manage and track your team's tasks</p>
         </div>
+        
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
+          <Button variant="outline" onClick={handleImport}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import
           </Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button onClick={handleAddTask}>
             <Plus className="h-4 w-4 mr-2" />
-            New Task
+            Add Task
           </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <ModernKPICard
           title="Total Tasks"
-          value={taskStats.total.toString()}
-          icon={CheckCircle}
-          change={{ value: "+5 this week", trend: "up" }}
-          gradient="from-blue-500 to-blue-600"
-        />
-        <ModernKPICard
-          title="Pending"
-          value={taskStats.pending.toString()}
-          icon={Clock}
-          change={{ value: "2 due today", trend: "neutral" }}
-          gradient="from-yellow-500 to-yellow-600"
-        />
-        <ModernKPICard
-          title="In Progress"
-          value={taskStats.inProgress.toString()}
-          icon={User}
-          change={{ value: "Active", trend: "up" }}
-          gradient="from-blue-500 to-blue-600"
+          value={totalTasks.toString()}
+          icon={Calendar}
+          description="vs last month"
         />
         <ModernKPICard
           title="Completed"
-          value={taskStats.completed.toString()}
+          value={completedTasks.toString()}
           icon={CheckCircle}
-          change={{ value: "+3 today", trend: "up" }}
-          gradient="from-green-500 to-green-600"
+          description="tasks finished"
         />
         <ModernKPICard
           title="Overdue"
-          value={taskStats.overdue.toString()}
+          value={overdueTasks.toString()}
           icon={AlertCircle}
-          change={{ value: "Needs attention", trend: "down" }}
-          gradient="from-red-500 to-red-600"
+          description="need attention"
+        />
+        <ModernKPICard
+          title="Pending"
+          value={pendingTasks.toString()}
+          icon={Clock}
+          description="in queue"
         />
       </div>
 
-      {/* Main Content */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Task List</CardTitle>
-              <CardDescription>Manage and track all tasks across your organization</CardDescription>
+      {/* Filters and Search */}
+      <div className="bg-white p-6 rounded-lg border">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search tasks..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full sm:w-64"
+              />
             </div>
-            <div className="flex items-center space-x-2">
-              {/* Search functionality moved to TaskTable component */}
+            
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterPriority} onValueChange={setFilterPriority}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="All Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="All Assignees" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+                <SelectItem value="Mike Chen">Mike Chen</SelectItem>
+                <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
+                <SelectItem value="David Brown">David Brown</SelectItem>
+                <SelectItem value="Lisa Park">Lisa Park</SelectItem>
+                <SelectItem value="Jennifer Lee">Jennifer Lee</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Advanced Filters
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Advanced Filters */}
+      {showFilters && (
+        <div className="bg-white p-6 rounded-lg border">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dateRange">Date Range</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                  <SelectItem value="quarter">This Quarter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="reporting">Reporting</SelectItem>
+                  <SelectItem value="administration">Administration</SelectItem>
+                  <SelectItem value="management">Management</SelectItem>
+                  <SelectItem value="legal">Legal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="relatedTo">Related To</Label>
+              <Input placeholder="Search related items..." />
+            </div>
+            
+            <div className="flex items-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(false)}
+                className="w-full"
+              >
+                Clear Filters
+              </Button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <TaskTable 
-            tasks={filteredTasks.map(task => ({
-              ...task,
-              relatedType: task.category,
-              createdAt: task.createdDate
-            }))}
-            onEdit={(task) => console.log('Edit task:', task)}
-            onDelete={(taskId) => console.log('Delete task:', taskId)}
-            onStatusChange={(taskId, status) => console.log('Change status:', taskId, status)}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            priorityFilter={priorityFilter}
-            onPriorityFilterChange={setPriorityFilter}
-          />
-        </CardContent>
-      </Card>
+        </div>
+      )}
+
+      {/* Tasks Table */}
+      <div className="bg-white rounded-lg border">
+        <TaskTable
+          tasks={filteredTasks}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
+          onView={(task) => console.log('View task:', task)}
+        />
+      </div>
+
+      {/* Task Form Modal */}
+      <EnhancedTaskForm
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setSelectedTask(null);
+        }}
+        onSubmit={handleFormSubmit}
+        task={selectedTask}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{taskToDelete?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
