@@ -18,7 +18,11 @@ import {
   Flag,
   Download,
   Upload,
-  Eye
+  Eye,
+  FileText,
+  TrendingUp,
+  Star,
+  Target
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -179,8 +183,8 @@ export const TasksPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
-          <p className="text-gray-500 mt-1">Manage and track your team's tasks</p>
+          <h1 className="text-3xl font-bold tracking-tight">Tasks Management</h1>
+          <p className="text-muted-foreground mt-1">Track and manage your team's activities</p>
         </div>
         
         <div className="flex items-center space-x-3">
@@ -192,105 +196,171 @@ export const TasksPage: React.FC = () => {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button onClick={handleAddTask}>
+          <Button onClick={handleAddTask} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
-            Add Task
+            New Task
           </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ModernKPICard
-          title="Total Tasks"
-          value={totalTasks.toString()}
-          icon={Calendar}
-          description="vs last month"
-        />
-        <ModernKPICard
-          title="Completed"
-          value={completedTasks.toString()}
-          icon={CheckCircle}
-          description="tasks finished"
-        />
-        <ModernKPICard
-          title="Overdue"
-          value={overdueTasks.toString()}
-          icon={AlertCircle}
-          description="need attention"
-        />
-        <ModernKPICard
-          title="Pending"
-          value={pendingTasks.toString()}
-          icon={Clock}
-          description="in queue"
-        />
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600">Total Tasks</p>
+                <p className="text-2xl font-bold text-blue-900">{totalTasks}</p>
+                <p className="text-xs text-blue-600 flex items-center mt-1">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  +8 this week
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-green-50 border-green-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-600">Completed</p>
+                <p className="text-2xl font-bold text-green-900">{completedTasks}</p>
+                <p className="text-xs text-green-600 flex items-center mt-1">
+                  <Star className="h-3 w-3 mr-1" />
+                  High quality work
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-green-600 flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-purple-50 border-purple-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600">Overdue</p>
+                <p className="text-2xl font-bold text-purple-900">{overdueTasks}</p>
+                <p className="text-xs text-purple-600 flex items-center mt-1">
+                  <Target className="h-3 w-3 mr-1" />
+                  Great results!
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-purple-600 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-orange-50 border-orange-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600">Pending</p>
+                <p className="text-2xl font-bold text-orange-900">{pendingTasks}</p>
+                <p className="text-xs text-orange-600 flex items-center mt-1">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Strong pipeline
+                </p>
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-orange-600 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white p-6 rounded-lg border">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search tasks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full sm:w-64"
-              />
+      {/* Task Filters */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold">Task Filters</h2>
+          <p className="text-sm text-muted-foreground">Filter and search your tasks</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg border">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search tasks..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-full sm:w-64"
+                />
+              </div>
+              
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filterPriority} onValueChange={setFilterPriority}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="All Sources" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="deal">Deal</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="All Assignees" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assignees</SelectItem>
+                  <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+                  <SelectItem value="Mike Chen">Mike Chen</SelectItem>
+                  <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
+                  <SelectItem value="David Brown">David Brown</SelectItem>
+                  <SelectItem value="Lisa Park">Lisa Park</SelectItem>
+                  <SelectItem value="Jennifer Lee">Jennifer Lee</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select>
+                <SelectTrigger className="w-full sm:w-40">
+                  <SelectValue placeholder="All Scores" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Scores</SelectItem>
+                  <SelectItem value="high">High (80-100)</SelectItem>
+                  <SelectItem value="medium">Medium (50-79)</SelectItem>
+                  <SelectItem value="low">Low (0-49)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
-              </SelectContent>
-            </Select>
 
-            <Select value={filterPriority} onValueChange={setFilterPriority}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="All Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterAssignee} onValueChange={setFilterAssignee}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="All Assignees" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assignees</SelectItem>
-                <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
-                <SelectItem value="Mike Chen">Mike Chen</SelectItem>
-                <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
-                <SelectItem value="David Brown">David Brown</SelectItem>
-                <SelectItem value="Lisa Park">Lisa Park</SelectItem>
-                <SelectItem value="Jennifer Lee">Jennifer Lee</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Advanced Filters
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -349,22 +419,86 @@ export const TasksPage: React.FC = () => {
       )}
 
       {/* Tasks Table */}
-      <div className="bg-white rounded-lg border">
-        <TaskTable
-          tasks={filteredTasks}
-          onEdit={handleEditTask}
-          onDelete={(taskId) => {
-            const task = filteredTasks.find(t => t.id === taskId);
-            if (task) handleDeleteTask(task);
-          }}
-          onStatusChange={() => {}}
-          searchTerm=""
-          onSearchChange={() => {}}
-          statusFilter="all"
-          onStatusFilterChange={() => {}}
-          priorityFilter="all"
-          onPriorityFilterChange={() => {}}
-        />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Tasks ({filteredTasks.length})</h2>
+            <p className="text-sm text-muted-foreground">Manage and track your team's tasks</p>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <span>Show</span>
+              <Select defaultValue="10">
+                <SelectTrigger className="w-16 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+              <span>entries</span>
+            </div>
+            
+            <div className="flex items-center border rounded-md">
+              <Button 
+                variant="default" 
+                size="sm"
+                className="rounded-r-none"
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="rounded-l-none"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border">
+          <TaskTable
+            tasks={filteredTasks}
+            onEdit={handleEditTask}
+            onDelete={(taskId) => {
+              const task = filteredTasks.find(t => t.id === taskId);
+              if (task) handleDeleteTask(task);
+            }}
+            onStatusChange={() => {}}
+            searchTerm=""
+            onSearchChange={() => {}}
+            statusFilter="all"
+            onStatusFilterChange={() => {}}
+            priorityFilter="all"
+            onPriorityFilterChange={() => {}}
+          />
+          
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              Showing 1 to {Math.min(10, filteredTasks.length)} of {filteredTasks.length} records
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm" disabled>
+                Previous
+              </Button>
+              <div className="flex items-center space-x-1">
+                <span className="text-sm">Page</span>
+                <span className="font-medium">1</span>
+                <span className="text-sm">of</span>
+                <span className="font-medium">6</span>
+              </div>
+              <Button variant="outline" size="sm">
+                Next
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Task Form Modal */}
