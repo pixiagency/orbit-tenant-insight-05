@@ -38,6 +38,7 @@ import {
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { DealDrawerForm } from '../../components/deals/DealDrawerForm';
 import { DealTable } from '../../components/deals/DealTable';
+import { DealAdvancedFilters } from '../../components/deals/DealAdvancedFilters';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
 import {
   DropdownMenu,
@@ -128,6 +129,18 @@ const DealsPage = () => {
   const [selectedDeals, setSelectedDeals] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [appliedFilters, setAppliedFilters] = useState<Array<{id: string, label: string, type: string}>>([]);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
+    valueRange: { min: '', max: '' },
+    probabilityRange: { min: '', max: '' },
+    assignedTo: 'all',
+    source: 'all',
+    stage: 'all',
+    lastActivity: 'all',
+    operator: 'AND' as 'AND' | 'OR',
+    textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals'
+  });
 
   const filteredDeals = deals.filter(deal => {
     const matchesStatus = statusFilter === 'all' || deal.stage === statusFilter;
@@ -174,13 +187,135 @@ const DealsPage = () => {
     }
   };
 
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) count++;
+    if (advancedFilters.valueRange.min || advancedFilters.valueRange.max) count++;
+    if (advancedFilters.probabilityRange.min || advancedFilters.probabilityRange.max) count++;
+    if (advancedFilters.assignedTo !== 'all') count++;
+    if (advancedFilters.source !== 'all') count++;
+    if (advancedFilters.stage !== 'all') count++;
+    if (advancedFilters.lastActivity !== 'all') count++;
+    return count;
+  };
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setAdvancedFilters({
+      dateRange: { from: undefined, to: undefined },
+      valueRange: { min: '', max: '' },
+      probabilityRange: { min: '', max: '' },
+      assignedTo: 'all',
+      source: 'all',
+      stage: 'all',
+      lastActivity: 'all',
+      operator: 'AND',
+      textCondition: 'contains'
+    });
+    setAppliedFilters([]);
+  };
+
+  const applyAdvancedFilters = () => {
+    const newAppliedFilters = [];
+    
+    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) {
+      newAppliedFilters.push({
+        id: 'dateRange',
+        label: `Created: ${advancedFilters.dateRange.from?.toLocaleDateString() || 'Any'} - ${advancedFilters.dateRange.to?.toLocaleDateString() || 'Any'}`,
+        type: 'dateRange'
+      });
+    }
+    
+    if (advancedFilters.valueRange.min || advancedFilters.valueRange.max) {
+      newAppliedFilters.push({
+        id: 'valueRange',
+        label: `Value: $${advancedFilters.valueRange.min || '0'} - $${advancedFilters.valueRange.max || '∞'}`,
+        type: 'valueRange'
+      });
+    }
+    
+    if (advancedFilters.probabilityRange.min || advancedFilters.probabilityRange.max) {
+      newAppliedFilters.push({
+        id: 'probabilityRange',
+        label: `Probability: ${advancedFilters.probabilityRange.min || '0'}% - ${advancedFilters.probabilityRange.max || '100'}%`,
+        type: 'probabilityRange'
+      });
+    }
+    
+    if (advancedFilters.assignedTo !== 'all') {
+      newAppliedFilters.push({
+        id: 'assignedTo',
+        label: `Assigned: ${advancedFilters.assignedTo}`,
+        type: 'assignedTo'
+      });
+    }
+    
+    if (advancedFilters.source !== 'all') {
+      newAppliedFilters.push({
+        id: 'source',
+        label: `Source: ${advancedFilters.source}`,
+        type: 'source'
+      });
+    }
+    
+    if (advancedFilters.stage !== 'all') {
+      newAppliedFilters.push({
+        id: 'stage',
+        label: `Stage: ${advancedFilters.stage}`,
+        type: 'stage'
+      });
+    }
+    
+    if (advancedFilters.lastActivity !== 'all') {
+      newAppliedFilters.push({
+        id: 'lastActivity',
+        label: `Activity: ${advancedFilters.lastActivity}`,
+        type: 'lastActivity'
+      });
+    }
+    
+    setAppliedFilters(newAppliedFilters);
+    setShowAdvancedFilters(false);
+  };
+
+  const removeAppliedFilter = (filterId: string) => {
+    const updatedAdvancedFilters = { ...advancedFilters };
+    
+    switch (filterId) {
+      case 'dateRange':
+        updatedAdvancedFilters.dateRange = { from: undefined, to: undefined };
+        break;
+      case 'valueRange':
+        updatedAdvancedFilters.valueRange = { min: '', max: '' };
+        break;
+      case 'probabilityRange':
+        updatedAdvancedFilters.probabilityRange = { min: '', max: '' };
+        break;
+      case 'assignedTo':
+        updatedAdvancedFilters.assignedTo = 'all';
+        break;
+      case 'source':
+        updatedAdvancedFilters.source = 'all';
+        break;
+      case 'stage':
+        updatedAdvancedFilters.stage = 'all';
+        break;
+      case 'lastActivity':
+        updatedAdvancedFilters.lastActivity = 'all';
+        break;
+    }
+    
+    setAdvancedFilters(updatedAdvancedFilters);
+    setAppliedFilters(prev => prev.filter(f => f.id !== filterId));
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
-          <p className="text-gray-600 mt-1">Manage your sales pipeline</p>
         </div>
         <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
@@ -229,6 +364,11 @@ const DealsPage = () => {
                 <Filter className="h-4 w-4 mr-2" />
                 Advanced Filters
               </Button>
+              {getActiveFiltersCount() > 0 && (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  Clear Filters ({getActiveFiltersCount()})
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -241,7 +381,7 @@ const DealsPage = () => {
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Stages" />
               </SelectTrigger>
               <SelectContent>
@@ -255,7 +395,7 @@ const DealsPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Sources" />
               </SelectTrigger>
               <SelectContent>
@@ -266,7 +406,7 @@ const DealsPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Assignees" />
               </SelectTrigger>
               <SelectContent>
@@ -277,6 +417,25 @@ const DealsPage = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Applied Filters */}
+          {appliedFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {appliedFilters.map((filter) => (
+                <div key={filter.id} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                  <span>{filter.label}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 hover:bg-primary/20"
+                    onClick={() => removeAppliedFilter(filter.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
           
           {selectedDeals.length > 0 && (
             <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
@@ -360,19 +519,27 @@ const DealsPage = () => {
         </CardContent>
       </Card>
 
-      {showAdvancedFilters && (
-        <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Advanced Filters</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">Advanced filtering options will be available here.</p>
-          </div>
-        </div>
-      )}
+      <DealAdvancedFilters
+        isOpen={showAdvancedFilters}
+        onClose={() => setShowAdvancedFilters(false)}
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        onApplyFilters={applyAdvancedFilters}
+        onClearFilters={() => {
+          setAdvancedFilters({
+            dateRange: { from: undefined, to: undefined },
+            valueRange: { min: '', max: '' },
+            probabilityRange: { min: '', max: '' },
+            assignedTo: 'all',
+            source: 'all',
+            stage: 'all',
+            lastActivity: 'all',
+            operator: 'AND',
+            textCondition: 'contains'
+          });
+          setAppliedFilters([]);
+        }}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>

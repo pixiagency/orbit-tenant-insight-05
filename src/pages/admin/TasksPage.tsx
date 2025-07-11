@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { TaskTable } from '../../components/tasks/TaskTable';
+import { TaskAdvancedFilters } from '../../components/tasks/TaskAdvancedFilters';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -124,6 +125,17 @@ const TasksPage = () => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [appliedFilters, setAppliedFilters] = useState<Array<{id: string, label: string, type: string}>>([]);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
+    dueDateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
+    priorityFilter: 'all',
+    assignedTo: 'all',
+    status: 'all',
+    lastActivity: 'all',
+    operator: 'AND' as 'AND' | 'OR',
+    textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals'
+  });
 
   const filteredTasks = tasks.filter(task => {
     const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
@@ -178,13 +190,124 @@ const TasksPage = () => {
     }
   };
 
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (priorityFilter !== 'all') count++;
+    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) count++;
+    if (advancedFilters.dueDateRange.from || advancedFilters.dueDateRange.to) count++;
+    if (advancedFilters.priorityFilter !== 'all') count++;
+    if (advancedFilters.assignedTo !== 'all') count++;
+    if (advancedFilters.status !== 'all') count++;
+    if (advancedFilters.lastActivity !== 'all') count++;
+    return count;
+  };
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setPriorityFilter('all');
+    setAdvancedFilters({
+      dateRange: { from: undefined, to: undefined },
+      dueDateRange: { from: undefined, to: undefined },
+      priorityFilter: 'all',
+      assignedTo: 'all',
+      status: 'all',
+      lastActivity: 'all',
+      operator: 'AND',
+      textCondition: 'contains'
+    });
+    setAppliedFilters([]);
+  };
+
+  const applyAdvancedFilters = () => {
+    const newAppliedFilters = [];
+    
+    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) {
+      newAppliedFilters.push({
+        id: 'dateRange',
+        label: `Created: ${advancedFilters.dateRange.from?.toLocaleDateString() || 'Any'} - ${advancedFilters.dateRange.to?.toLocaleDateString() || 'Any'}`,
+        type: 'dateRange'
+      });
+    }
+    
+    if (advancedFilters.dueDateRange.from || advancedFilters.dueDateRange.to) {
+      newAppliedFilters.push({
+        id: 'dueDateRange',
+        label: `Due: ${advancedFilters.dueDateRange.from?.toLocaleDateString() || 'Any'} - ${advancedFilters.dueDateRange.to?.toLocaleDateString() || 'Any'}`,
+        type: 'dueDateRange'
+      });
+    }
+    
+    if (advancedFilters.priorityFilter !== 'all') {
+      newAppliedFilters.push({
+        id: 'priorityFilter',
+        label: `Priority: ${advancedFilters.priorityFilter}`,
+        type: 'priorityFilter'
+      });
+    }
+    
+    if (advancedFilters.assignedTo !== 'all') {
+      newAppliedFilters.push({
+        id: 'assignedTo',
+        label: `Assigned: ${advancedFilters.assignedTo}`,
+        type: 'assignedTo'
+      });
+    }
+    
+    if (advancedFilters.status !== 'all') {
+      newAppliedFilters.push({
+        id: 'status',
+        label: `Status: ${advancedFilters.status}`,
+        type: 'status'
+      });
+    }
+    
+    if (advancedFilters.lastActivity !== 'all') {
+      newAppliedFilters.push({
+        id: 'lastActivity',
+        label: `Activity: ${advancedFilters.lastActivity}`,
+        type: 'lastActivity'
+      });
+    }
+    
+    setAppliedFilters(newAppliedFilters);
+    setShowAdvancedFilters(false);
+  };
+
+  const removeAppliedFilter = (filterId: string) => {
+    const updatedAdvancedFilters = { ...advancedFilters };
+    
+    switch (filterId) {
+      case 'dateRange':
+        updatedAdvancedFilters.dateRange = { from: undefined, to: undefined };
+        break;
+      case 'dueDateRange':
+        updatedAdvancedFilters.dueDateRange = { from: undefined, to: undefined };
+        break;
+      case 'priorityFilter':
+        updatedAdvancedFilters.priorityFilter = 'all';
+        break;
+      case 'assignedTo':
+        updatedAdvancedFilters.assignedTo = 'all';
+        break;
+      case 'status':
+        updatedAdvancedFilters.status = 'all';
+        break;
+      case 'lastActivity':
+        updatedAdvancedFilters.lastActivity = 'all';
+        break;
+    }
+    
+    setAdvancedFilters(updatedAdvancedFilters);
+    setAppliedFilters(prev => prev.filter(f => f.id !== filterId));
+  };
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
-          <p className="text-gray-600 mt-1">Manage your team's tasks and activities</p>
         </div>
         <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4 mr-2" />
@@ -233,6 +356,11 @@ const TasksPage = () => {
                 <Filter className="h-4 w-4 mr-2" />
                 Advanced Filters
               </Button>
+              {getActiveFiltersCount() > 0 && (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  Clear Filters ({getActiveFiltersCount()})
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -245,7 +373,7 @@ const TasksPage = () => {
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -253,11 +381,11 @@ const TasksPage = () => {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="in-progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
@@ -269,7 +397,7 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="All Assignees" />
               </SelectTrigger>
               <SelectContent>
@@ -280,6 +408,25 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Applied Filters */}
+          {appliedFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {appliedFilters.map((filter) => (
+                <div key={filter.id} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
+                  <span>{filter.label}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0 hover:bg-primary/20"
+                    onClick={() => removeAppliedFilter(filter.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
           
           {selectedTasks.length > 0 && (
             <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
@@ -364,19 +511,26 @@ const TasksPage = () => {
         </CardContent>
       </Card>
 
-      {showAdvancedFilters && (
-        <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Advanced Filters</h3>
-              <Button variant="ghost" size="sm" onClick={() => setShowAdvancedFilters(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <p className="text-sm text-muted-foreground">Advanced filtering options will be available here.</p>
-          </div>
-        </div>
-      )}
+      <TaskAdvancedFilters
+        isOpen={showAdvancedFilters}
+        onClose={() => setShowAdvancedFilters(false)}
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        onApplyFilters={applyAdvancedFilters}
+        onClearFilters={() => {
+          setAdvancedFilters({
+            dateRange: { from: undefined, to: undefined },
+            dueDateRange: { from: undefined, to: undefined },
+            priorityFilter: 'all',
+            assignedTo: 'all',
+            status: 'all',
+            lastActivity: 'all',
+            operator: 'AND',
+            textCondition: 'contains'
+          });
+          setAppliedFilters([]);
+        }}
+      />
 
       {/* Task Form */}
       <EnhancedTaskForm
