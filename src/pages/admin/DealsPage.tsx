@@ -24,9 +24,7 @@ import {
   Target,
   Mail,
   Phone,
-  X,
-  Import,
-  ArrowUpFromLine
+  X
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -319,22 +317,10 @@ const DealsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.location.href = '/admin/import-export'}
-            className="flex items-center gap-2"
-          >
-            <Import className="h-4 w-4" />
-            <ArrowUpFromLine className="h-4 w-4" />
-            Import/Export
-          </Button>
-          <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Deal
-          </Button>
-        </div>
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Deal
+        </Button>
       </div>
 
       {/* KPI Cards */}

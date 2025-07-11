@@ -19,7 +19,11 @@ import {
   ChevronRight,
   Search,
   Bell,
-  CheckSquare
+  CheckSquare,
+  Mail,
+  Upload,
+  Download,
+  ArrowUpDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -53,7 +57,7 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Deals', url: '/admin/deals', icon: FileText, badge: '8' },
   { title: 'Tasks', url: '/admin/tasks', icon: CheckSquare, badge: '3' },
   { title: 'Calendar', url: '/admin/calendar', icon: Calendar },
-  { title: 'Import/Export', url: '/admin/import-export', icon: FileText },
+  { title: 'Import/Export', url: '/admin/import-export', icon: ArrowUpDown },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];

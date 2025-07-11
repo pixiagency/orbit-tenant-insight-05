@@ -346,7 +346,7 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full max-w-4xl overflow-y-auto">
+      <SheetContent className="w-full max-w-7xl overflow-y-auto animate-fade-in">
         <SheetHeader>
           <SheetTitle>Deal Management Form</SheetTitle>
           <SheetDescription>
@@ -356,59 +356,61 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
 
         <div className="mt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="essentials">Essentials</TabsTrigger>
-              <TabsTrigger value="qualification">Qualification</TabsTrigger>
-              <TabsTrigger value="products">Products</TabsTrigger>
-              <TabsTrigger value="financial">Financial</TabsTrigger>
-              <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-              <TabsTrigger value="collaboration">Collaboration</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-6 bg-muted p-1 rounded-lg">
+              <TabsTrigger value="essentials" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Essentials</TabsTrigger>
+              <TabsTrigger value="qualification" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Qualification</TabsTrigger>
+              <TabsTrigger value="products" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Products</TabsTrigger>
+              <TabsTrigger value="financial" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Financial</TabsTrigger>
+              <TabsTrigger value="intelligence" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Intelligence</TabsTrigger>
+              <TabsTrigger value="collaboration" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Collaboration</TabsTrigger>
             </TabsList>
 
             {/* Essential Deal Information */}
-            <TabsContent value="essentials" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Essential Deal Information</CardTitle>
-                  <CardDescription>Core required fields for the deal</CardDescription>
+            <TabsContent value="essentials" className="space-y-6 animate-fade-in">
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Essential Deal Information</CardTitle>
+                  <CardDescription className="text-gray-600">Core required fields for the deal</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="dealName">Deal Name *</Label>
+                <CardContent className="space-y-6 p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="dealName" className="text-sm font-medium text-gray-700">Deal Name *</Label>
                       <Input
                         id="dealName"
                         value={formData.dealName}
                         onChange={(e) => handleInputChange('dealName', e.target.value)}
                         placeholder="Enter deal name"
                         maxLength={255}
+                        className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="dealValue">Deal Value *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="dealValue" className="text-sm font-medium text-gray-700">Deal Value *</Label>
                       <Input
                         id="dealValue"
                         type="number"
                         value={formData.dealValue}
                         onChange={(e) => handleInputChange('dealValue', Number(e.target.value))}
                         placeholder="0.00"
+                        className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Close Date *</Label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Close Date *</Label>
                       <DatePicker
                         value={formData.closeDate}
                         onChange={(date) => handleInputChange('closeDate', date)}
                         placeholder="Select close date"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="stage">Stage *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="stage" className="text-sm font-medium text-gray-700">Stage *</Label>
                       <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                           <SelectValue placeholder="Select stage" />
                         </SelectTrigger>
                         <SelectContent>
@@ -423,10 +425,10 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="owner">Owner *</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="owner" className="text-sm font-medium text-gray-700">Owner *</Label>
                     <Select value={formData.owner} onValueChange={(value) => handleInputChange('owner', value)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                         <SelectValue placeholder="Select owner" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1377,12 +1379,12 @@ export const EnhancedDealForm: React.FC<EnhancedDealFormProps> = ({
           </Tabs>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
-            <Button variant="outline" onClick={onClose}>
+          <div className="flex justify-end space-x-4 pt-8 border-t bg-gray-50 -mx-6 px-6 py-4 rounded-b-lg">
+            <Button variant="outline" onClick={onClose} className="px-6 py-2 hover:bg-gray-100">
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 px-6 py-2 animate-pulse">
               <Save className="h-4 w-4 mr-2" />
               Save Deal
             </Button>
