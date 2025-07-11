@@ -24,7 +24,9 @@ import {
   Target,
   Mail,
   Phone,
-  X
+  X,
+  Import,
+  ArrowUpFromLine
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,7 +38,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
-import { DealDrawerForm } from '../../components/deals/DealDrawerForm';
+import { EnhancedDealForm } from '../../components/deals/EnhancedDealForm';
 import { DealTable } from '../../components/deals/DealTable';
 import { DealAdvancedFilters } from '../../components/deals/DealAdvancedFilters';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
@@ -317,10 +319,22 @@ const DealsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Deal
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.location.href = '/admin/import-export'}
+            className="flex items-center gap-2"
+          >
+            <Import className="h-4 w-4" />
+            <ArrowUpFromLine className="h-4 w-4" />
+            Import/Export
+          </Button>
+          <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Deal
+          </Button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -559,6 +573,67 @@ const DealsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Enhanced Deal Form */}
+      <EnhancedDealForm
+        isOpen={isDrawerOpen}
+        onClose={() => {
+          setIsDrawerOpen(false);
+          setEditingDeal(null);
+        }}
+        onSave={(dealData) => {
+          if (editingDeal) {
+            const updatedDeal: Deal = {
+              ...editingDeal,
+              title: dealData.dealName,
+              value: dealData.dealValue,
+              stage: dealData.stage as Deal['stage'],
+              assignedTo: dealData.owner,
+              closeDate: dealData.closeDate?.toISOString().split('T')[0] || editingDeal.closeDate,
+              description: dealData.description || editingDeal.description,
+              company: dealData.primaryAccount || editingDeal.company,
+              contact: dealData.primaryContact || editingDeal.contact,
+              source: dealData.leadSource || editingDeal.source,
+              probability: dealData.stageProbability || editingDeal.probability
+            };
+            setDeals(prev => prev.map(deal =>
+              deal.id === editingDeal.id ? updatedDeal : deal
+            ));
+            toast.success('Deal updated successfully');
+          } else {
+            const newDeal: Deal = {
+              id: Date.now().toString(),
+              title: dealData.dealName || 'New Deal',
+              company: dealData.primaryAccount || 'Unknown Company',
+              contact: dealData.primaryContact || 'Unknown Contact',
+              value: dealData.dealValue || 0,
+              stage: (dealData.stage as Deal['stage']) || 'prospecting',
+              assignedTo: dealData.owner || 'Unassigned',
+              closeDate: dealData.closeDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+              source: dealData.leadSource || 'Unknown',
+              description: dealData.description || '',
+              lastActivity: new Date().toISOString().split('T')[0],
+              probability: dealData.stageProbability || 50
+            };
+            setDeals(prev => [...prev, newDeal]);
+            toast.success('Deal created successfully');
+          }
+          setIsDrawerOpen(false);
+          setEditingDeal(null);
+        }}
+        initialData={editingDeal ? {
+          dealName: editingDeal.title,
+          dealValue: editingDeal.value,
+          closeDate: editingDeal.closeDate ? new Date(editingDeal.closeDate) : undefined,
+          stage: editingDeal.stage,
+          owner: editingDeal.assignedTo,
+          primaryAccount: editingDeal.company,
+          primaryContact: editingDeal.contact,
+          leadSource: editingDeal.source,
+          description: editingDeal.description,
+          stageProbability: editingDeal.probability
+        } : undefined}
+      />
     </div>
   );
 };
