@@ -1248,27 +1248,47 @@ export const LeadsPage = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <ModernKPICard title="Total Contacts" value={leadStats.total.toString()} icon={Users} change={{
-        value: "+8 this week",
-        trend: "up"
-      }} gradient="from-blue-500 to-blue-600" />
-        <ModernKPICard title="New Contacts" value={leadStats.new.toString()} icon={UserPlus} change={{
-        value: "2 today",
-        trend: "up"
-      }} gradient="from-green-500 to-green-600" />
-        <ModernKPICard title="Qualified" value={leadStats.qualified.toString()} icon={Star} change={{
-        value: "Hot prospects",
-        trend: "up"
-      }} gradient="from-yellow-500 to-yellow-600" />
-        <ModernKPICard title="Converted" value={leadStats.converted.toString()} icon={TrendingUp} change={{
-        value: "Great results!",
-        trend: "up"
-      }} gradient="from-purple-500 to-purple-600" />
-        <ModernKPICard title="Total Value" value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} icon={TrendingUp} change={{
-        value: "Pipeline value",
-        trend: "up"
-      }} gradient="from-orange-500 to-orange-600" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ModernKPICard 
+          title="Total Contacts" 
+          value={leadStats.total.toString()} 
+          icon={Users} 
+          change={{
+            value: "+8 this week",
+            trend: "up"
+          }} 
+          gradient="from-blue-500 to-blue-600" 
+        />
+        <ModernKPICard 
+          title="Active Leads" 
+          value={leadStats.qualified.toString()} 
+          icon={Star} 
+          change={{
+            value: "High quality leads",
+            trend: "up"
+          }} 
+          gradient="from-green-500 to-green-600" 
+        />
+        <ModernKPICard 
+          title="Conversions" 
+          value={leadStats.converted.toString()} 
+          icon={TrendingUp} 
+          change={{
+            value: "Great results!",
+            trend: "up"
+          }} 
+          gradient="from-purple-500 to-purple-600" 
+        />
+        <ModernKPICard 
+          title="Pipeline Value" 
+          value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} 
+          icon={TrendingUp} 
+          change={{
+            value: "Strong pipeline",
+            trend: "up"
+          }} 
+          gradient="from-orange-500 to-orange-600" 
+        />
       </div>
 
       {/* Filters */}

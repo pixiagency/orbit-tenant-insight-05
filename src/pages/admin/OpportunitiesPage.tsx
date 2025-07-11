@@ -212,6 +212,106 @@ const opportunitiesData: Opportunity[] = [
     city: 'Miami',
     createdAt: '2024-01-12T13:45:00Z',
     lastActivity: '2024-01-17'
+  },
+  {
+    id: '8',
+    name: 'Digital Marketing Platform',
+    company: 'Marketing Agency Pro',
+    contact: 'Jennifer Wilson',
+    email: 'j.wilson@marketingpro.com',
+    phone: '+1 (555) 234-5678',
+    stage: 'prospecting',
+    value: 85000,
+    probability: 30,
+    expectedCloseDate: '2024-04-10',
+    assignedTo: 'Sarah Johnson',
+    source: 'Google Ads',
+    description: 'Marketing automation and analytics platform',
+    notes: 'Initial discovery call completed.',
+    pipeline: 'marketing',
+    city: 'Austin',
+    createdAt: '2024-01-15T10:20:00Z',
+    lastActivity: '2024-01-20'
+  },
+  {
+    id: '9',
+    name: 'Enterprise Security Solution',
+    company: 'SecureTech Corp',
+    contact: 'David Kim',
+    email: 'd.kim@securetech.com',
+    phone: '+1 (555) 876-5432',
+    stage: 'qualification',
+    value: 250000,
+    probability: 60,
+    expectedCloseDate: '2024-03-15',
+    assignedTo: 'Mike Chen',
+    source: 'Referral',
+    description: 'Comprehensive enterprise security platform',
+    notes: 'Security assessment in progress.',
+    pipeline: 'enterprise',
+    city: 'Denver',
+    createdAt: '2024-01-20T14:30:00Z',
+    lastActivity: '2024-01-25'
+  },
+  {
+    id: '10',
+    name: 'Customer Support Platform',
+    company: 'Support Solutions Inc',
+    contact: 'Rachel Green',
+    email: 'r.green@supportsolutions.com',
+    phone: '+1 (555) 345-6789',
+    stage: 'proposal',
+    value: 120000,
+    probability: 75,
+    expectedCloseDate: '2024-02-28',
+    assignedTo: 'Emily Rodriguez',
+    source: 'Website',
+    description: 'Advanced customer support and ticketing system',
+    notes: 'Proposal submitted and under review.',
+    pipeline: 'support',
+    city: 'Phoenix',
+    createdAt: '2024-01-18T09:15:00Z',
+    lastActivity: '2024-01-22'
+  },
+  {
+    id: '11',
+    name: 'Supply Chain Optimization',
+    company: 'Logistics Masters',
+    contact: 'Alex Johnson',
+    email: 'a.johnson@logisticsmasters.com',
+    phone: '+1 (555) 987-1234',
+    stage: 'negotiation',
+    value: 180000,
+    probability: 85,
+    expectedCloseDate: '2024-02-15',
+    assignedTo: 'David Brown',
+    source: 'Trade Show',
+    description: 'Supply chain management and optimization tools',
+    notes: 'Contract negotiations in final stages.',
+    pipeline: 'sales',
+    city: 'Chicago',
+    createdAt: '2024-01-10T11:45:00Z',
+    lastActivity: '2024-01-24'
+  },
+  {
+    id: '12',
+    name: 'Data Analytics Dashboard',
+    company: 'Analytics Pro',
+    contact: 'Maria Rodriguez',
+    email: 'm.rodriguez@analyticspro.com',
+    phone: '+1 (555) 567-8901',
+    stage: 'closed-won',
+    value: 95000,
+    probability: 100,
+    expectedCloseDate: '2024-01-30',
+    assignedTo: 'Sarah Johnson',
+    source: 'LinkedIn',
+    description: 'Business intelligence and data visualization platform',
+    notes: 'Successfully closed and implementation started.',
+    pipeline: 'marketing',
+    city: 'San Diego',
+    createdAt: '2024-01-05T16:20:00Z',
+    lastActivity: '2024-01-30'
   }
 ];
 
@@ -262,8 +362,9 @@ export const OpportunitiesPage = () => {
     const matchesStage = stageFilter === 'all' || opportunity.stage === stageFilter;
     const matchesSource = sourceFilter === 'all' || opportunity.source === sourceFilter;
     const matchesAssignee = assigneeFilter === 'all' || opportunity.assignedTo === assigneeFilter;
+    const matchesPipeline = selectedPipeline === 'all' || opportunity.pipeline === selectedPipeline;
 
-    return matchesSearch && matchesStage && matchesSource && matchesAssignee;
+    return matchesSearch && matchesStage && matchesSource && matchesAssignee && matchesPipeline;
   });
 
   const opportunityStats = {
@@ -358,6 +459,7 @@ export const OpportunitiesPage = () => {
     setStageFilter('all');
     setSourceFilter('all');
     setAssigneeFilter('all');
+    setSelectedPipeline('all');
     setAdvancedFilters({
       dateRange: { from: undefined, to: undefined },
       valueRange: { min: '', max: '' },
@@ -450,9 +552,11 @@ export const OpportunitiesPage = () => {
                   <SelectValue placeholder="Select Pipeline" />
                 </SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-800">
+                  <SelectItem value="all">All Pipelines</SelectItem>
                   <SelectItem value="sales">Sales Pipeline</SelectItem>
                   <SelectItem value="marketing">Marketing Pipeline</SelectItem>
-                  <SelectItem value="partnerships">Partnership Pipeline</SelectItem>
+                  <SelectItem value="support">Support Pipeline</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Pipeline</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>

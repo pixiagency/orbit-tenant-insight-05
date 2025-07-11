@@ -35,12 +35,14 @@ interface Opportunity {
   competitorInfo?: string;
   decisionMakers?: string;
   budget?: number;
-  timeline?: string;
-  painPoints?: string;
-  proposalSent?: boolean;
-  contractSent?: boolean;
-  country?: string;
-  city?: string;
+    timeline?: string;
+    painPoints?: string;
+    proposalSent?: boolean;
+    contractSent?: boolean;
+    country?: string;
+    city?: string;
+    pipeline?: string;
+    notes?: string;
   createdAt: string;
   lastActivity: string;
 }
@@ -80,7 +82,9 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     proposalSent: false,
     contractSent: false,
     country: '',
-    city: ''
+    city: '',
+    pipeline: 'sales',
+    notes: ''
   });
 
   useEffect(() => {
@@ -107,7 +111,9 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         proposalSent: opportunity.proposalSent || false,
         contractSent: opportunity.contractSent || false,
         country: opportunity.country || '',
-        city: opportunity.city || ''
+        city: opportunity.city || '',
+        pipeline: opportunity.pipeline || 'sales',
+        notes: opportunity.notes || ''
       });
     } else {
       setFormData({
@@ -132,7 +138,9 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         proposalSent: false,
         contractSent: false,
         country: '',
-        city: ''
+        city: '',
+        pipeline: 'sales',
+        notes: ''
       });
     }
   }, [opportunity, isOpen]);
@@ -151,7 +159,11 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       contact: contact.firstName ? `${contact.firstName} ${contact.lastName}` : '',
       email: contact.email || '',
       phone: contact.phone || '',
-      company: contact.company || prev.company
+      company: contact.company || prev.company,
+      // Auto-fill additional fields based on contact
+      name: prev.name || `${contact.company || 'Opportunity'} - ${contact.firstName} ${contact.lastName}`,
+      city: contact.city || prev.city,
+      source: contact.source || prev.source
     }));
   };
 
@@ -279,6 +291,21 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="pipeline">Pipeline *</Label>
+              <Select value={formData.pipeline} onValueChange={(value) => handleInputChange('pipeline', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pipeline" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sales">Sales Pipeline</SelectItem>
+                  <SelectItem value="marketing">Marketing Pipeline</SelectItem>
+                  <SelectItem value="support">Support Pipeline</SelectItem>
+                  <SelectItem value="enterprise">Enterprise Pipeline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="stage">Stage *</Label>
               <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
                 <SelectTrigger>
@@ -355,87 +382,32 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           </div>
         </div>
 
-        {/* Sales Details */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Sales Details</h3>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="budget">Budget ($)</Label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  id="budget"
-                  type="number"
-                  className="pl-10"
-                  value={formData.budget}
-                  onChange={(e) => handleInputChange('budget', e.target.value)}
-                  placeholder="Estimated budget"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="timeline">Timeline</Label>
-              <Select value={formData.timeline} onValueChange={(value) => handleInputChange('timeline', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select timeline" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ASAP">ASAP</SelectItem>
-                  <SelectItem value="1-3 months">1-3 months</SelectItem>
-                  <SelectItem value="3-6 months">3-6 months</SelectItem>
-                  <SelectItem value="6-12 months">6-12 months</SelectItem>
-                  <SelectItem value="12+ months">12+ months</SelectItem>
-                  <SelectItem value="Not defined">Not defined</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="decisionMakers">Decision Makers</Label>
-            <Input
-              id="decisionMakers"
-              value={formData.decisionMakers}
-              onChange={(e) => handleInputChange('decisionMakers', e.target.value)}
-              placeholder="Key decision makers..."
-            />
-          </div>
-          
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="competitorInfo">Competitor Information</Label>
-            <Textarea
-              id="competitorInfo"
-              value={formData.competitorInfo}
-              onChange={(e) => handleInputChange('competitorInfo', e.target.value)}
-              placeholder="Known competitors and their advantages/disadvantages..."
-              rows={3}
-            />
-          </div>
-          
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="painPoints">Pain Points</Label>
-            <Textarea
-              id="painPoints"
-              value={formData.painPoints}
-              onChange={(e) => handleInputChange('painPoints', e.target.value)}
-              placeholder="Customer pain points and challenges..."
-              rows={3}
-            />
-          </div>
-        </div>
 
-        {/* Description */}
-        <div className="space-y-2">
-          <Label htmlFor="description">Notes & Description</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            placeholder="Additional notes and opportunity details..."
-            rows={4}
-          />
+        {/* Notes & Description */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium text-gray-900">Notes & Description</h3>
+          
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => handleInputChange('notes', e.target.value)}
+              placeholder="Internal notes and comments..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Detailed opportunity description..."
+              rows={4}
+            />
+          </div>
         </div>
       </div>
     </DrawerForm>

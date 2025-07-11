@@ -29,6 +29,7 @@ import {
 import { toast } from 'sonner';
 import { CountrySelect } from '@/components/shared/CountrySelect';
 import { CitySelect } from '@/components/shared/CitySelect';
+import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Lead } from '@/types/leads';
 
 interface EnhancedLeadDrawerFormProps {
@@ -333,11 +334,10 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="mobile_phone" className="text-sm font-medium">Mobile Phone</Label>
-              <Input
-                {...register('mobile_phone')}
-                type="tel"
-                placeholder="+1 (555) 987-6543"
-                className="bg-gray-50 dark:bg-gray-700"
+              <PhoneInput
+                value={watch('mobile_phone') || ''}
+                onChange={(value) => setValue('mobile_phone', value)}
+                placeholder="Enter mobile phone"
               />
             </div>
 
