@@ -63,8 +63,8 @@ export const TaskAdvancedFilters: React.FC<TaskAdvancedFiltersProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50">
-      <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg">
+    <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}>
+      <div className="fixed right-0 top-0 h-full w-96 bg-background shadow-lg" onClick={(e) => e.stopPropagation()}>
         <Card className="h-full border-0 rounded-none">
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">

@@ -880,10 +880,7 @@ export const OpportunitiesPage = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Opportunity Pipeline ({filteredOpportunities.length})</CardTitle>
-              <CardDescription>Manage and track your sales opportunities</CardDescription>
-            </div>
+            <div></div>
             <div className="flex items-center space-x-2">
               {/* Bulk Actions */}
               {selectedOpportunities.length > 0 && (

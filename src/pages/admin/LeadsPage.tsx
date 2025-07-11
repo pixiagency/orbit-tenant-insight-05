@@ -1464,10 +1464,7 @@ export const LeadsPage = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Contacts ({filteredLeads.length})</CardTitle>
-              <CardDescription>Manage and track your sales contacts</CardDescription>
-            </div>
+            <div></div>
             <div className="flex items-center space-x-2">
               {/* Bulk Actions */}
               {selectedLeads.length > 0 && <div className="flex items-center space-x-2 mr-4">

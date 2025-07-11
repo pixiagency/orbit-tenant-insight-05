@@ -309,7 +309,7 @@ const TasksPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90">
+        <Button onClick={() => setIsDrawerOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="h-4 w-4 mr-2" />
           Add Task
         </Button>
@@ -373,7 +373,7 @@ const TasksPage = () => {
               </div>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger>
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -385,7 +385,7 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger>
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
@@ -397,7 +397,7 @@ const TasksPage = () => {
               </SelectContent>
             </Select>
             <Select>
-              <SelectTrigger className="w-full">
+              <SelectTrigger>
                 <SelectValue placeholder="All Assignees" />
               </SelectTrigger>
               <SelectContent>
