@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Globe, Moon, Sun, Settings, User, Bell, X, Map, HelpCircle, FileText, LogOut } from 'lucide-react';
+import { Search, Globe, Moon, Sun, Settings, User, Bell, X, Map, HelpCircle, FileText, LogOut, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -113,6 +113,17 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="md:hidden h-9 w-9 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <Search className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+          </Button>
+
+          {/* Import Center */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/admin/import-export')}
+            className="h-9 w-9 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+            title="Import/Export Center"
+          >
+            <ArrowUpDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </Button>
 
           {/* Notifications */}

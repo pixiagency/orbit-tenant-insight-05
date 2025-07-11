@@ -23,7 +23,8 @@ import {
   Mail,
   Upload,
   Download,
-  ArrowUpDown
+  ArrowUpDown,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -58,6 +59,7 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Tasks', url: '/admin/tasks', icon: CheckSquare, badge: '3' },
   { title: 'Calendar', url: '/admin/calendar', icon: Calendar },
   { title: 'Import/Export', url: '/admin/import-export', icon: ArrowUpDown },
+  { title: 'PR / SR', url: '/admin/pr-sr', icon: Megaphone },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];

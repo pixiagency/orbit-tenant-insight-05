@@ -41,6 +41,7 @@ import { AIAssistantPage } from "./pages/admin/AIAssistantPage";
 import { ReportsPage } from "./pages/admin/ReportsPage";
 import { NotificationsPage } from "./pages/admin/NotificationsPage";
 import { ProductsPage } from "./pages/admin/ProductsPage";
+import { PRSRPage } from "./pages/admin/PRSRPage";
 import Index from "./pages/Index";
 
 // Website Pages
@@ -138,6 +139,7 @@ const App = () => {
                           <Route path="reports" element={<ReportsPage />} />
                           <Route path="notifications" element={<NotificationsPage />} />
                           <Route path="products" element={<ProductsPage />} />
+                          <Route path="pr-sr" element={<PRSRPage />} />
                           <Route path="settings/*" element={<SettingsPage />} />
                         </Routes>
                       </ComprehensiveDashboardLayout>
