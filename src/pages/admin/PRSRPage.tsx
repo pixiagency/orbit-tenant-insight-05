@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ModernDashboardLayout } from '../../components/layout/ModernDashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -92,7 +93,7 @@ export const PRSRPage: React.FC = () => {
 
   return (
     <ModernDashboardLayout>
-      <div className="space-y-6">
+      <div className="flex-1 space-y-4 p-4 md:p-6 pt-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
@@ -116,7 +117,7 @@ export const PRSRPage: React.FC = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {kpiData.map((kpi, index) => (
             <ModernKPICard key={index} {...kpi} />
           ))}
