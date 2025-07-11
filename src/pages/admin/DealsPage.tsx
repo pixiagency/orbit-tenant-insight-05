@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { DealDrawerForm } from '../../components/deals/DealDrawerForm';
+import { DealTable } from '../../components/deals/DealTable';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
 import {
   DropdownMenu,
@@ -237,15 +238,7 @@ export const DealsPage = () => {
               <CardDescription>Manage your sales deals and track progress through the pipeline</CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search deals..."
-                  className="pl-10 w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              {/* Search functionality moved to DealTable component */}
             </div>
           </div>
         </CardHeader>
@@ -258,72 +251,20 @@ export const DealsPage = () => {
             </TabsList>
 
             <TabsContent value="list" className="space-y-4">
-              <div className="space-y-4">
-                {filteredDeals.map((deal) => (
-                  <div key={deal.id} className="flex items-center justify-between p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 text-lg">{deal.title}</h3>
-                          <Badge variant="outline" className={getStageColor(deal.stage)}>
-                            {deal.stage.replace('-', ' ')}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-1">{deal.company} • {deal.contact}</p>
-                        <p className="text-sm text-gray-500 mb-2">{deal.description}</p>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span className="flex items-center space-x-1">
-                            <DollarSign className="h-3 w-3" />
-                            <span>${deal.value.toLocaleString()}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <TrendingUp className="h-3 w-3" />
-                            <span>{deal.probability}% probability</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <User className="h-3 w-3" />
-                            <span>{deal.owner}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{new Date(deal.expectedCloseDate).toLocaleDateString()}</span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-right">
-                        <div className="font-semibold text-lg text-green-600">${deal.value.toLocaleString()}</div>
-                        <div className="text-sm text-gray-500">{deal.probability}% prob</div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => {
-                            setSelectedDeal(deal as any);
-                            setShowDealForm(true);
-                          }}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Deal
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Deal
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <DealTable
+                deals={filteredDeals}
+                onEdit={(deal) => {
+                  setSelectedDeal(deal as any);
+                  setShowDealForm(true);
+                }}
+                onDelete={(dealId) => {
+                  console.log('Delete deal:', dealId);
+                }}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                stageFilter={stageFilter}
+                onStageFilterChange={setStageFilter}
+              />
             </TabsContent>
 
             <TabsContent value="pipeline">

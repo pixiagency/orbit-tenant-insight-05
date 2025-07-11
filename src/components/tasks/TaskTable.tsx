@@ -1,6 +1,14 @@
 
 import React from 'react';
-import { MoreHorizontal, Calendar, User, Clock, Flag } from 'lucide-react';
+import { MoreHorizontal, Calendar, User, Clock, Flag, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -37,6 +45,12 @@ interface TaskTableProps {
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onStatusChange: (taskId: string, status: string) => void;
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  statusFilter: string;
+  onStatusFilterChange: (value: string) => void;
+  priorityFilter: string;
+  onPriorityFilterChange: (value: string) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -60,10 +74,62 @@ const getPriorityColor = (priority: string) => {
   return colors[priority as keyof typeof colors] || 'text-gray-600';
 };
 
-export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, onStatusChange }) => {
+export const TaskTable: React.FC<TaskTableProps> = ({ 
+  tasks, 
+  onEdit, 
+  onDelete, 
+  onStatusChange,
+  searchTerm,
+  onSearchChange,
+  statusFilter,
+  onStatusFilterChange,
+  priorityFilter,
+  onPriorityFilterChange
+}) => {
   return (
-    <div className="bg-white rounded-lg border">
-      <Table>
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search tasks..."
+              className="pl-10 w-64"
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in-progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="overdue">Overdue</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={priorityFilter} onValueChange={onPriorityFilterChange}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-lg border">
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Task</TableHead>
@@ -146,7 +212,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, o
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     </div>
   );
 };

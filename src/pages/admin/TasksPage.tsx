@@ -223,15 +223,7 @@ export const TasksPage = () => {
               <CardDescription>Manage and track all tasks across your organization</CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search tasks..."
-                  className="pl-10 w-64"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              {/* Search functionality moved to TaskTable component */}
             </div>
           </div>
         </CardHeader>
@@ -245,6 +237,12 @@ export const TasksPage = () => {
             onEdit={(task) => console.log('Edit task:', task)}
             onDelete={(taskId) => console.log('Delete task:', taskId)}
             onStatusChange={(taskId, status) => console.log('Change status:', taskId, status)}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            priorityFilter={priorityFilter}
+            onPriorityFilterChange={setPriorityFilter}
           />
         </CardContent>
       </Card>
