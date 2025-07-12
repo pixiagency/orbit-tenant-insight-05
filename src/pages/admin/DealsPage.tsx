@@ -36,7 +36,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
-import { EnhancedDealForm } from '../../components/deals/EnhancedDealForm';
+import { RegeneratedDealForm } from '../../components/deals/RegeneratedDealForm';
 import { DealTable } from '../../components/deals/DealTable';
 import { DealAdvancedFilters } from '../../components/deals/DealAdvancedFilters';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
@@ -310,6 +310,8 @@ const DealsPage = () => {
     setAppliedFilters(prev => prev.filter(f => f.id !== filterId));
   };
 
+  
+
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
@@ -560,8 +562,8 @@ const DealsPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Enhanced Deal Form */}
-      <EnhancedDealForm
+      {/* Regenerated Deal Form */}
+      <RegeneratedDealForm
         isOpen={isDrawerOpen}
         onClose={() => {
           setIsDrawerOpen(false);
@@ -571,16 +573,9 @@ const DealsPage = () => {
           if (editingDeal) {
             const updatedDeal: Deal = {
               ...editingDeal,
-              title: dealData.dealName,
-              value: dealData.dealValue,
-              stage: dealData.stage as Deal['stage'],
-              assignedTo: dealData.owner,
-              closeDate: dealData.closeDate?.toISOString().split('T')[0] || editingDeal.closeDate,
-              description: dealData.description || editingDeal.description,
-              company: dealData.primaryAccount || editingDeal.company,
-              contact: dealData.primaryContact || editingDeal.contact,
-              source: dealData.leadSource || editingDeal.source,
-              probability: dealData.stageProbability || editingDeal.probability
+              ...dealData,
+              id: editingDeal.id,
+              lastActivity: new Date().toISOString().split('T')[0]
             };
             setDeals(prev => prev.map(deal =>
               deal.id === editingDeal.id ? updatedDeal : deal
@@ -588,18 +583,9 @@ const DealsPage = () => {
             toast.success('Deal updated successfully');
           } else {
             const newDeal: Deal = {
+              ...dealData,
               id: Date.now().toString(),
-              title: dealData.dealName || 'New Deal',
-              company: dealData.primaryAccount || 'Unknown Company',
-              contact: dealData.primaryContact || 'Unknown Contact',
-              value: dealData.dealValue || 0,
-              stage: (dealData.stage as Deal['stage']) || 'prospecting',
-              assignedTo: dealData.owner || 'Unassigned',
-              closeDate: dealData.closeDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-              source: dealData.leadSource || 'Unknown',
-              description: dealData.description || '',
-              lastActivity: new Date().toISOString().split('T')[0],
-              probability: dealData.stageProbability || 50
+              lastActivity: new Date().toISOString().split('T')[0]
             };
             setDeals(prev => [...prev, newDeal]);
             toast.success('Deal created successfully');
@@ -607,18 +593,7 @@ const DealsPage = () => {
           setIsDrawerOpen(false);
           setEditingDeal(null);
         }}
-        initialData={editingDeal ? {
-          dealName: editingDeal.title,
-          dealValue: editingDeal.value,
-          closeDate: editingDeal.closeDate ? new Date(editingDeal.closeDate) : undefined,
-          stage: editingDeal.stage,
-          owner: editingDeal.assignedTo,
-          primaryAccount: editingDeal.company,
-          primaryContact: editingDeal.contact,
-          leadSource: editingDeal.source,
-          description: editingDeal.description,
-          stageProbability: editingDeal.probability
-        } : undefined}
+        initialData={editingDeal}
       />
     </div>
   );
