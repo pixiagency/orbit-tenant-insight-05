@@ -14,13 +14,17 @@ import {
 import { toast } from 'sonner';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { PRSRDrawerForm } from '../../components/pr-sr/PRSRDrawerForm';
+import { ProductServiceDrawerForm } from '../../components/pr-sr/ProductServiceDrawerForm';
 import { RegeneratedPRSRTable } from '../../components/pr-sr/RegeneratedPRSRTable';
 import { PRSRAdvancedFilters } from '../../components/pr-sr/PRSRAdvancedFilters';
 import { PRSR } from '@/types/pr-sr';
+import { ProductService } from '@/types/products-services';
 
 export const PRSRPage: React.FC = () => {
   const [showPRSRForm, setShowPRSRForm] = useState(false);
+  const [showProductServiceForm, setShowProductServiceForm] = useState(false);
   const [selectedPRSR, setSelectedPRSR] = useState<PRSR | null>(null);
+  const [selectedProductService, setSelectedProductService] = useState<ProductService | null>(null);
   const [filters, setFilters] = useState({
     search: '',
     type: 'all',
@@ -41,6 +45,11 @@ export const PRSRPage: React.FC = () => {
     setShowPRSRForm(true);
   };
 
+  const handleAddProductService = () => {
+    setSelectedProductService(null);
+    setShowProductServiceForm(true);
+  };
+
   const handleEditPRSR = (prsr: PRSR) => {
     setSelectedPRSR(prsr);
     setShowPRSRForm(true);
@@ -51,6 +60,13 @@ export const PRSRPage: React.FC = () => {
     setShowPRSRForm(false);
     setSelectedPRSR(null);
     toast.success(selectedPRSR ? 'PR/SR contact updated successfully!' : 'PR/SR contact created successfully!');
+  };
+
+  const handleSaveProductService = (productServiceData: ProductService) => {
+    console.log('Saving Product/Service:', productServiceData);
+    setShowProductServiceForm(false);
+    setSelectedProductService(null);
+    toast.success(selectedProductService ? 'Product/Service updated successfully!' : 'Product/Service created successfully!');
   };
 
   const kpiData = [
@@ -102,6 +118,10 @@ export const PRSRPage: React.FC = () => {
               <Plus className="h-4 w-4 mr-2" />
               Add PR/SR Contact
             </Button>
+            <Button onClick={handleAddProductService} className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product/Service
+            </Button>
           </div>
         </div>
 
@@ -142,6 +162,17 @@ export const PRSRPage: React.FC = () => {
         }} 
         onSubmit={handleSavePRSR} 
         prsr={selectedPRSR} 
+      />
+
+      {/* Product/Service Form */}
+      <ProductServiceDrawerForm
+        isOpen={showProductServiceForm} 
+        onClose={() => {
+          setShowProductServiceForm(false);
+          setSelectedProductService(null);
+        }} 
+        onSubmit={handleSaveProductService} 
+        productService={selectedProductService} 
       />
     </div>
   );
