@@ -92,7 +92,6 @@ const mockProductServiceData: PRSR[] = [
     campaign_interests: ['Healthcare Products', 'Medical Devices', 'Patient Care'],
     notes: 'Specializes in healthcare product launches'
   },
-  // Add more mock data to test pagination
   {
     id: '4',
     first_name: 'David',
@@ -191,7 +190,6 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
 
   const handleBulkAction = (action: string) => {
     console.log(`Bulk action: ${action} for rows:`, selectedRows);
-    // Implement bulk actions here
     setSelectedRows([]);
   };
 
@@ -221,7 +219,7 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
   return (
     <div className="space-y-4">
       {/* Table Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between bg-white px-4 py-3 border-b">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Show</span>
@@ -239,9 +237,7 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              of {filteredData.length} entries
-            </span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">entries</span>
           </div>
 
           {selectedRows.length > 0 && (
@@ -278,8 +274,39 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
           )}
         </div>
 
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} results
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} entries
+          </div>
+          <div className="flex items-center space-x-1">
+            {totalPages > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 px-3 text-sm"
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center space-x-1">
+                  <span className="text-sm text-gray-600">Page</span>
+                  <span className="text-sm font-medium text-gray-900">{currentPage}</span>
+                  <span className="text-sm text-gray-600">of {totalPages}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-8 px-3 text-sm"
+                >
+                  Next
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -441,41 +468,6 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
           </div>
         )}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={page === currentPage}
-                    className="cursor-pointer"
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
     </div>
   );
 };

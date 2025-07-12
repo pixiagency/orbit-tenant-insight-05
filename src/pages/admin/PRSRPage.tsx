@@ -116,7 +116,7 @@ export const PRSRPage: React.FC = () => {
         <PRSRAdvancedFilters 
           filters={filters}
           onFiltersChange={setFilters}
-          filteredCount={847} // This would be calculated based on actual filtered data
+          filteredCount={847}
         />
 
         {/* Main Content */}
