@@ -40,11 +40,6 @@ export const PRSRPage: React.FC = () => {
     }
   });
 
-  const handleAddPRSR = () => {
-    setSelectedPRSR(null);
-    setShowPRSRForm(true);
-  };
-
   const handleAddProductService = () => {
     setSelectedProductService(null);
     setShowProductServiceForm(true);
@@ -113,10 +108,6 @@ export const PRSRPage: React.FC = () => {
             <Button variant="outline" size="sm" className="border-gray-300">
               <Download className="h-4 w-4 mr-2" />
               Export
-            </Button>
-            <Button onClick={handleAddPRSR} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Add PR/SR Contact
             </Button>
             <Button onClick={handleAddProductService} className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white">
               <Plus className="h-4 w-4 mr-2" />
