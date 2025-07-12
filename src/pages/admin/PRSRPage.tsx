@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
-import { RegeneratedPRSRForm } from '../../components/pr-sr/RegeneratedPRSRForm';
+import { PRSRDrawerForm } from '../../components/pr-sr/PRSRDrawerForm';
 import { RegeneratedPRSRTable } from '../../components/pr-sr/RegeneratedPRSRTable';
 import { PRSRAdvancedFilters } from '../../components/pr-sr/PRSRAdvancedFilters';
 import { PRSR } from '@/types/pr-sr';
@@ -100,7 +100,7 @@ export const PRSRPage: React.FC = () => {
             </Button>
             <Button onClick={handleAddPRSR} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
               <Plus className="h-4 w-4 mr-2" />
-              Add Contact
+              Add Product/Service Contact
             </Button>
           </div>
         </div>
@@ -133,8 +133,8 @@ export const PRSRPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Contact Form */}
-      <RegeneratedPRSRForm 
+      {/* Enhanced Product/Service Contact Form */}
+      <PRSRDrawerForm
         isOpen={showPRSRForm} 
         onClose={() => {
           setShowPRSRForm(false);
