@@ -14,17 +14,62 @@ import {
 import { toast } from 'sonner';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { PRSRDrawerForm } from '../../components/pr-sr/PRSRDrawerForm';
-import { ProductServiceDrawerForm } from '../../components/pr-sr/ProductServiceDrawerForm';
+import { ProductServiceForm } from '../../components/pr-sr/ProductServiceForm';
 import { RegeneratedPRSRTable } from '../../components/pr-sr/RegeneratedPRSRTable';
 import { PRSRAdvancedFilters } from '../../components/pr-sr/PRSRAdvancedFilters';
 import { PRSR } from '@/types/pr-sr';
-import { ProductService } from '@/types/products-services';
+
+// Define the comprehensive ProductService type
+interface ProductServiceFormData {
+  item_type: 'Product' | 'Service';
+  name: string;
+  sku: string;
+  description: string;
+  category: string;
+  product_type?: 'Physical Item' | 'Digital Download';
+  price: number;
+  compare_price?: number;
+  has_variants?: boolean;
+  variant_options?: Array<{
+    name: string;
+    values: string;
+    priceModifier: number;
+  }>;
+  service_type?: 'One-time Service' | 'Recurring Service';
+  duration?: string;
+  booking_required?: boolean;
+  track_inventory?: boolean;
+  quantity?: number;
+  low_stock_threshold?: number;
+  allow_backorders?: boolean;
+  unlimited_quantity?: boolean;
+  requires_shipping?: boolean;
+  weight?: number;
+  weight_unit?: 'kg' | 'lb' | 'g' | 'oz';
+  shipping_class?: 'Standard' | 'Express' | 'Free' | 'Heavy Item';
+  free_shipping_over?: number;
+  featured_image?: string;
+  gallery_images?: string[];
+  product_video_url?: string;
+  add_custom_fields?: boolean;
+  custom_fields?: Array<{
+    name: string;
+    type: 'Text' | 'Number' | 'Date' | 'Dropdown' | 'Checkbox';
+    value: string;
+    required: boolean;
+  }>;
+  status: 'Active' | 'Inactive' | 'Draft';
+  featured?: boolean;
+  tax_included?: boolean;
+  seo_title?: string;
+  seo_description?: string;
+}
 
 export const PRSRPage: React.FC = () => {
   const [showPRSRForm, setShowPRSRForm] = useState(false);
   const [showProductServiceForm, setShowProductServiceForm] = useState(false);
   const [selectedPRSR, setSelectedPRSR] = useState<PRSR | null>(null);
-  const [selectedProductService, setSelectedProductService] = useState<ProductService | null>(null);
+  const [selectedProductService, setSelectedProductService] = useState<ProductServiceFormData | null>(null);
   const [filters, setFilters] = useState({
     search: '',
     type: 'all',
@@ -57,7 +102,7 @@ export const PRSRPage: React.FC = () => {
     toast.success(selectedPRSR ? 'PR/SR contact updated successfully!' : 'PR/SR contact created successfully!');
   };
 
-  const handleSaveProductService = (productServiceData: ProductService) => {
+  const handleSaveProductService = (productServiceData: ProductServiceFormData) => {
     console.log('Saving Product/Service:', productServiceData);
     setShowProductServiceForm(false);
     setSelectedProductService(null);
@@ -156,7 +201,7 @@ export const PRSRPage: React.FC = () => {
       />
 
       {/* Product/Service Form */}
-      <ProductServiceDrawerForm
+      <ProductServiceForm
         isOpen={showProductServiceForm} 
         onClose={() => {
           setShowProductServiceForm(false);
