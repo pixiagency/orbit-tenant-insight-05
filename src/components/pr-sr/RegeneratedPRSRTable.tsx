@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Eye, Trash2, Mail, Phone, Star, Package, ShoppingCart, ChevronDown, MapPin, Calendar, Users, Building } from 'lucide-react';
+import { MoreHorizontal, Edit, Eye, Trash2, Package, ShoppingCart, ChevronDown, TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
 import { PRSR } from '@/types/pr-sr';
 
 interface RegeneratedPRSRTableProps {
@@ -17,18 +17,17 @@ interface RegeneratedPRSRTableProps {
   onEdit: (prsr: PRSR) => void;
 }
 
-// Enhanced mock data for product/service PR/SR contacts
+// Enhanced mock data for products/services
 const mockProductServiceData: PRSR[] = [
   {
     id: '1',
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    email: 'sarah.johnson@techsolutions.com',
-    phone: '+1 (555) 123-4567',
-    mobile_phone: '+1 (555) 123-4568',
+    first_name: 'Premium Software Suite',
+    last_name: '',
+    email: 'software@company.com',
+    phone: '',
     company: 'TechSolutions Inc.',
-    job_title: 'Product Marketing Director',
-    department: 'Marketing',
+    job_title: 'Enterprise Software',
+    department: 'Software',
     type: 'pr',
     contact_status: 'Active',
     lead_source: 'Website',
@@ -38,68 +37,64 @@ const mockProductServiceData: PRSR[] = [
     do_not_call: false,
     priority: 'High',
     media_type: 'Digital',
-    reach: 75000,
+    reach: 2500,
     influence_score: 88,
     created_date: '2024-01-15',
     modified_date: '2024-01-15',
-    campaign_interests: ['Software Solutions', 'Enterprise Tech', 'Cloud Services'],
-    notes: 'Key decision maker for enterprise software purchases',
+    campaign_interests: ['Software Solutions', 'Enterprise Tech'],
+    notes: 'Best-selling enterprise software package',
     website: 'https://techsolutions.com',
     industry: 'Technology',
     city: 'San Francisco',
     state: 'CA',
     country: 'USA',
-    last_contact_date: '2024-01-20',
-    next_follow_up_date: '2024-02-15',
-    contact_owner: 'John Smith',
-    social_media_handles: {
-      linkedin: 'sarahjohnson',
-      twitter: '@sjohnson_tech'
-    }
+    price: 299.99,
+    category: 'Software',
+    sku: 'SOFT-001',
+    inventory_quantity: 150,
+    sales_count: 2500
   },
   {
     id: '2',
-    first_name: 'Michael',
-    last_name: 'Rodriguez',
-    email: 'm.rodriguez@retailplus.com',
-    phone: '+1 (555) 234-5678',
+    first_name: 'Customer Service Training',
+    last_name: '',
+    email: 'training@retailplus.com',
     company: 'RetailPlus Corporation',
-    job_title: 'Service Excellence Manager',
-    department: 'Customer Service',
+    job_title: 'Training Service',
+    department: 'Services',
     type: 'sr',
-    contact_status: 'Qualified',
+    contact_status: 'Active',
     lead_source: 'Referral',
     email_opt_in: true,
     phone_opt_in: false,
     preferred_contact_method: 'Email',
     do_not_call: true,
     priority: 'Medium',
-    media_type: 'Social Media',
-    reach: 35000,
+    media_type: 'Service',
+    reach: 1200,
     influence_score: 76,
     created_date: '2024-01-20',
     modified_date: '2024-01-20',
-    campaign_interests: ['Customer Service', 'Retail Solutions', 'Training Services'],
-    notes: 'Focuses on service improvement initiatives',
-    website: 'https://retailplus.com',
-    industry: 'Retail',
+    campaign_interests: ['Customer Service', 'Training'],
+    notes: 'Comprehensive customer service training program',
+    industry: 'Education',
     city: 'New York',
     state: 'NY',
     country: 'USA',
-    last_contact_date: '2024-01-25',
-    next_follow_up_date: '2024-02-20',
-    contact_owner: 'Jane Doe'
+    price: 1499.99,
+    category: 'Training',
+    sku: 'TRAIN-002',
+    inventory_quantity: 0,
+    sales_count: 1200
   },
   {
     id: '3',
-    first_name: 'Emily',
-    last_name: 'Chen',
-    email: 'emily.chen@healthcareservices.org',
-    phone: '+1 (555) 345-6789',
-    mobile_phone: '+1 (555) 345-6790',
+    first_name: 'Healthcare Analytics Platform',
+    last_name: '',
+    email: 'analytics@healthcare.com',
     company: 'HealthCare Services Group',
-    job_title: 'Product Development Lead',
-    department: 'R&D',
+    job_title: 'Analytics Software',
+    department: 'Healthcare',
     type: 'pr',
     contact_status: 'Active',
     lead_source: 'Event',
@@ -108,80 +103,88 @@ const mockProductServiceData: PRSR[] = [
     preferred_contact_method: 'Phone',
     do_not_call: false,
     priority: 'High',
-    media_type: 'Print',
-    reach: 45000,
+    media_type: 'Digital',
+    reach: 800,
     influence_score: 82,
     created_date: '2024-01-25',
     modified_date: '2024-01-25',
-    campaign_interests: ['Healthcare Products', 'Medical Devices', 'Patient Care'],
-    notes: 'Specializes in healthcare product launches',
+    campaign_interests: ['Healthcare', 'Analytics'],
+    notes: 'Advanced healthcare data analytics solution',
     industry: 'Healthcare',
     city: 'Boston',
     state: 'MA',
     country: 'USA',
-    last_contact_date: '2024-01-30',
-    contact_owner: 'Mike Wilson'
+    price: 4999.99,
+    category: 'Healthcare',
+    sku: 'HLTH-003',
+    inventory_quantity: 25,
+    sales_count: 800
   },
   {
     id: '4',
-    first_name: 'David',
-    last_name: 'Wilson',
-    email: 'david.wilson@manufacturing.com',
-    phone: '+1 (555) 456-7890',
+    first_name: 'Manufacturing Consulting',
+    last_name: '',
+    email: 'consulting@manufacturing.com',
     company: 'Manufacturing Solutions',
-    job_title: 'Operations Manager',
-    department: 'Operations',
+    job_title: 'Consulting Service',
+    department: 'Services',
     type: 'sr',
-    contact_status: 'Active',
+    contact_status: 'Inactive',
     lead_source: 'Trade Show',
     email_opt_in: true,
     phone_opt_in: true,
     preferred_contact_method: 'Phone',
     do_not_call: false,
-    priority: 'Medium',
-    media_type: 'TV',
-    reach: 25000,
+    priority: 'Low',
+    media_type: 'Service',
+    reach: 350,
     influence_score: 65,
     created_date: '2024-01-30',
     modified_date: '2024-01-30',
-    campaign_interests: ['Manufacturing Services', 'Equipment Maintenance'],
-    notes: 'Interested in operational efficiency solutions',
+    campaign_interests: ['Manufacturing', 'Consulting'],
+    notes: 'Operational efficiency consulting services',
     industry: 'Manufacturing',
     city: 'Detroit',
     state: 'MI',
     country: 'USA',
-    next_follow_up_date: '2024-02-25',
-    contact_owner: 'Sarah Lee'
+    price: 2500.00,
+    category: 'Consulting',
+    sku: 'CONS-004',
+    inventory_quantity: 0,
+    sales_count: 350
   },
   {
     id: '5',
-    first_name: 'Lisa',
-    last_name: 'Anderson',
-    email: 'lisa.anderson@fintech.com',
-    phone: '+1 (555) 567-8901',
+    first_name: 'Financial Planning Tool',
+    last_name: '',
+    email: 'planning@fintech.com',
     company: 'FinTech Innovations',
-    job_title: 'Product Manager',
-    department: 'Product',
+    job_title: 'Planning Software',
+    department: 'Financial',
     type: 'pr',
-    contact_status: 'Inactive',
+    contact_status: 'Active',
     lead_source: 'Website',
     email_opt_in: false,
     phone_opt_in: false,
     preferred_contact_method: 'Email',
     do_not_call: true,
-    priority: 'Low',
-    media_type: 'Blog',
-    reach: 15000,
+    priority: 'Medium',
+    media_type: 'Digital',
+    reach: 600,
     influence_score: 45,
     created_date: '2024-02-01',
     modified_date: '2024-02-01',
-    campaign_interests: ['Financial Products', 'Payment Solutions'],
-    notes: 'Currently inactive but high potential',
+    campaign_interests: ['Financial Planning', 'Software'],
+    notes: 'Comprehensive financial planning and analysis tool',
     industry: 'Financial Services',
     city: 'Austin',
     state: 'TX',
     country: 'USA',
-    contact_owner: 'Alex Brown'
+    price: 199.99,
+    category: 'Financial',
+    sku: 'FIN-005',
+    inventory_quantity: 500,
+    sales_count: 600
   }
 ];
 
@@ -199,9 +202,9 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
 
   const filteredData = data.filter(item => {
     const matchesSearch = !searchTerm || 
-      `${item.first_name} ${item.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.job_title?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesSource = sourceFilter === 'all' || item.lead_source.toLowerCase() === sourceFilter;
@@ -245,31 +248,25 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Critical': return 'destructive';
-      case 'High': return 'default';
-      case 'Medium': return 'secondary';
-      case 'Low': return 'outline';
-      default: return 'outline';
-    }
-  };
-
   const getTypeIcon = (type: string) => {
     return type === 'pr' ? Package : ShoppingCart;
   };
 
-  const getMediaTypeColor = (mediaType: string) => {
-    switch (mediaType) {
-      case 'Digital': return 'bg-blue-100 text-blue-800';
-      case 'Print': return 'bg-green-100 text-green-800';
-      case 'TV': return 'bg-purple-100 text-purple-800';
-      case 'Radio': return 'bg-orange-100 text-orange-800';
-      case 'Social Media': return 'bg-pink-100 text-pink-800';
-      case 'Blog': return 'bg-yellow-100 text-yellow-800';
-      case 'Podcast': return 'bg-indigo-100 text-indigo-800';
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Software': return 'bg-blue-100 text-blue-800';
+      case 'Training': return 'bg-green-100 text-green-800';
+      case 'Healthcare': return 'bg-purple-100 text-purple-800';
+      case 'Consulting': return 'bg-orange-100 text-orange-800';
+      case 'Financial': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getInventoryStatus = (quantity: number) => {
+    if (quantity === 0) return { color: 'destructive', text: 'Out of Stock', icon: AlertTriangle };
+    if (quantity < 50) return { color: 'secondary', text: 'Low Stock', icon: AlertTriangle };
+    return { color: 'default', text: 'In Stock', icon: CheckCircle };
   };
 
   return (
@@ -377,216 +374,117 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead className="font-semibold">Contact Information</TableHead>
-              <TableHead className="font-semibold">Company & Position</TableHead>
-              <TableHead className="font-semibold">Type & Category</TableHead>
-              <TableHead className="font-semibold">Contact Details</TableHead>
-              <TableHead className="font-semibold">Performance</TableHead>
-              <TableHead className="font-semibold">Follow-up</TableHead>
+              <TableHead className="font-semibold">Product</TableHead>
+              <TableHead className="font-semibold">Category</TableHead>
+              <TableHead className="font-semibold">Price</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Inventory</TableHead>
+              <TableHead className="font-semibold">Sales</TableHead>
               <TableHead className="font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((prsr) => {
-              const TypeIcon = getTypeIcon(prsr.type);
+            {paginatedData.map((product) => {
+              const TypeIcon = getTypeIcon(product.type);
+              const inventoryStatus = getInventoryStatus(product.inventory_quantity || 0);
+              const InventoryIcon = inventoryStatus.icon;
+              
               return (
-                <TableRow key={prsr.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <TableRow key={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <TableCell>
                     <Checkbox
-                      checked={selectedRows.includes(prsr.id!)}
-                      onCheckedChange={(checked) => handleSelectRow(prsr.id!, checked as boolean)}
+                      checked={selectedRows.includes(product.id!)}
+                      onCheckedChange={(checked) => handleSelectRow(product.id!, checked as boolean)}
                     />
                   </TableCell>
                   
-                  {/* Contact Information */}
+                  {/* Product */}
                   <TableCell className="py-4">
-                    <div className="flex flex-col space-y-1">
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {prsr.first_name} {prsr.last_name}
-                      </div>
-                      <div className="text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
-                        {prsr.email}
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs text-gray-500">
-                        {prsr.phone && (
-                          <span className="flex items-center">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {prsr.phone}
-                          </span>
-                        )}
-                        {prsr.mobile_phone && (
-                          <span className="flex items-center">
-                            <Phone className="h-3 w-3 mr-1" />
-                            {prsr.mobile_phone}
-                          </span>
-                        )}
-                      </div>
-                      {(prsr.city || prsr.state || prsr.country) && (
-                        <div className="flex items-center text-xs text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {[prsr.city, prsr.state, prsr.country].filter(Boolean).join(', ')}
+                    <div className="flex items-start space-x-3">
+                      <TypeIcon className="h-5 w-5 text-gray-500 mt-0.5" />
+                      <div className="flex flex-col space-y-1">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {product.first_name}
                         </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  
-                  {/* Company & Position */}
-                  <TableCell className="py-4">
-                    <div className="flex flex-col space-y-1">
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {prsr.company}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {prsr.job_title}
-                      </div>
-                      {prsr.department && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          SKU: {product.sku}
+                        </div>
                         <div className="text-xs text-gray-500">
-                          <Building className="h-3 w-3 inline mr-1" />
-                          {prsr.department}
+                          {product.job_title}
                         </div>
-                      )}
-                      {prsr.industry && (
-                        <Badge variant="outline" className="text-xs w-fit">
-                          {prsr.industry}
-                        </Badge>
-                      )}
+                      </div>
                     </div>
                   </TableCell>
                   
-                  {/* Type & Category */}
+                  {/* Category */}
                   <TableCell className="py-4">
-                    <div className="flex flex-col space-y-2">
+                    <Badge variant="outline" className={`${getCategoryColor(product.category || 'Other')}`}>
+                      {product.category || 'Other'}
+                    </Badge>
+                  </TableCell>
+                  
+                  {/* Price */}
+                  <TableCell className="py-4">
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
+                      ${product.price?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}
+                    </div>
+                  </TableCell>
+                  
+                  {/* Status */}
+                  <TableCell className="py-4">
+                    <Badge variant={getStatusColor(product.contact_status)} className="text-xs">
+                      {product.contact_status}
+                    </Badge>
+                  </TableCell>
+                  
+                  {/* Inventory */}
+                  <TableCell className="py-4">
+                    <div className="flex flex-col space-y-1">
                       <div className="flex items-center space-x-2">
-                        <TypeIcon className="h-4 w-4 text-gray-500" />
-                        <Badge variant={prsr.type === 'pr' ? 'default' : 'secondary'} className="text-xs">
-                          {prsr.type === 'pr' ? 'PR' : 'SR'}
-                        </Badge>
+                        <InventoryIcon className="h-4 w-4 text-gray-500" />
+                        <span className="font-medium text-gray-900 dark:text-gray-100">
+                          {product.inventory_quantity || 0}
+                        </span>
                       </div>
-                      {prsr.media_type && (
-                        <Badge variant="outline" className={`text-xs ${getMediaTypeColor(prsr.media_type)}`}>
-                          {prsr.media_type}
-                        </Badge>
-                      )}
-                      <div className="flex items-center space-x-1">
-                        <Badge variant={getStatusColor(prsr.contact_status)} className="text-xs">
-                          {prsr.contact_status}
-                        </Badge>
-                        <Badge variant={getPriorityColor(prsr.priority || 'Medium')} className="text-xs">
-                          {prsr.priority || 'Medium'}
-                        </Badge>
-                      </div>
+                      <Badge variant={inventoryStatus.color as any} className="text-xs w-fit">
+                        {inventoryStatus.text}
+                      </Badge>
                     </div>
                   </TableCell>
                   
-                  {/* Contact Details */}
+                  {/* Sales */}
                   <TableCell className="py-4">
-                    <div className="flex flex-col space-y-1">
-                      <div className="text-xs text-gray-600">
-                        Source: <span className="font-medium">{prsr.lead_source}</span>
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        Preferred: <span className="font-medium">{prsr.preferred_contact_method}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs">
-                        <span className={`px-1 py-0.5 rounded ${prsr.email_opt_in ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          Email: {prsr.email_opt_in ? 'Yes' : 'No'}
-                        </span>
-                        <span className={`px-1 py-0.5 rounded ${prsr.phone_opt_in ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          Phone: {prsr.phone_opt_in ? 'Yes' : 'No'}
-                        </span>
-                      </div>
-                      {prsr.do_not_call && (
-                        <Badge variant="destructive" className="text-xs w-fit">
-                          Do Not Call
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  
-                  {/* Performance */}
-                  <TableCell className="py-4">
-                    <div className="flex flex-col space-y-2">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        <Users className="h-4 w-4 inline mr-1" />
-                        {prsr.reach?.toLocaleString() || 'N/A'}
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {prsr.influence_score || 0}
-                        </span>
-                      </div>
-                      {prsr.campaign_interests && prsr.campaign_interests.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {prsr.campaign_interests.slice(0, 2).map((interest, index) => (
-                            <Badge key={index} variant="outline" className="text-xs px-1 py-0">
-                              {interest}
-                            </Badge>
-                          ))}
-                          {prsr.campaign_interests.length > 2 && (
-                            <Badge variant="outline" className="text-xs px-1 py-0">
-                              +{prsr.campaign_interests.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  
-                  {/* Follow-up */}
-                  <TableCell className="py-4">
-                    <div className="flex flex-col space-y-1">
-                      {prsr.last_contact_date && (
-                        <div className="text-xs text-gray-600">
-                          <Calendar className="h-3 w-3 inline mr-1" />
-                          Last: {new Date(prsr.last_contact_date).toLocaleDateString()}
-                        </div>
-                      )}
-                      {prsr.next_follow_up_date && (
-                        <div className="text-xs text-green-600 font-medium">
-                          <Calendar className="h-3 w-3 inline mr-1" />
-                          Next: {new Date(prsr.next_follow_up_date).toLocaleDateString()}
-                        </div>
-                      )}
-                      {prsr.contact_owner && (
-                        <div className="text-xs text-gray-600">
-                          Owner: <span className="font-medium">{prsr.contact_owner}</span>
-                        </div>
-                      )}
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {product.sales_count?.toLocaleString() || 0}
+                      </span>
                     </div>
                   </TableCell>
                   
                   {/* Actions */}
                   <TableCell className="py-4">
-                    <div className="flex items-center space-x-1">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                        <Mail className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-green-50 dark:hover:bg-green-900/20">
-                        <Phone className="h-4 w-4 text-green-600" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem onClick={() => onEdit(prsr)} className="cursor-pointer">
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Contact
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Profile
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600 cursor-pointer">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => onEdit(product)} className="cursor-pointer">
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Product
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600 cursor-pointer">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               );
@@ -597,7 +495,7 @@ export const RegeneratedPRSRTable: React.FC<RegeneratedPRSRTableProps> = ({
         {paginatedData.length === 0 && (
           <div className="text-center py-12 bg-gray-50 dark:bg-gray-800">
             <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-gray-500 text-lg font-medium">No contacts found</p>
+            <p className="text-gray-500 text-lg font-medium">No products found</p>
             <p className="text-gray-400 text-sm">Try adjusting your search criteria</p>
           </div>
         )}

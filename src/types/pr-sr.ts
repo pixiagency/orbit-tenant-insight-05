@@ -1,3 +1,4 @@
+
 export interface PRSR {
   id?: string;
   first_name: string;
@@ -7,7 +8,7 @@ export interface PRSR {
   mobile_phone?: string;
   job_title?: string;
   department?: string;
-  type: 'pr' | 'sr'; // Public Relations or Social Responsibility
+  type: 'pr' | 'sr'; // Product or Service
   contact_status: 'Active' | 'Inactive' | 'Qualified' | 'Unqualified';
   lead_source: string;
   email_opt_in: boolean;
@@ -29,8 +30,8 @@ export interface PRSR {
   created_date: string;
   modified_date: string;
   priority?: 'Low' | 'Medium' | 'High' | 'Critical';
-  media_type?: 'Print' | 'Digital' | 'TV' | 'Radio' | 'Social Media' | 'Blog' | 'Podcast';
-  reach?: number; // For PR: audience reach, For SR: community impact
+  media_type?: 'Print' | 'Digital' | 'TV' | 'Radio' | 'Social Media' | 'Blog' | 'Podcast' | 'Service';
+  reach?: number;
   influence_score?: number;
   last_contact_date?: string;
   next_follow_up_date?: string;
@@ -41,4 +42,10 @@ export interface PRSR {
     instagram?: string;
     facebook?: string;
   };
+  // Product/Service specific fields
+  price?: number;
+  category?: string;
+  sku?: string;
+  inventory_quantity?: number;
+  sales_count?: number;
 }
