@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
-import { RegeneratedDealForm } from '../../components/deals/RegeneratedDealForm';
 import { DealTable } from '../../components/deals/DealTable';
 import { DealAdvancedFilters } from '../../components/deals/DealAdvancedFilters';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
@@ -120,8 +120,6 @@ const dealsData: Deal[] = [
 
 const DealsPage = () => {
   const [deals, setDeals] = useState<Deal[]>(dealsData);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -169,8 +167,7 @@ const DealsPage = () => {
   };
 
   const handleEditDeal = (deal: Deal) => {
-    setEditingDeal(deal);
-    setIsDrawerOpen(true);
+    toast.info('Edit functionality not available');
   };
 
   const handleDeleteDeal = (dealId: string) => {
@@ -310,8 +307,6 @@ const DealsPage = () => {
     setAppliedFilters(prev => prev.filter(f => f.id !== filterId));
   };
 
-  
-
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
@@ -319,9 +314,9 @@ const DealsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button disabled className="bg-gray-400 text-white cursor-not-allowed">
           <Plus className="h-4 w-4 mr-2" />
-          Add Deal
+          Add Deal (Form Removed)
         </Button>
       </div>
 
@@ -559,42 +554,9 @@ const DealsPage = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Regenerated Deal Form */}
-      <RegeneratedDealForm
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setEditingDeal(null);
-        }}
-        onSave={(dealData) => {
-          if (editingDeal) {
-            const updatedDeal: Deal = {
-              ...editingDeal,
-              ...dealData,
-              id: editingDeal.id,
-              lastActivity: new Date().toISOString().split('T')[0]
-            };
-            setDeals(prev => prev.map(deal =>
-              deal.id === editingDeal.id ? updatedDeal : deal
-            ));
-            toast.success('Deal updated successfully');
-          } else {
-            const newDeal: Deal = {
-              ...dealData,
-              id: Date.now().toString(),
-              lastActivity: new Date().toISOString().split('T')[0]
-            };
-            setDeals(prev => [...prev, newDeal]);
-            toast.success('Deal created successfully');
-          }
-          setIsDrawerOpen(false);
-          setEditingDeal(null);
-        }}
-        initialData={editingDeal}
-      />
     </div>
   );
 };
