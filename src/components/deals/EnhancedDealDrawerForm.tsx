@@ -34,11 +34,11 @@ interface EnhancedDealDrawerFormProps {
   isOpen: boolean;
   deal?: Deal | null;
   onClose: () => void;
-  onSubmit: (data: Deal) => void;
+  onSave: (data: Deal) => void;
   isLoading?: boolean;
 }
 
-export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ onSubmit, ...props }) => {
+export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ onSave, ...props }) => {
   const { getActiveFields } = useCustomFields();
   
   const handleCustomFieldsClick = () => {
@@ -47,7 +47,7 @@ export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ 
   
   return (
     <div className="relative">
-      <DealDrawerForm {...props} onSave={onSubmit} />
+      <DealDrawerForm {...props} onSave={onSave} customFields={getActiveFields()} />
       <div className="absolute top-4 right-4">
         <Button
           variant="outline"
