@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DealDrawerForm } from './DealDrawerForm';
 import { useCustomFields } from '../../hooks/useCustomFields';
@@ -7,34 +6,56 @@ import { Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Deal {
-  id: string;
+  id?: string;
   title: string;
+  description: string;
   company: string;
-  contact: string;
-  email: string;
-  phone: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
   value: number;
   stage: string;
+  priority: string;
   probability: number;
   expectedCloseDate: string;
-  owner: string;
+  actualCloseDate?: string;
   source: string;
+  dealType: string;
+  assignedTo: string;
+  tags: string;
+  notes: string;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface DealFormData {
+  title: string;
   description: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
-  industry: string;
-  companySize: string;
-  website: string;
+  company: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  value: string;
+  stage: string;
+  priority: string;
+  probability: string;
+  expectedCloseDate: string;
+  actualCloseDate: string;
+  source: string;
+  dealType: string;
+  assignedTo: string;
+  tags: string;
+  notes: string;
+  status: string;
 }
 
 interface EnhancedDealDrawerFormProps {
   isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (deal: Deal) => void;
   deal?: Deal | null;
+  onClose: () => void;
+  onSubmit: (data: DealFormData) => void;
+  isLoading?: boolean;
 }
 
 export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ onSubmit, ...props }) => {
