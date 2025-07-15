@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, User, Flag, Clock } from 'lucide-react';
+import { Calendar, User, Flag, Clock, Tag, Phone, Mail, Users, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -12,6 +12,9 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { DrawerForm } from '@/components/layout/DrawerForm';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { X } from 'lucide-react';
 
 interface Task {
   id: string;
@@ -34,6 +37,36 @@ interface TaskFormProps {
   onSave: (data: any) => void;
 }
 
+// Mock data for related items based on type
+const mockRelatedData = {
+  lead: [
+    { id: '1', name: 'John Smith - TechCorp' },
+    { id: '2', name: 'Sarah Johnson - DesignCo' },
+    { id: '3', name: 'Mike Chen - StartupLtd' }
+  ],
+  opportunity: [
+    { id: '1', name: 'Website Redesign Project' },
+    { id: '2', name: 'Mobile App Development' },
+    { id: '3', name: 'SEO Optimization Campaign' }
+  ],
+  contact: [
+    { id: '1', name: 'Alice Brown' },
+    { id: '2', name: 'David Wilson' },
+    { id: '3', name: 'Emily Davis' }
+  ],
+  deal: [
+    { id: '1', name: 'Q1 Software License Deal' },
+    { id: '2', name: 'Annual Consulting Contract' },
+    { id: '3', name: 'Hardware Purchase Agreement' }
+  ]
+};
+
+// Mock stored tags for autocomplete
+const storedTags = [
+  'follow-up', 'urgent', 'client-meeting', 'proposal', 'contract', 'support',
+  'sales-call', 'presentation', 'demo', 'negotiation', 'onboarding', 'training'
+];
+
 export const TaskForm: React.FC<TaskFormProps> = ({
   isOpen,
   task,
@@ -50,10 +83,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     dueTime: '',
     relatedTo: '',
     relatedType: 'lead',
-    estimatedHours: '',
-    tags: '',
+    taskType: 'call',
+    tags: [] as string[],
     notes: ''
   });
+
+  const [tagInput, setTagInput] = useState('');
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     if (task) {
@@ -67,8 +103,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         dueTime: '',
         relatedTo: task.relatedTo,
         relatedType: task.relatedType,
-        estimatedHours: '',
-        tags: '',
+        taskType: 'call',
+        tags: [],
         notes: ''
       });
     } else {
@@ -82,8 +118,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         dueTime: '',
         relatedTo: '',
         relatedType: 'lead',
-        estimatedHours: '',
-        tags: '',
+        taskType: 'call',
+        tags: [],
         notes: ''
       });
     }
@@ -96,11 +132,72 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }));
   };
 
+  const handleRelatedTypeChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      relatedType: value,
+      relatedTo: '' // Reset related to when type changes
+    }));
+  };
+
+  const handleTagInputChange = (value: string) => {
+    setTagInput(value);
+    
+    if (value.length >= 3) {
+      const suggestions = storedTags.filter(tag => 
+        tag.toLowerCase().includes(value.toLowerCase()) &&
+        !formData.tags.includes(tag)
+      );
+      setTagSuggestions(suggestions);
+    } else {
+      setTagSuggestions([]);
+    }
+  };
+
+  const addTag = (tag: string) => {
+    if (!formData.tags.includes(tag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+    }
+    setTagInput('');
+    setTagSuggestions([]);
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleTagInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      addTag(tagInput.trim());
+    }
+  };
+
   const handleSave = () => {
-    onSave({
-      ...formData,
-      estimatedHours: parseFloat(formData.estimatedHours) || 0
-    });
+    onSave(formData);
+  };
+
+  const getTaskTypeIcon = (type: string) => {
+    switch (type) {
+      case 'call':
+        return Phone;
+      case 'meeting':
+        return Users;
+      case 'email':
+        return Mail;
+      case 'follow-up':
+        return Clock;
+      case 'presentation':
+        return FileText;
+      default:
+        return FileText;
+    }
   };
 
   return (
@@ -141,6 +238,29 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label htmlFor="taskType">Task Type</Label>
+                <div className="relative">
+                  {React.createElement(getTaskTypeIcon(formData.taskType), {
+                    className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"
+                  })}
+                  <Select value={formData.taskType} onValueChange={(value) => handleInputChange('taskType', value)}>
+                    <SelectTrigger className="pl-10">
+                      <SelectValue placeholder="Select task type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="call">Call</SelectItem>
+                      <SelectItem value="meeting">Meeting</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="follow-up">Follow-up</SelectItem>
+                      <SelectItem value="presentation">Presentation</SelectItem>
+                      <SelectItem value="demo">Demo</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
                   <SelectTrigger>
@@ -155,23 +275,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
-                <div className="relative">
-                  <Flag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
-                    <SelectTrigger className="pl-10">
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <div className="relative">
+                <Flag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+                  <SelectTrigger className="pl-10">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -228,18 +348,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 </div>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="estimatedHours">Estimated Hours</Label>
-              <Input
-                id="estimatedHours"
-                type="number"
-                step="0.5"
-                value={formData.estimatedHours}
-                onChange={(e) => handleInputChange('estimatedHours', e.target.value)}
-                placeholder="0"
-              />
-            </div>
           </div>
         </div>
 
@@ -250,7 +358,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="relatedType">Related To Type</Label>
-                <Select value={formData.relatedType} onValueChange={(value) => handleInputChange('relatedType', value)}>
+                <Select value={formData.relatedType} onValueChange={handleRelatedTypeChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -265,23 +373,66 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               
               <div className="space-y-2">
                 <Label htmlFor="relatedTo">Related To</Label>
-                <Input
-                  id="relatedTo"
-                  value={formData.relatedTo}
-                  onChange={(e) => handleInputChange('relatedTo', e.target.value)}
-                  placeholder="Enter related record name"
-                />
+                <Select value={formData.relatedTo} onValueChange={(value) => handleInputChange('relatedTo', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select related record" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockRelatedData[formData.relatedType as keyof typeof mockRelatedData]?.map((item) => (
+                      <SelectItem key={item.id} value={item.name}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="tags">Tags</Label>
-              <Input
-                id="tags"
-                value={formData.tags}
-                onChange={(e) => handleInputChange('tags', e.target.value)}
-                placeholder="Enter tags separated by commas"
-              />
+              <div className="space-y-2">
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                        <Tag className="h-3 w-3" />
+                        {tag}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => removeTag(tag)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <div className="relative">
+                  <Input
+                    id="tags"
+                    value={tagInput}
+                    onChange={(e) => handleTagInputChange(e.target.value)}
+                    onKeyPress={handleTagInputKeyPress}
+                    placeholder="Type at least 3 characters to see suggestions..."
+                  />
+                  {tagSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-32 overflow-y-auto">
+                      {tagSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
+                          onClick={() => addTag(suggestion)}
+                        >
+                          <Tag className="h-3 w-3" />
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
