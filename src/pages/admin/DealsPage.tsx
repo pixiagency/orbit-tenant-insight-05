@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ import {
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { DealTable } from '../../components/deals/DealTable';
 import { DealAdvancedFilters } from '../../components/deals/DealAdvancedFilters';
+import { EnhancedDealDrawerForm } from '../../components/deals/EnhancedDealDrawerForm';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
 import {
   DropdownMenu,
@@ -138,6 +140,8 @@ const DealsPage = () => {
     operator: 'AND' as 'AND' | 'OR',
     textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals'
   });
+  const [dealFormOpen, setDealFormOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<any | null>(null);
 
   const filteredDeals = deals.filter(deal => {
     const matchesStatus = statusFilter === 'all' || deal.stage === statusFilter;
@@ -166,12 +170,43 @@ const DealsPage = () => {
   };
 
   const handleEditDeal = (deal: Deal) => {
-    toast.info('Edit functionality not available');
+    setEditingDeal(deal);
+    setDealFormOpen(true);
   };
 
   const handleDeleteDeal = (dealId: string) => {
     setDealToDelete(dealId);
     setDeleteModalOpen(true);
+  };
+
+  const handleSaveDeal = (dealData: any) => {
+    if (editingDeal) {
+      // Update existing deal
+      setDeals(prev => prev.map(deal => 
+        deal.id === editingDeal.id ? { ...deal, ...dealData } : deal
+      ));
+      toast.success('Deal updated successfully!');
+    } else {
+      // Add new deal
+      const newDeal = {
+        id: String(Date.now()),
+        title: dealData.title,
+        company: dealData.company,
+        contact: dealData.contactName,
+        value: dealData.value,
+        stage: dealData.stage.toLowerCase().replace(' ', '-') as Deal['stage'],
+        probability: dealData.probability,
+        closeDate: dealData.expectedCloseDate,
+        assignedTo: dealData.assignedTo,
+        source: dealData.source,
+        description: dealData.description,
+        lastActivity: new Date().toISOString().split('T')[0]
+      };
+      setDeals(prev => [...prev, newDeal]);
+      toast.success('Deal created successfully!');
+    }
+    setDealFormOpen(false);
+    setEditingDeal(null);
   };
 
   const confirmDelete = () => {
@@ -313,9 +348,9 @@ const DealsPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Deals</h1>
         </div>
-        <Button disabled className="bg-gray-400 text-white cursor-not-allowed">
+        <Button onClick={() => setDealFormOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Deal (Form Removed)
+          Add Deal
         </Button>
       </div>
 
@@ -517,6 +552,17 @@ const DealsPage = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Enhanced Deal Form */}
+      <EnhancedDealDrawerForm
+        isOpen={dealFormOpen}
+        deal={editingDeal}
+        onClose={() => {
+          setDealFormOpen(false);
+          setEditingDeal(null);
+        }}
+        onSave={handleSaveDeal}
+      />
 
       <DealAdvancedFilters
         isOpen={showAdvancedFilters}
