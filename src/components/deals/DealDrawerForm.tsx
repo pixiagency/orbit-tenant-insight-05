@@ -23,7 +23,8 @@ import {
   FileText,
   Plus,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Calculator
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -121,6 +122,26 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   const dealType = watch('deal_type');
   const includeItems = watch('include_items');
   const customerValue = watch('customer');
+
+  // Calculate total deal value based on items
+  const calculateDealValue = () => {
+    if (!includeItems || items.length === 0) {
+      return 0;
+    }
+
+    return items.reduce((total, item) => {
+      const quantity = dealType === 'product_sale' ? (item.quantity || 1) : 1;
+      return total + (item.unit_price * quantity);
+    }, 0);
+  };
+
+  // Auto-update deal value when items change
+  useEffect(() => {
+    if (includeItems && items.length > 0) {
+      const calculatedValue = calculateDealValue();
+      setValue('deal_value', calculatedValue);
+    }
+  }, [items, includeItems, dealType, setValue]);
 
   useEffect(() => {
     if (deal) {
@@ -311,8 +332,14 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deal_value" className="text-sm font-medium">
+              <Label htmlFor="deal_value" className="text-sm font-medium flex items-center">
                 Deal Value <span className="text-red-500">*</span>
+                {includeItems && items.length > 0 && (
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    <Calculator className="h-3 w-3 mr-1" />
+                    Auto-calculated
+                  </Badge>
+                )}
               </Label>
               <Input
                 {...register('deal_value', { required: true, valueAsNumber: true })}
@@ -321,7 +348,11 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                 min="0"
                 step="0.01"
                 className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                readOnly={includeItems && items.length > 0}
               />
+              {includeItems && items.length > 0 && (
+                <p className="text-xs text-gray-500">Value is automatically calculated from items below</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -485,8 +516,25 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                       />
                     </div>
                   </div>
+
+                  {/* Show item total */}
+                  <div className="text-right">
+                    <span className="text-sm text-gray-600">
+                      Total: ${((item.unit_price || 0) * (dealType === 'product_sale' ? (item.quantity || 1) : 1)).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               ))}
+
+              {/* Show grand total */}
+              {items.length > 0 && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Total Deal Value:</span>
+                    <span className="text-lg font-bold">${calculateDealValue().toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
