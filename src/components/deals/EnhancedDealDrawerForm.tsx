@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DealDrawerForm } from './DealDrawerForm';
 import { useCustomFields } from '../../hooks/useCustomFields';
@@ -22,39 +23,18 @@ interface Deal {
   source: string;
   dealType: string;
   assignedTo: string;
-  tags: string;
+  tags: string[];
   notes: string;
   status: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface DealFormData {
-  title: string;
-  description: string;
-  company: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  value: string;
-  stage: string;
-  priority: string;
-  probability: string;
-  expectedCloseDate: string;
-  actualCloseDate: string;
-  source: string;
-  dealType: string;
-  assignedTo: string;
-  tags: string;
-  notes: string;
-  status: string;
-}
-
 interface EnhancedDealDrawerFormProps {
   isOpen: boolean;
   deal?: Deal | null;
   onClose: () => void;
-  onSubmit: (data: DealFormData) => void;
+  onSubmit: (data: Deal) => void;
   isLoading?: boolean;
 }
 

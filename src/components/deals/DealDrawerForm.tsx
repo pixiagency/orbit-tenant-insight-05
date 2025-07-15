@@ -1,12 +1,31 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { DollarSign, Calendar, User, Building, TrendingUp, FileText, Target } from 'lucide-react';
-import { DrawerForm } from '../layout/DrawerForm';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { DrawerForm } from '../layout/DrawerForm';
+import { ContactSearchSelect } from '../shared/ContactSearchSelect';
+import { 
+  Target, 
+  Building, 
+  Phone, 
+  Mail, 
+  DollarSign, 
+  Calendar,
+  TrendingUp,
+  FileText,
+  Settings,
+  AlertCircle,
+  Users,
+  Star
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Deal {
   id?: string;
@@ -25,42 +44,22 @@ interface Deal {
   source: string;
   dealType: string;
   assignedTo: string;
-  tags: string;
+  tags: string[];
   notes: string;
   status: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-interface DealFormData {
-  title: string;
-  description: string;
-  company: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  value: string;
-  stage: string;
-  priority: string;
-  probability: string;
-  expectedCloseDate: string;
-  actualCloseDate: string;
-  source: string;
-  dealType: string;
-  assignedTo: string;
-  tags: string;
-  notes: string;
-  status: string;
-}
-
 interface DealDrawerFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: DealFormData) => void;
+  onSave: (data: Deal) => void;
   deal?: Deal | null;
   isLoading?: boolean;
 }
 
+// Deal Configuration Constants
 const DEAL_STAGES = [
   'Lead', 'Qualified', 'Proposal', 'Negotiation', 'Decision', 'Closed Won', 'Closed Lost'
 ];
@@ -78,7 +77,7 @@ const DEAL_TYPES = [
 ];
 
 const SALES_REPS = [
-  'John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'David Brown', 'Lisa Miller'
+  'Sarah Johnson', 'Mike Chen', 'Emily Rodriguez', 'David Brown', 'Alex Thompson'
 ];
 
 const DEAL_STATUS = [
@@ -92,7 +91,12 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   deal,
   isLoading = false,
 }) => {
-  const form = useForm<DealFormData>({
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [selectedContactId, setSelectedContactId] = useState<string>('');
+
+  const form = useForm<Deal>({
     defaultValues: {
       title: '',
       description: '',
@@ -100,19 +104,19 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
       contactName: '',
       contactEmail: '',
       contactPhone: '',
-      value: '',
+      value: 0,
       stage: 'Lead',
       priority: 'Medium',
-      probability: '10',
+      probability: 10,
       expectedCloseDate: '',
       actualCloseDate: '',
       source: 'Website',
       dealType: 'New Business',
       assignedTo: '',
-      tags: '',
+      tags: [],
       notes: '',
       status: 'Active',
-    },
+    }
   });
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = form;
@@ -122,15 +126,15 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   // Auto-update probability based on stage
   const updateProbabilityByStage = (stage: string) => {
     const probabilities = {
-      'Lead': '10',
-      'Qualified': '25',
-      'Proposal': '50',
-      'Negotiation': '75',
-      'Decision': '90',
-      'Closed Won': '100',
-      'Closed Lost': '0'
+      'Lead': 10,
+      'Qualified': 25,
+      'Proposal': 50,
+      'Negotiation': 75,
+      'Decision': 90,
+      'Closed Won': 100,
+      'Closed Lost': 0
     };
-    setValue('probability', probabilities[stage] || '10');
+    setValue('probability', probabilities[stage] || 10);
   };
 
   useEffect(() => {
@@ -139,26 +143,8 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
 
   useEffect(() => {
     if (deal) {
-      reset({
-        title: deal.title || '',
-        description: deal.description || '',
-        company: deal.company || '',
-        contactName: deal.contactName || '',
-        contactEmail: deal.contactEmail || '',
-        contactPhone: deal.contactPhone || '',
-        value: deal.value?.toString() || '',
-        stage: deal.stage || 'Lead',
-        priority: deal.priority || 'Medium',
-        probability: deal.probability?.toString() || '10',
-        expectedCloseDate: deal.expectedCloseDate?.split('T')[0] || '',
-        actualCloseDate: deal.actualCloseDate?.split('T')[0] || '',
-        source: deal.source || 'Website',
-        dealType: deal.dealType || 'New Business',
-        assignedTo: deal.assignedTo || '',
-        tags: deal.tags || '',
-        notes: deal.notes || '',
-        status: deal.status || 'Active',
-      });
+      reset(deal);
+      setTags(deal.tags || []);
     } else {
       reset({
         title: '',
@@ -167,24 +153,86 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         contactName: '',
         contactEmail: '',
         contactPhone: '',
-        value: '',
+        value: 0,
         stage: 'Lead',
         priority: 'Medium',
-        probability: '10',
+        probability: 10,
         expectedCloseDate: '',
         actualCloseDate: '',
         source: 'Website',
         dealType: 'New Business',
         assignedTo: '',
-        tags: '',
+        tags: [],
         notes: '',
         status: 'Active',
       });
+      setTags([]);
     }
-  }, [deal, reset]);
+  }, [deal, reset, isOpen]);
 
-  const onSubmit = (data: DealFormData) => {
+  // Custom validation logic
+  const validateForm = (data: Deal): string[] => {
+    const errors: string[] = [];
+    
+    if (!data.title?.trim()) {
+      errors.push('Deal title is required');
+    }
+    
+    if (!data.company?.trim()) {
+      errors.push('Company name is required');
+    }
+    
+    if (!data.contactName?.trim()) {
+      errors.push('Contact name is required');
+    }
+    
+    if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
+      errors.push('Please enter a valid email address');
+    }
+    
+    if (!data.value || data.value <= 0) {
+      errors.push('Deal value must be greater than 0');
+    }
+    
+    return errors;
+  };
+
+  const onFormSubmit = (data: Deal) => {
+    const validationErrors = validateForm(data);
+    
+    if (validationErrors.length > 0) {
+      setValidationErrors(validationErrors);
+      toast.error('Please fix the validation errors');
+      return;
+    }
+    
+    setValidationErrors([]);
+    data.tags = tags;
+    data.updatedAt = new Date().toISOString();
+    
     onSave(data);
+    toast.success(deal ? 'Deal updated successfully!' : 'Deal created successfully!');
+    onClose();
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleContactSelect = (contactId: string, contact: any) => {
+    setSelectedContactId(contactId);
+    if (contact.firstName) {
+      setValue('contactName', `${contact.firstName} ${contact.lastName}`);
+      setValue('contactEmail', contact.email);
+      setValue('company', contact.company || '');
+    }
   };
 
   return (
@@ -192,39 +240,52 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={deal ? 'Edit Deal' : 'Add New Deal'}
-      description={deal ? 'Update deal information and details' : 'Create a new deal opportunity'}
-      onSave={handleSubmit(onSubmit)}
-      isLoading={isLoading}
+      description={deal ? 'Update the deal information below.' : 'Enter the deal information below.'}
+      onSave={handleSubmit(onFormSubmit)}
       saveText={deal ? 'Update Deal' : 'Create Deal'}
+      width="wide"
     >
-      <form className="space-y-4 sm:space-y-6">
-        {/* Basic Information */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <Target className="inline h-4 w-4 mr-2" />
+      <form className="space-y-6">
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              <div className="space-y-1">
+                {validationErrors.map((error, index) => (
+                  <div key={index}>• {error}</div>
+                ))}
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Basic Deal Information */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Target className="h-4 w-4 mr-2" />
             Deal Information
           </h4>
 
-          <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            <div>
-              <Label htmlFor="title" className="text-sm font-medium">Deal Title *</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium">
+                Deal Title <span className="text-red-500">*</span>
+              </Label>
               <Input
-                {...register('title', { required: 'Deal title is required' })}
-                placeholder="e.g., Enterprise Software License"
-                className="mt-1"
+                {...register('title', { required: true })}
+                placeholder="Enterprise Software License - Q4 2024"
+                className="bg-gray-50 dark:bg-gray-700"
               />
-              {errors.title && (
-                <span className="text-sm text-red-600">{errors.title.message}</span>
-              )}
             </div>
 
-            <div>
+            <div className="md:col-span-2 space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">Description</Label>
               <Textarea
                 {...register('description')}
-                placeholder="Brief description of the deal opportunity"
-                className="mt-1"
                 rows={3}
+                placeholder="Brief description of the deal opportunity..."
+                className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
           </div>
@@ -233,62 +294,64 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         <Separator />
 
         {/* Company & Contact Information */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <Building className="inline h-4 w-4 mr-2" />
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Building className="h-4 w-4 mr-2" />
             Company & Contact
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <Label htmlFor="company" className="text-sm font-medium">Company *</Label>
-              <Input
-                {...register('company', { required: 'Company is required' })}
-                placeholder="e.g., TechCorp Inc."
-                className="mt-1"
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Search Existing Contact</Label>
+              <ContactSearchSelect
+                value={selectedContactId}
+                onValueChange={handleContactSelect}
+                placeholder="Search for existing contact..."
               />
-              {errors.company && (
-                <span className="text-sm text-red-600">{errors.company.message}</span>
-              )}
             </div>
 
-            <div>
-              <Label htmlFor="contactName" className="text-sm font-medium">Contact Name *</Label>
-              <Input
-                {...register('contactName', { required: 'Contact name is required' })}
-                placeholder="e.g., John Smith"
-                className="mt-1"
-              />
-              {errors.contactName && (
-                <span className="text-sm text-red-600">{errors.contactName.message}</span>
-              )}
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="company" className="text-sm font-medium">
+                  Company <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  {...register('company', { required: true })}
+                  placeholder="TechCorp Inc."
+                  className="bg-gray-50 dark:bg-gray-700"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="contactEmail" className="text-sm font-medium">Contact Email</Label>
-              <Input
-                {...register('contactEmail', {
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Invalid email address'
-                  }
-                })}
-                type="email"
-                placeholder="john@techcorp.com"
-                className="mt-1"
-              />
-              {errors.contactEmail && (
-                <span className="text-sm text-red-600">{errors.contactEmail.message}</span>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactName" className="text-sm font-medium">
+                  Contact Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  {...register('contactName', { required: true })}
+                  placeholder="John Smith"
+                  className="bg-gray-50 dark:bg-gray-700"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="contactPhone" className="text-sm font-medium">Contact Phone</Label>
-              <Input
-                {...register('contactPhone')}
-                placeholder="+1 (555) 123-4567"
-                className="mt-1"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="contactEmail" className="text-sm font-medium">Contact Email</Label>
+                <Input
+                  {...register('contactEmail')}
+                  type="email"
+                  placeholder="john@techcorp.com"
+                  className="bg-gray-50 dark:bg-gray-700"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contactPhone" className="text-sm font-medium">Contact Phone</Label>
+                <Input
+                  {...register('contactPhone')}
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  className="bg-gray-50 dark:bg-gray-700"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -296,33 +359,31 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         <Separator />
 
         {/* Deal Value & Stage */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <DollarSign className="inline h-4 w-4 mr-2" />
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <DollarSign className="h-4 w-4 mr-2" />
             Deal Value & Stage
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <Label htmlFor="value" className="text-sm font-medium">Deal Value *</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="value" className="text-sm font-medium">
+                Deal Value <span className="text-red-500">*</span>
+              </Label>
               <Input
-                {...register('value', { required: 'Deal value is required' })}
+                {...register('value', { required: true, valueAsNumber: true })}
                 type="number"
                 placeholder="50000"
-                className="mt-1"
+                min="0"
+                step="0.01"
+                className="bg-gray-50 dark:bg-gray-700"
               />
-              {errors.value && (
-                <span className="text-sm text-red-600">{errors.value.message}</span>
-              )}
             </div>
 
-            <div>
-              <Label htmlFor="stage" className="text-sm font-medium">Stage *</Label>
-              <Select 
-                onValueChange={(value) => setValue('stage', value)} 
-                defaultValue={watch('stage')}
-              >
-                <SelectTrigger className="mt-1">
+            <div className="space-y-2">
+              <Label htmlFor="stage" className="text-sm font-medium">Stage</Label>
+              <Select onValueChange={(value) => setValue('stage', value)} defaultValue={watch('stage')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
                 <SelectContent>
@@ -333,36 +394,32 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-              {errors.stage && (
-                <span className="text-sm text-red-600">Please select a stage</span>
-              )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="probability" className="text-sm font-medium">Probability (%)</Label>
               <Input
-                {...register('probability')}
+                {...register('probability', { valueAsNumber: true })}
                 type="number"
                 min="0"
                 max="100"
-                placeholder="50"
-                className="mt-1"
+                className="bg-gray-50 dark:bg-gray-700"
+                readOnly
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="priority" className="text-sm font-medium">Priority</Label>
-              <Select 
-                onValueChange={(value) => setValue('priority', value)} 
-                defaultValue={watch('priority')}
-              >
-                <SelectTrigger className="mt-1">
+              <Select onValueChange={(value) => setValue('priority', value)} defaultValue={watch('priority')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
                   {DEAL_PRIORITIES.map((priority) => (
                     <SelectItem key={priority} value={priority}>
-                      {priority}
+                      <Badge variant={priority === 'Urgent' ? 'destructive' : priority === 'High' ? 'default' : 'secondary'}>
+                        {priority}
+                      </Badge>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -374,63 +431,62 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         <Separator />
 
         {/* Timeline & Assignment */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <Calendar className="inline h-4 w-4 mr-2" />
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Calendar className="h-4 w-4 mr-2" />
             Timeline & Assignment
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="expectedCloseDate" className="text-sm font-medium">Expected Close Date</Label>
               <Input
                 {...register('expectedCloseDate')}
                 type="date"
-                className="mt-1"
+                className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="actualCloseDate" className="text-sm font-medium">Actual Close Date</Label>
               <Input
                 {...register('actualCloseDate')}
                 type="date"
-                className="mt-1"
+                className="bg-gray-50 dark:bg-gray-700"
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="assignedTo" className="text-sm font-medium">Assigned To</Label>
-              <Select 
-                onValueChange={(value) => setValue('assignedTo', value)} 
-                defaultValue={watch('assignedTo')}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select sales rep" />
+              <Select onValueChange={(value) => setValue('assignedTo', value)} defaultValue={watch('assignedTo')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
+                  <SelectValue placeholder="Assign to sales rep" />
                 </SelectTrigger>
                 <SelectContent>
                   {SALES_REPS.map((rep) => (
                     <SelectItem key={rep} value={rep}>
-                      {rep}
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-4 w-4" />
+                        <span>{rep}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium">Status</Label>
-              <Select 
-                onValueChange={(value) => setValue('status', value)} 
-                defaultValue={watch('status')}
-              >
-                <SelectTrigger className="mt-1">
+              <Select onValueChange={(value) => setValue('status', value)} defaultValue={watch('status')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   {DEAL_STATUS.map((status) => (
                     <SelectItem key={status} value={status}>
-                      {status}
+                      <Badge variant={status === 'Active' ? 'default' : status === 'Completed' ? 'secondary' : 'destructive'}>
+                        {status}
+                      </Badge>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -442,20 +498,17 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         <Separator />
 
         {/* Additional Information */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <TrendingUp className="inline h-4 w-4 mr-2" />
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <TrendingUp className="h-4 w-4 mr-2" />
             Additional Information
           </h4>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="source" className="text-sm font-medium">Lead Source</Label>
-              <Select 
-                onValueChange={(value) => setValue('source', value)} 
-                defaultValue={watch('source')}
-              >
-                <SelectTrigger className="mt-1">
+              <Select onValueChange={(value) => setValue('source', value)} defaultValue={watch('source')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select source" />
                 </SelectTrigger>
                 <SelectContent>
@@ -468,13 +521,10 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
               </Select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="dealType" className="text-sm font-medium">Deal Type</Label>
-              <Select 
-                onValueChange={(value) => setValue('dealType', value)} 
-                defaultValue={watch('dealType')}
-              >
-                <SelectTrigger className="mt-1">
+              <Select onValueChange={(value) => setValue('dealType', value)} defaultValue={watch('dealType')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700">
                   <SelectValue placeholder="Select deal type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -486,14 +536,36 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="sm:col-span-2">
-              <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Tags</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
               <Input
-                {...register('tags')}
-                placeholder="e.g., enterprise, software, urgent"
-                className="mt-1"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add a tag"
+                className="bg-gray-50 dark:bg-gray-700"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
               />
+              <Button type="button" variant="outline" onClick={addTag}>
+                Add
+              </Button>
             </div>
           </div>
         </div>
@@ -501,19 +573,19 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         <Separator />
 
         {/* Notes */}
-        <div className="space-y-3 sm:space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            <FileText className="inline h-4 w-4 mr-2" />
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <FileText className="h-4 w-4 mr-2" />
             Notes
           </h4>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="notes" className="text-sm font-medium">Additional Notes</Label>
             <Textarea
               {...register('notes')}
-              placeholder="Any additional information about this deal..."
-              className="mt-1"
               rows={4}
+              placeholder="Additional notes about this deal opportunity..."
+              className="bg-gray-50 dark:bg-gray-700"
             />
           </div>
         </div>
