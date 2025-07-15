@@ -183,23 +183,36 @@ const DealsPage = () => {
     if (editingDeal) {
       // Update existing deal
       setDeals(prev => prev.map(deal => 
-        deal.id === editingDeal.id ? { ...deal, ...dealData } : deal
+        deal.id === editingDeal.id ? { 
+          ...deal, 
+          title: dealData.deal_name,
+          company: dealData.customer,
+          contact: dealData.customer, // You might want to get actual contact name
+          value: dealData.deal_value,
+          stage: dealData.payment_status === 'paid' ? 'closed-won' : 'negotiation' as Deal['stage'],
+          probability: dealData.payment_status === 'paid' ? 100 : 80,
+          closeDate: dealData.sale_date,
+          assignedTo: dealData.sales_rep,
+          source: 'Direct',
+          description: dealData.notes || '',
+          lastActivity: new Date().toISOString().split('T')[0]
+        } : deal
       ));
       toast.success('Deal updated successfully!');
     } else {
       // Add new deal
       const newDeal = {
         id: String(Date.now()),
-        title: dealData.title,
-        company: dealData.company,
-        contact: dealData.contactName,
-        value: dealData.value,
-        stage: dealData.stage.toLowerCase().replace(' ', '-') as Deal['stage'],
-        probability: dealData.probability,
-        closeDate: dealData.expectedCloseDate,
-        assignedTo: dealData.assignedTo,
-        source: dealData.source,
-        description: dealData.description,
+        title: dealData.deal_name,
+        company: dealData.customer,
+        contact: dealData.customer, // You might want to get actual contact name
+        value: dealData.deal_value,
+        stage: dealData.payment_status === 'paid' ? 'closed-won' : 'negotiation' as Deal['stage'],
+        probability: dealData.payment_status === 'paid' ? 100 : 80,
+        closeDate: dealData.sale_date,
+        assignedTo: dealData.sales_rep,
+        source: 'Direct',
+        description: dealData.notes || '',
         lastActivity: new Date().toISOString().split('T')[0]
       };
       setDeals(prev => [...prev, newDeal]);

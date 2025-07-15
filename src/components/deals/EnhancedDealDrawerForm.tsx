@@ -6,35 +6,33 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Deal {
-  id?: string;
-  title: string;
-  description: string;
-  company: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  value: number;
-  stage: string;
-  priority: string;
-  probability: number;
-  expectedCloseDate: string;
-  actualCloseDate?: string;
-  source: string;
-  dealType: string;
-  assignedTo: string;
-  tags: string[];
-  notes: string;
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
+interface DealFormData {
+  deal_type: 'product_sale' | 'service_sale' | 'subscription';
+  deal_name: string;
+  customer: string;
+  deal_value: number;
+  sale_date: string;
+  include_items: boolean;
+  items: Array<{
+    item: string;
+    quantity?: number;
+    unit_price: number;
+  }>;
+  sales_rep: string;
+  payment_status: 'paid' | 'pending' | 'partial';
+  payment_method?: 'cash' | 'card' | 'bank_transfer' | 'check';
+  notes?: string;
+  recurring_amount?: number;
+  billing_cycle?: 'monthly' | 'quarterly' | 'yearly';
+  subscription_start?: string;
+  subscription_end?: string;
 }
 
 interface EnhancedDealDrawerFormProps {
   isOpen: boolean;
-  deal?: Deal | null;
+  deal?: DealFormData | null;
   onClose: () => void;
-  onSave: (data: Deal) => void;
+  onSave: (data: DealFormData) => void;
   isLoading?: boolean;
 }
 
@@ -47,8 +45,8 @@ export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ 
   
   return (
     <div className="relative">
-      <DealDrawerForm {...props} onSave={onSave} customFields={getActiveFields()} />
-      <div className="absolute top-4 right-4">
+      <DealDrawerForm {...props} onSave={onSave} />
+      <div className="absolute top-4 right-4 z-10">
         <Button
           variant="outline"
           size="sm"

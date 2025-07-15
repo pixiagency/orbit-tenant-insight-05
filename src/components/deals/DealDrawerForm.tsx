@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,147 +16,73 @@ import { ContactSearchSelect } from '../shared/ContactSearchSelect';
 import { 
   Target, 
   Building, 
-  Phone, 
-  Mail, 
-  Globe, 
-  MapPin, 
-  Star, 
-  Settings, 
-  Calendar,
-  AlertCircle,
-  CheckCircle,
-  Info,
-  Users,
   DollarSign,
-  TrendingUp,
-  FileText
+  Calendar,
+  Users,
+  CreditCard,
+  FileText,
+  Plus,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { CountrySelect } from '@/components/shared/CountrySelect';
-import { CitySelect } from '@/components/shared/CitySelect';
-import { PhoneInput } from '@/components/shared/PhoneInput';
 
-interface Deal {
-  id?: string;
-  title: string;
-  description: string;
-  company: string;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  value: number;
-  stage: string;
-  priority: string;
-  probability: number;
-  expectedCloseDate: string;
-  actualCloseDate?: string;
-  source: string;
-  dealType: string;
-  assignedTo: string;
-  tags: string[];
-  notes: string;
-  status: string;
-  createdAt?: string;
-  updatedAt?: string;
-  // Address fields
-  address?: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
-  country?: string;
-  website?: string;
-  // Communication preferences
-  emailOptIn?: boolean;
-  phoneOptIn?: boolean;
-  preferredContactMethod?: string;
-  doNotCall?: boolean;
-  // System fields
-  createdDate?: string;
-  modifiedDate?: string;
+interface DealFormData {
+  deal_type: 'product_sale' | 'service_sale' | 'subscription';
+  deal_name: string;
+  customer: string;
+  deal_value: number;
+  sale_date: string;
+  include_items: boolean;
+  items: Array<{
+    item: string;
+    quantity?: number;
+    unit_price: number;
+  }>;
+  sales_rep: string;
+  payment_status: 'paid' | 'pending' | 'partial';
+  payment_method?: 'cash' | 'card' | 'bank_transfer' | 'check';
+  notes?: string;
+  // Subscription-specific fields
+  recurring_amount?: number;
+  billing_cycle?: 'monthly' | 'quarterly' | 'yearly';
+  subscription_start?: string;
+  subscription_end?: string;
 }
 
 interface DealDrawerFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (deal: Deal) => void;
-  deal?: Deal | null;
-  customFields?: CustomField[];
+  onSave: (deal: DealFormData) => void;
+  deal?: DealFormData | null;
 }
 
-interface CustomField {
-  id: string;
-  name: string;
-  label: string;
-  type: 'text' | 'textarea' | 'number' | 'email' | 'phone' | 'date' | 'datetime' | 'select' | 'multiselect' | 'checkbox' | 'radio' | 'file' | 'url' | 'currency' | 'percentage' | 'rating' | 'boolean';
-  required: boolean;
-  placeholder?: string;
-  helpText?: string;
-  defaultValue?: any;
-  options?: string[];
-  validation?: {
-    min?: number;
-    max?: number;
-    pattern?: string;
-    message?: string;
-  };
-  conditionalLogic?: {
-    showWhen: string;
-    equals: any;
-  };
-  section?: string;
-}
-
-// Deal Specification Constants
-const DEAL_STAGES = [
-  'Lead',
-  'Qualified', 
-  'Proposal',
-  'Negotiation',
-  'Decision',
-  'Closed Won',
-  'Closed Lost'
+// Mock data - replace with actual data from your backend
+const CUSTOMERS = [
+  { id: '1', name: 'ABC Corp', type: 'company' },
+  { id: '2', name: 'XYZ Ltd', type: 'company' },
+  { id: '3', name: 'John Smith', type: 'contact' },
 ];
 
-const DEAL_STATUSES = [
-  'Active',
-  'Inactive', 
-  'On Hold'
+const PRODUCTS = [
+  { id: '1', name: 'Website Design', price: 2500 },
+  { id: '2', name: 'Mobile App', price: 5000 },
+  { id: '3', name: 'Logo Design', price: 500 },
 ];
 
-const DEAL_SOURCES = [
-  'Website',
-  'Referral',
-  'Cold Call',
-  'Event',
-  'Social Media',
-  'Advertisement',
-  'Partner',
-  'Direct'
+const SERVICES = [
+  { id: '1', name: 'Consulting Hours', price: 150 },
+  { id: '2', name: 'Marketing Strategy', price: 2000 },
+  { id: '3', name: 'SEO Audit', price: 800 },
 ];
 
-const DEAL_PRIORITIES = [
-  'Low',
-  'Medium',
-  'High',
-  'Urgent'
+const SUBSCRIPTIONS = [
+  { id: '1', name: 'Monthly Maintenance', price: 200 },
+  { id: '2', name: 'Cloud Hosting', price: 50 },
+  { id: '3', name: 'Support Package', price: 300 },
 ];
 
-const DEAL_TYPES = [
-  'New Business',
-  'Existing Business',
-  'Renewal',
-  'Upsell',
-  'Cross-sell'
-];
-
-const PREFERRED_CONTACT_METHODS = [
-  'Email',
-  'Phone',
-  'SMS',
-  'WhatsApp'
-];
-
-const DEAL_OWNERS = [
+const SALES_REPS = [
   'Sarah Johnson', 'Mike Chen', 'Emily Rodriguez', 'David Brown', 'Alex Thompson'
 ];
 
@@ -164,145 +90,98 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   isOpen,
   onClose,
   onSave,
-  deal,
-  customFields = []
+  deal
 }) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
-  const [selectedContactId, setSelectedContactId] = useState<string>('');
+  const [selectedCustomer, setSelectedCustomer] = useState<string>('');
+  const [items, setItems] = useState<Array<{ item: string; quantity?: number; unit_price: number }>>([]);
 
-  const form = useForm<Deal>({
+  const form = useForm<DealFormData>({
     defaultValues: {
-      title: '',
-      description: '',
-      company: '',
-      contactName: '',
-      contactEmail: '',
-      contactPhone: '',
-      value: 0,
-      stage: 'Lead',
-      priority: 'Medium',
-      probability: 10,
-      expectedCloseDate: '',
-      actualCloseDate: '',
-      source: 'Website',
-      dealType: 'New Business',
-      assignedTo: '',
-      tags: [],
+      deal_type: 'product_sale',
+      deal_name: '',
+      customer: '',
+      deal_value: 0,
+      sale_date: new Date().toISOString().split('T')[0],
+      include_items: false,
+      items: [],
+      sales_rep: '',
+      payment_status: 'pending',
+      payment_method: undefined,
       notes: '',
-      status: 'Active',
-      address: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: '',
-      website: '',
-      emailOptIn: true,
-      phoneOptIn: true,
-      preferredContactMethod: 'Email',
-      doNotCall: false,
-      createdDate: new Date().toISOString().split('T')[0],
-      modifiedDate: new Date().toISOString().split('T')[0]
+      recurring_amount: 0,
+      billing_cycle: 'monthly',
+      subscription_start: '',
+      subscription_end: ''
     }
   });
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = form;
 
-  const selectedStage = watch('stage');
-
-  // Auto-update probability based on stage
-  const updateProbabilityByStage = (stage: string) => {
-    const probabilities: { [key: string]: number } = {
-      'Lead': 10,
-      'Qualified': 25,
-      'Proposal': 50,
-      'Negotiation': 75,
-      'Decision': 90,
-      'Closed Won': 100,
-      'Closed Lost': 0
-    };
-    setValue('probability', probabilities[stage] || 10);
-  };
-
-  useEffect(() => {
-    updateProbabilityByStage(selectedStage);
-  }, [selectedStage, setValue]);
+  const dealType = watch('deal_type');
+  const includeItems = watch('include_items');
+  const customerValue = watch('customer');
 
   useEffect(() => {
     if (deal) {
       reset(deal);
-      setTags(deal.tags || []);
+      setItems(deal.items || []);
     } else {
       reset({
-        title: '',
-        description: '',
-        company: '',
-        contactName: '',
-        contactEmail: '',
-        contactPhone: '',
-        value: 0,
-        stage: 'Lead',
-        priority: 'Medium',
-        probability: 10,
-        expectedCloseDate: '',
-        actualCloseDate: '',
-        source: 'Website',
-        dealType: 'New Business',
-        assignedTo: '',
-        tags: [],
+        deal_type: 'product_sale',
+        deal_name: '',
+        customer: '',
+        deal_value: 0,
+        sale_date: new Date().toISOString().split('T')[0],
+        include_items: false,
+        items: [],
+        sales_rep: '',
+        payment_status: 'pending',
+        payment_method: undefined,
         notes: '',
-        status: 'Active',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
-        website: '',
-        emailOptIn: true,
-        phoneOptIn: true,
-        preferredContactMethod: 'Email',
-        doNotCall: false,
-        createdDate: new Date().toISOString().split('T')[0],
-        modifiedDate: new Date().toISOString().split('T')[0]
+        recurring_amount: 0,
+        billing_cycle: 'monthly',
+        subscription_start: '',
+        subscription_end: ''
       });
-      setTags([]);
+      setItems([]);
     }
   }, [deal, reset, isOpen]);
 
-  // Custom validation logic
-  const validateForm = (data: Deal): string[] => {
+  // Auto-generate deal name based on customer selection
+  useEffect(() => {
+    if (customerValue && !deal) {
+      const customer = CUSTOMERS.find(c => c.id === customerValue);
+      if (customer) {
+        const dealTypeText = dealType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        setValue('deal_name', `${dealTypeText} for ${customer.name}`);
+      }
+    }
+  }, [customerValue, dealType, setValue, deal]);
+
+  const validateForm = (data: DealFormData): string[] => {
     const errors: string[] = [];
     
-    // Title is always required
-    if (!data.title?.trim()) {
-      errors.push('Deal title is required');
-    }
+    if (!data.deal_type) errors.push('Deal type is required');
+    if (!data.deal_name?.trim()) errors.push('Deal name is required');
+    if (!data.customer) errors.push('Customer is required');
+    if (!data.deal_value || data.deal_value <= 0) errors.push('Deal value must be greater than 0');
+    if (!data.sale_date) errors.push('Sale date is required');
+    if (!data.sales_rep) errors.push('Sales representative is required');
+    if (!data.payment_status) errors.push('Payment status is required');
     
-    // Company is required
-    if (!data.company?.trim()) {
-      errors.push('Company name is required');
-    }
-    
-    // Contact name is required
-    if (!data.contactName?.trim()) {
-      errors.push('Contact name is required');
-    }
-    
-    // Email validation
-    if (data.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
-      errors.push('Please enter a valid email address');
-    }
-    
-    // Value must be greater than 0
-    if (!data.value || data.value <= 0) {
-      errors.push('Deal value must be greater than 0');
+    if (data.deal_type === 'subscription') {
+      if (!data.recurring_amount || data.recurring_amount <= 0) {
+        errors.push('Recurring amount is required for subscriptions');
+      }
+      if (!data.billing_cycle) errors.push('Billing cycle is required for subscriptions');
+      if (!data.subscription_start) errors.push('Subscription start date is required');
     }
     
     return errors;
   };
 
-  const onFormSubmit = (data: Deal) => {
+  const onFormSubmit = (data: DealFormData) => {
     const validationErrors = validateForm(data);
     
     if (validationErrors.length > 0) {
@@ -312,31 +191,33 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     }
     
     setValidationErrors([]);
-    data.tags = tags;
-    data.modifiedDate = new Date().toISOString().split('T')[0];
+    data.items = items;
     
     onSave(data);
     toast.success(deal ? 'Deal updated successfully!' : 'Deal created successfully!');
     onClose();
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags([...tags, newTag.trim()]);
-      setNewTag('');
-    }
+  const addItem = () => {
+    setItems([...items, { item: '', quantity: dealType === 'product_sale' ? 1 : undefined, unit_price: 0 }]);
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+  const removeItem = (index: number) => {
+    setItems(items.filter((_, i) => i !== index));
   };
 
-  const handleContactSelect = (contactId: string, contact: any) => {
-    setSelectedContactId(contactId);
-    if (contact.firstName) {
-      setValue('contactName', `${contact.firstName} ${contact.lastName}`);
-      setValue('contactEmail', contact.email);
-      setValue('company', contact.company || '');
+  const updateItem = (index: number, field: string, value: any) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setItems(newItems);
+  };
+
+  const getAvailableItems = () => {
+    switch (dealType) {
+      case 'product_sale': return PRODUCTS;
+      case 'service_sale': return SERVICES;
+      case 'subscription': return SUBSCRIPTIONS;
+      default: return [];
     }
   };
 
@@ -364,129 +245,79 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
           </Alert>
         )}
 
-        {/* Basic Deal Information */}
+        {/* Deal Type */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
             <Target className="h-4 w-4 mr-2" />
-            Basic Deal Information
+            Deal Type
           </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">
-                Deal Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                {...register('title', { required: true })}
-                placeholder="Enterprise Software License - Q4 2024"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
+          <RadioGroup
+            value={watch('deal_type')}
+            onValueChange={(value) => setValue('deal_type', value as any)}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <div className="flex items-center space-x-2 p-3 border rounded-lg">
+              <RadioGroupItem value="product_sale" id="product_sale" />
+              <Label htmlFor="product_sale" className="cursor-pointer font-medium">Product Sale</Label>
             </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">Description</Label>
-              <Textarea
-                {...register('description')}
-                rows={3}
-                placeholder="Brief description of the deal opportunity..."
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
+            <div className="flex items-center space-x-2 p-3 border rounded-lg">
+              <RadioGroupItem value="service_sale" id="service_sale" />
+              <Label htmlFor="service_sale" className="cursor-pointer font-medium">Service Sale</Label>
             </div>
-          </div>
+            <div className="flex items-center space-x-2 p-3 border rounded-lg">
+              <RadioGroupItem value="subscription" id="subscription" />
+              <Label htmlFor="subscription" className="cursor-pointer font-medium">Subscription</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <Separator />
 
-        {/* Company & Contact Information */}
+        {/* Basic Information */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
             <Building className="h-4 w-4 mr-2" />
-            Company & Contact Information
-          </h4>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Search Existing Contact</Label>
-              <ContactSearchSelect
-                value={selectedContactId}
-                onValueChange={handleContactSelect}
-                placeholder="Search for existing contact..."
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company" className="text-sm font-medium">
-                  Company <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  {...register('company', { required: true })}
-                  placeholder="TechCorp Inc."
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactName" className="text-sm font-medium">
-                  Contact Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  {...register('contactName', { required: true })}
-                  placeholder="John Smith"
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail" className="text-sm font-medium">Contact Email</Label>
-                <Input
-                  {...register('contactEmail')}
-                  type="email"
-                  placeholder="john@techcorp.com"
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactPhone" className="text-sm font-medium">Contact Phone</Label>
-                <PhoneInput
-                  value={watch('contactPhone') || ''}
-                  onChange={(value) => setValue('contactPhone', value)}
-                  placeholder="Enter contact phone"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="website" className="text-sm font-medium">Website</Label>
-                <Input
-                  {...register('website')}
-                  type="url"
-                  placeholder="https://company.com"
-                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Deal Value & Stage */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Deal Value & Stage
+            Basic Information
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="value" className="text-sm font-medium">
+              <Label htmlFor="deal_name" className="text-sm font-medium">
+                Deal Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                {...register('deal_name', { required: true })}
+                placeholder="Website Design for ABC Corp"
+                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Customer <span className="text-red-500">*</span>
+              </Label>
+              <Select onValueChange={(value) => setValue('customer', value)} value={watch('customer')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CUSTOMERS.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name} ({customer.type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="deal_value" className="text-sm font-medium">
                 Deal Value <span className="text-red-500">*</span>
               </Label>
               <Input
-                {...register('value', { required: true, valueAsNumber: true })}
+                {...register('deal_value', { required: true, valueAsNumber: true })}
                 type="number"
-                placeholder="50000"
+                placeholder="5000"
                 min="0"
                 step="0.01"
                 className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
@@ -494,356 +325,256 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="stage" className="text-sm font-medium">Stage</Label>
-              <Select onValueChange={(value) => setValue('stage', value)} defaultValue={watch('stage')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select stage" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_STAGES.map((stage) => (
-                    <SelectItem key={stage} value={stage}>
-                      {stage}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="probability" className="text-sm font-medium">Probability (%)</Label>
+              <Label htmlFor="sale_date" className="text-sm font-medium">
+                Sale Date <span className="text-red-500">*</span>
+              </Label>
               <Input
-                {...register('probability', { valueAsNumber: true })}
-                type="number"
-                min="0"
-                max="100"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                readOnly
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="priority" className="text-sm font-medium">Priority</Label>
-              <Select onValueChange={(value) => setValue('priority', value)} defaultValue={watch('priority')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_PRIORITIES.map((priority) => (
-                    <SelectItem key={priority} value={priority}>
-                      <Badge variant={priority === 'Urgent' ? 'destructive' : priority === 'High' ? 'default' : 'secondary'}>
-                        {priority}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Deal Status & Classification */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Star className="h-4 w-4 mr-2" />
-            Deal Status & Classification
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="status" className="text-sm font-medium">Deal Status</Label>
-              <Select onValueChange={(value) => setValue('status', value)} defaultValue={watch('status')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_STATUSES.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      <Badge variant={status === 'Active' ? 'default' : status === 'Inactive' ? 'secondary' : 'destructive'}>
-                        {status}
-                      </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="source" className="text-sm font-medium">Deal Source</Label>
-              <Select onValueChange={(value) => setValue('source', value)} defaultValue={watch('source')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select source" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_SOURCES.map((source) => (
-                    <SelectItem key={source} value={source}>
-                      {source}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dealType" className="text-sm font-medium">Deal Type</Label>
-              <Select onValueChange={(value) => setValue('dealType', value)} defaultValue={watch('dealType')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select deal type" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Communication Preferences */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Mail className="h-4 w-4 mr-2" />
-            Communication Preferences
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="preferredContactMethod" className="text-sm font-medium">Preferred Contact Method</Label>
-              <Select onValueChange={(value) => setValue('preferredContactMethod', value)} defaultValue={watch('preferredContactMethod')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Select method" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {PREFERRED_CONTACT_METHODS.map((method) => (
-                    <SelectItem key={method} value={method}>
-                      {method}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Communication Permissions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-green-700 dark:text-green-400">Email Permissions</Label>
-              <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <Checkbox
-                  checked={watch('emailOptIn')}
-                  onCheckedChange={(checked) => setValue('emailOptIn', checked as boolean)}
-                />
-                <Label className="text-sm cursor-pointer">Permission to send emails</Label>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-blue-700 dark:text-blue-400">Phone Permissions</Label>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <Checkbox
-                    checked={watch('phoneOptIn')}
-                    onCheckedChange={(checked) => setValue('phoneOptIn', checked as boolean)}
-                  />
-                  <Label className="text-sm cursor-pointer">Permission to call</Label>
-                </div>
-                <div className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                  <Checkbox
-                    checked={watch('doNotCall')}
-                    onCheckedChange={(checked) => setValue('doNotCall', checked as boolean)}
-                  />
-                  <Label className="text-sm cursor-pointer text-red-700 dark:text-red-400">Do Not Call (Legal flag)</Label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Timeline & Assignment */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Calendar className="h-4 w-4 mr-2" />
-            Timeline & Assignment
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="expectedCloseDate" className="text-sm font-medium">Expected Close Date</Label>
-              <Input
-                {...register('expectedCloseDate')}
+                {...register('sale_date', { required: true })}
                 type="date"
                 className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
               />
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="actualCloseDate" className="text-sm font-medium">Actual Close Date</Label>
-              <Input
-                {...register('actualCloseDate')}
-                type="date"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
+        {/* Subscription-specific fields */}
+        {dealType === 'subscription' && (
+          <>
+            <Separator />
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Subscription Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="recurring_amount" className="text-sm font-medium">
+                    Recurring Amount <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    {...register('recurring_amount', { valueAsNumber: true })}
+                    type="number"
+                    placeholder="200"
+                    min="0"
+                    step="0.01"
+                    className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    Billing Cycle <span className="text-red-500">*</span>
+                  </Label>
+                  <Select onValueChange={(value) => setValue('billing_cycle', value as any)} value={watch('billing_cycle')}>
+                    <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                      <SelectValue placeholder="Select billing cycle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subscription_start" className="text-sm font-medium">
+                    Subscription Start <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    {...register('subscription_start')}
+                    type="date"
+                    className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subscription_end" className="text-sm font-medium">Subscription End</Label>
+                  <Input
+                    {...register('subscription_end')}
+                    type="date"
+                    className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                  />
+                </div>
+              </div>
             </div>
+          </>
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="assignedTo" className="text-sm font-medium">Assigned To</Label>
-              <Select onValueChange={(value) => setValue('assignedTo', value)} defaultValue={watch('assignedTo')}>
-                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <SelectValue placeholder="Assign to sales rep" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800">
-                  {DEAL_OWNERS.map((owner) => (
-                    <SelectItem key={owner} value={owner}>
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4" />
-                        <span>{owner}</span>
+        <Separator />
+
+        {/* Products/Services */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              checked={includeItems}
+              onCheckedChange={(checked) => setValue('include_items', checked as boolean)}
+            />
+            <Label className="text-sm font-medium">Include Items</Label>
+          </div>
+
+          {includeItems && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-medium">Items</h5>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </div>
+
+              {items.map((item, index) => (
+                <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Item {index + 1}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeItem(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Item</Label>
+                      <Select 
+                        onValueChange={(value) => {
+                          const selectedItem = getAvailableItems().find(i => i.id === value);
+                          updateItem(index, 'item', value);
+                          if (selectedItem) {
+                            updateItem(index, 'unit_price', selectedItem.price);
+                          }
+                        }} 
+                        value={item.item}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getAvailableItems().map((availableItem) => (
+                            <SelectItem key={availableItem.id} value={availableItem.id}>
+                              {availableItem.name} - ${availableItem.price}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {dealType === 'product_sale' && (
+                      <div className="space-y-2">
+                        <Label className="text-sm">Quantity</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.quantity || 1}
+                          onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value))}
+                        />
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+                    )}
 
-        <Separator />
-
-        {/* Address Information */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <MapPin className="h-4 w-4 mr-2" />
-            Address Information
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="address" className="text-sm font-medium">Street Address</Label>
-              <Input
-                {...register('address')}
-                placeholder="123 Main Street"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country" className="text-sm font-medium">Country</Label>
-              <CountrySelect
-                value={watch('country')}
-                onValueChange={(val) => setValue('country', val)}
-                placeholder="Select country"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city" className="text-sm font-medium">City</Label>
-              <CitySelect
-                value={watch('city')}
-                onValueChange={(val) => setValue('city', val)}
-                country={watch('country')}
-                placeholder="Select city"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state" className="text-sm font-medium">State/Province</Label>
-              <Input
-                {...register('state')}
-                placeholder="NY"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="zipCode" className="text-sm font-medium">ZIP/Postal Code</Label>
-              <Input
-                {...register('zipCode')}
-                placeholder="10001"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-              />
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* System Fields */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Settings className="h-4 w-4 mr-2" />
-            System Fields
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs text-gray-500">Created Date</Label>
-                  <div className="text-sm font-medium">{watch('createdDate')}</div>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Unit Price</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.unit_price}
+                        onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value))}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-gray-500">Modified Date</Label>
-                  <div className="text-sm font-medium">{watch('modifiedDate')}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Additional Information */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
-            <Info className="h-4 w-4 mr-2" />
-            Additional Information
-          </h4>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Tags</Label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="ml-1 text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </Badge>
               ))}
             </div>
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add a tag"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              />
-              <Button type="button" variant="outline" onClick={addTag}>
-                Add
-              </Button>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Assignment */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Users className="h-4 w-4 mr-2" />
+            Assignment
+          </h4>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">
+              Sales Representative <span className="text-red-500">*</span>
+            </Label>
+            <Select onValueChange={(value) => setValue('sales_rep', value)} value={watch('sales_rep')}>
+              <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                <SelectValue placeholder="Select sales rep" />
+              </SelectTrigger>
+              <SelectContent>
+                {SALES_REPS.map((rep) => (
+                  <SelectItem key={rep} value={rep}>
+                    {rep}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Payment & Status */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <CreditCard className="h-4 w-4 mr-2" />
+            Payment & Status
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">
+                Payment Status <span className="text-red-500">*</span>
+              </Label>
+              <RadioGroup
+                value={watch('payment_status')}
+                onValueChange={(value) => setValue('payment_status', value as any)}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="paid" id="paid" />
+                  <Label htmlFor="paid">Paid</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="pending" id="pending" />
+                  <Label htmlFor="pending">Pending</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="partial" id="partial" />
+                  <Label htmlFor="partial">Partial</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Payment Method</Label>
+              <Select onValueChange={(value) => setValue('payment_method', value as any)} value={watch('payment_method')}>
+                <SelectTrigger className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="card">Card</SelectItem>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="check">Check</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-sm font-medium">Notes</Label>
             <Textarea
               {...register('notes')}
-              rows={4}
-              placeholder="Additional notes about this deal opportunity..."
+              rows={3}
+              placeholder="Additional notes about this deal..."
               className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
             />
           </div>
