@@ -24,7 +24,9 @@ import {
   Plus,
   Trash2,
   AlertCircle,
-  Calculator
+  Calculator,
+  Percent,
+  Receipt
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -43,6 +45,15 @@ interface DealFormData {
   sales_rep: string;
   payment_status: 'paid' | 'pending' | 'partial';
   payment_method?: 'cash' | 'card' | 'bank_transfer' | 'check';
+  partial_amount?: number;
+  due_amount?: number;
+  discount_type?: 'percentage' | 'fixed';
+  discount_value?: number;
+  tax_rate?: number;
+  subtotal?: number;
+  discount_amount?: number;
+  tax_amount?: number;
+  final_total?: number;
   notes?: string;
   // Subscription-specific fields
   recurring_amount?: number;
@@ -109,6 +120,15 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
       sales_rep: '',
       payment_status: 'pending',
       payment_method: undefined,
+      partial_amount: 0,
+      due_amount: 0,
+      discount_type: 'percentage',
+      discount_value: 0,
+      tax_rate: 0,
+      subtotal: 0,
+      discount_amount: 0,
+      tax_amount: 0,
+      final_total: 0,
       notes: '',
       recurring_amount: 0,
       billing_cycle: 'monthly',
@@ -122,11 +142,16 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   const dealType = watch('deal_type');
   const includeItems = watch('include_items');
   const customerValue = watch('customer');
+  const paymentStatus = watch('payment_status');
+  const discountType = watch('discount_type');
+  const discountValue = watch('discount_value') || 0;
+  const taxRate = watch('tax_rate') || 0;
+  const partialAmount = watch('partial_amount') || 0;
 
-  // Calculate total deal value based on items
-  const calculateDealValue = () => {
+  // Calculate subtotal from items
+  const calculateSubtotal = () => {
     if (!includeItems || items.length === 0) {
-      return 0;
+      return watch('deal_value') || 0;
     }
 
     return items.reduce((total, item) => {
@@ -135,13 +160,52 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     }, 0);
   };
 
-  // Auto-update deal value when items change
-  useEffect(() => {
-    if (includeItems && items.length > 0) {
-      const calculatedValue = calculateDealValue();
-      setValue('deal_value', calculatedValue);
+  // Calculate discount amount
+  const calculateDiscountAmount = (subtotal: number) => {
+    if (!discountValue) return 0;
+    
+    if (discountType === 'percentage') {
+      return (subtotal * discountValue) / 100;
+    } else {
+      return Math.min(discountValue, subtotal); // Fixed amount, but not more than subtotal
     }
-  }, [items, includeItems, dealType, setValue]);
+  };
+
+  // Calculate final totals
+  const calculateTotals = () => {
+    const subtotal = calculateSubtotal();
+    const discountAmount = calculateDiscountAmount(subtotal);
+    const afterDiscount = subtotal - discountAmount;
+    const taxAmount = (afterDiscount * taxRate) / 100;
+    const finalTotal = afterDiscount + taxAmount;
+    
+    return {
+      subtotal,
+      discountAmount,
+      taxAmount,
+      finalTotal
+    };
+  };
+
+  // Auto-update calculations when items or values change
+  useEffect(() => {
+    const { subtotal, discountAmount, taxAmount, finalTotal } = calculateTotals();
+    
+    setValue('subtotal', subtotal);
+    setValue('discount_amount', discountAmount);
+    setValue('tax_amount', taxAmount);
+    setValue('final_total', finalTotal);
+    setValue('deal_value', finalTotal);
+
+    // Calculate due amount based on payment status
+    if (paymentStatus === 'pending') {
+      setValue('due_amount', finalTotal);
+    } else if (paymentStatus === 'partial') {
+      setValue('due_amount', Math.max(0, finalTotal - partialAmount));
+    } else if (paymentStatus === 'paid') {
+      setValue('due_amount', 0);
+    }
+  }, [items, includeItems, dealType, discountType, discountValue, taxRate, paymentStatus, partialAmount, setValue]);
 
   useEffect(() => {
     if (deal) {
@@ -159,6 +223,15 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         sales_rep: '',
         payment_status: 'pending',
         payment_method: undefined,
+        partial_amount: 0,
+        due_amount: 0,
+        discount_type: 'percentage',
+        discount_value: 0,
+        tax_rate: 0,
+        subtotal: 0,
+        discount_amount: 0,
+        tax_amount: 0,
+        final_total: 0,
         notes: '',
         recurring_amount: 0,
         billing_cycle: 'monthly',
@@ -190,6 +263,15 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     if (!data.sale_date) errors.push('Sale date is required');
     if (!data.sales_rep) errors.push('Sales representative is required');
     if (!data.payment_status) errors.push('Payment status is required');
+    
+    if (data.payment_status === 'partial') {
+      if (!data.partial_amount || data.partial_amount <= 0) {
+        errors.push('Partial amount is required when payment status is partial');
+      }
+      if (data.partial_amount && data.final_total && data.partial_amount >= data.final_total) {
+        errors.push('Partial amount cannot be greater than or equal to total amount');
+      }
+    }
     
     if (data.deal_type === 'subscription') {
       if (!data.recurring_amount || data.recurring_amount <= 0) {
@@ -241,6 +323,8 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
       default: return [];
     }
   };
+
+  const totals = calculateTotals();
 
   return (
     <DrawerForm
@@ -329,30 +413,6 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="deal_value" className="text-sm font-medium flex items-center">
-                Deal Value <span className="text-red-500">*</span>
-                {includeItems && items.length > 0 && (
-                  <Badge variant="outline" className="ml-2 text-xs">
-                    <Calculator className="h-3 w-3 mr-1" />
-                    Auto-calculated
-                  </Badge>
-                )}
-              </Label>
-              <Input
-                {...register('deal_value', { required: true, valueAsNumber: true })}
-                type="number"
-                placeholder="5000"
-                min="0"
-                step="0.01"
-                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                readOnly={includeItems && items.length > 0}
-              />
-              {includeItems && items.length > 0 && (
-                <p className="text-xs text-gray-500">Value is automatically calculated from items below</p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -525,18 +585,96 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
                   </div>
                 </div>
               ))}
-
-              {/* Show grand total */}
-              {items.length > 0 && (
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Total Deal Value:</span>
-                    <span className="text-lg font-bold">${calculateDealValue().toFixed(2)}</span>
-                  </div>
-                </div>
-              )}
             </div>
           )}
+        </div>
+
+        <Separator />
+
+        {/* Tax & Discount */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Receipt className="h-4 w-4 mr-2" />
+            Tax & Discount
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Label className="text-sm font-medium">Discount Type</Label>
+              </div>
+              <RadioGroup
+                value={watch('discount_type')}
+                onValueChange={(value) => setValue('discount_type', value as any)}
+                className="flex space-x-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="percentage" id="percentage" />
+                  <Label htmlFor="percentage">%</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="fixed" id="fixed" />
+                  <Label htmlFor="fixed">Fixed</Label>
+                </div>
+              </RadioGroup>
+              <Input
+                {...register('discount_value', { valueAsNumber: true })}
+                type="number"
+                placeholder={discountType === 'percentage' ? '0' : '0.00'}
+                min="0"
+                max={discountType === 'percentage' ? '100' : undefined}
+                step="0.01"
+                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tax_rate" className="text-sm font-medium">Tax Rate (%)</Label>
+              <Input
+                {...register('tax_rate', { valueAsNumber: true })}
+                type="number"
+                placeholder="0"
+                min="0"
+                max="100"
+                step="0.01"
+                className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+              />
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Deal Summary */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+            <Calculator className="h-4 w-4 mr-2" />
+            Deal Summary
+          </h4>
+
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Subtotal:</span>
+              <span className="text-sm font-medium">${totals.subtotal.toFixed(2)}</span>
+            </div>
+            {totals.discountAmount > 0 && (
+              <div className="flex justify-between items-center text-green-600">
+                <span className="text-sm">Discount:</span>
+                <span className="text-sm font-medium">-${totals.discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            {totals.taxAmount > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Tax:</span>
+                <span className="text-sm font-medium">${totals.taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Total:</span>
+              <span className="text-lg font-bold">${totals.finalTotal.toFixed(2)}</span>
+            </div>
+          </div>
         </div>
 
         <Separator />
@@ -616,6 +754,44 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
               </Select>
             </div>
           </div>
+
+          {/* Partial Payment Fields */}
+          {paymentStatus === 'partial' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <div className="space-y-2">
+                <Label htmlFor="partial_amount" className="text-sm font-medium">
+                  Amount Paid <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  {...register('partial_amount', { valueAsNumber: true })}
+                  type="number"
+                  placeholder="0.00"
+                  min="0"
+                  max={totals.finalTotal}
+                  step="0.01"
+                  className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Amount Due</Label>
+                <Input
+                  value={`$${Math.max(0, totals.finalTotal - partialAmount).toFixed(2)}`}
+                  readOnly
+                  className="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Pending Payment Info */}
+          {paymentStatus === 'pending' && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Total Amount Due:</span>
+                <span className="text-lg font-bold text-blue-800 dark:text-blue-200">${totals.finalTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes" className="text-sm font-medium">Notes</Label>

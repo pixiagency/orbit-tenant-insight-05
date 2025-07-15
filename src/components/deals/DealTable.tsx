@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,9 @@ interface Deal {
   source: string;
   description: string;
   lastActivity: string;
+  payment_status?: 'paid' | 'pending' | 'partial';
+  partial_amount?: number;
+  due_amount?: number;
 }
 
 interface DealTableProps {
@@ -61,6 +65,19 @@ const getStageColor = (stage: string): string => {
   }
 };
 
+const getPaymentStatusColor = (status: string): string => {
+  switch (status) {
+    case 'paid':
+      return 'bg-green-100 text-green-800';
+    case 'pending':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'partial':
+      return 'bg-orange-100 text-orange-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 export const DealTable: React.FC<DealTableProps> = ({
   deals,
   onEdit,
@@ -83,6 +100,7 @@ export const DealTable: React.FC<DealTableProps> = ({
           <TableHead>Company</TableHead>
           <TableHead>Value</TableHead>
           <TableHead>Stage</TableHead>
+          <TableHead>Payment Status</TableHead>
           <TableHead>Close Date</TableHead>
           <TableHead>Assigned To</TableHead>
         </TableRow>
@@ -128,11 +146,35 @@ export const DealTable: React.FC<DealTableProps> = ({
               </div>
             </TableCell>
             <TableCell>{deal.company}</TableCell>
-            <TableCell>${deal.value.toLocaleString()}</TableCell>
+            <TableCell>
+              <div className="space-y-1">
+                <div>${deal.value.toLocaleString()}</div>
+                {deal.payment_status === 'partial' && deal.due_amount && (
+                  <div className="text-xs text-orange-600">
+                    Due: ${deal.due_amount.toLocaleString()}
+                  </div>
+                )}
+                {deal.payment_status === 'pending' && (
+                  <div className="text-xs text-yellow-600">
+                    Due: ${deal.value.toLocaleString()}
+                  </div>
+                )}
+              </div>
+            </TableCell>
             <TableCell>
               <Badge variant="secondary" className={getStageColor(deal.stage)}>
                 {deal.stage}
               </Badge>
+            </TableCell>
+            <TableCell>
+              {deal.payment_status && (
+                <Badge variant="secondary" className={getPaymentStatusColor(deal.payment_status)}>
+                  {deal.payment_status === 'partial' && deal.partial_amount 
+                    ? `Partial ($${deal.partial_amount.toLocaleString()})`
+                    : deal.payment_status.charAt(0).toUpperCase() + deal.payment_status.slice(1)
+                  }
+                </Badge>
+              )}
             </TableCell>
             <TableCell>{deal.closeDate}</TableCell>
             <TableCell>{deal.assignedTo}</TableCell>
