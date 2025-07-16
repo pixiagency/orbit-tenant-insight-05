@@ -75,7 +75,6 @@ const adminMenuItems: MenuItem[] = [
   { title: 'Ads AI', url: '/admin/ads-ai', icon: Zap },
   { title: 'Automation', url: '/admin/automation', icon: Workflow },
   { title: 'Forms', url: '/admin/forms', icon: FormInput },
-  { title: 'Products / Services', url: '/admin/products', icon: Package },
   { title: 'PR / SR', url: '/admin/pr-sr', icon: Megaphone },
   { title: 'AI Assistant', url: '/admin/ai-assistant', icon: Bot },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
