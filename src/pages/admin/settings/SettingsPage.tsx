@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { GeneralSettingsPage } from './GeneralSettingsPage';
 import { UserRoleManagementPage } from './UserRoleManagementPage';
 import { TeamsManagementPage } from './TeamsManagementPage';
+import { ContactSettingsPage } from './ContactSettingsPage';
 import { CustomFieldsPage } from './CustomFieldsPage';
 import { PipelinesPage } from './PipelinesPage';
 import { ClockInOutPage } from './ClockInOutPage';
@@ -13,6 +15,7 @@ import { FormsPage } from './FormsPage';
 import { ReportingAIPage } from './ReportingAIPage';
 import { AIModulePage } from './AIModulePage';
 import { CallLogsSettingsPage } from './CallLogsSettingsPage';
+import { MapsLocationPage } from './MapsLocationPage';
 
 export const SettingsPage: React.FC = () => {
   return (
@@ -22,9 +25,11 @@ export const SettingsPage: React.FC = () => {
         <Route path="/general" element={<GeneralSettingsPage />} />
         <Route path="/users" element={<UserRoleManagementPage />} />
         <Route path="/teams" element={<TeamsManagementPage />} />
+        <Route path="/contacts" element={<ContactSettingsPage />} />
         <Route path="/fields" element={<CustomFieldsPage />} />
         <Route path="/pipelines" element={<PipelinesPage />} />
         <Route path="/clock" element={<ClockInOutPage />} />
+        <Route path="/maps" element={<MapsLocationPage />} />
         <Route path="/integrations" element={<IntegrationsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/automation" element={<AutomationPage />} />

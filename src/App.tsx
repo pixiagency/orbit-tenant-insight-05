@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -40,7 +41,6 @@ import { FormsPage } from "./pages/admin/FormsPage";
 import { AIAssistantPage } from "./pages/admin/AIAssistantPage";
 import { ReportsPage } from "./pages/admin/ReportsPage";
 import { NotificationsPage } from "./pages/admin/NotificationsPage";
-import { ProductsPage } from "./pages/admin/ProductsPage";
 import { PRSRPage } from "./pages/admin/PRSRPage";
 import Index from "./pages/Index";
 
@@ -138,7 +138,6 @@ const App = () => {
                           <Route path="ai-assistant" element={<AIAssistantPage />} />
                           <Route path="reports" element={<ReportsPage />} />
                           <Route path="notifications" element={<NotificationsPage />} />
-                          <Route path="products" element={<ProductsPage />} />
                           <Route path="pr-sr" element={<PRSRPage />} />
                           <Route path="settings/*" element={<SettingsPage />} />
                         </Routes>

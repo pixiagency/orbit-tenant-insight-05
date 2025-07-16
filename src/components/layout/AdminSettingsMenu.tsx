@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
@@ -15,13 +16,15 @@ import {
   BarChart3,
   Phone,
   MapPin,
-  Brain
+  Brain,
+  UserCheck
 } from 'lucide-react';
 
 const settingsItems = [
   { title: 'General Settings', url: '/admin/settings/general', icon: Settings },
   { title: 'Users & Roles', url: '/admin/settings/users', icon: Users },
   { title: 'Teams Management', url: '/admin/settings/teams', icon: UsersRound },
+  { title: 'Contact Settings', url: '/admin/settings/contacts', icon: UserCheck },
   { title: 'Custom Fields', url: '/admin/settings/fields', icon: FormInput },
   { title: 'Pipelines', url: '/admin/settings/pipelines', icon: Share2 },
   { title: 'Clock-in/Clock-out', url: '/admin/settings/clock', icon: Clock },
