@@ -2,9 +2,6 @@
 import React from 'react';
 import { DealDrawerForm } from './DealDrawerForm';
 import { useCustomFields } from '../../hooks/useCustomFields';
-import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
-import { toast } from 'sonner';
 
 interface DealFormData {
   deal_type: 'product_sale' | 'service_sale' | 'subscription';
@@ -39,23 +36,7 @@ interface EnhancedDealDrawerFormProps {
 export const EnhancedDealDrawerForm: React.FC<EnhancedDealDrawerFormProps> = ({ onSave, ...props }) => {
   const { getActiveFields } = useCustomFields();
   
-  const handleCustomFieldsClick = () => {
-    toast.info('Navigate to Settings > Custom Fields to manage deal fields');
-  };
-  
   return (
-    <div className="relative">
-      <DealDrawerForm {...props} onSave={onSave} />
-      <div className="absolute top-4 right-4 z-10">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCustomFieldsClick}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          Manage Custom Fields
-        </Button>
-      </div>
-    </div>
+    <DealDrawerForm {...props} onSave={onSave} />
   );
 };
