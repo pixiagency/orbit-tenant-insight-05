@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, User, Building2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -150,7 +151,10 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         city: opportunity.city || '',
         pipeline: opportunity.pipeline || 'sales',
         notes: opportunity.notes || '',
-        products: opportunity.products || []
+        products: opportunity.products || [],
+        status: opportunity.status || 'active',
+        lossReason: opportunity.lossReason || '',
+        lossDescription: opportunity.lossDescription || ''
       });
       setProducts(opportunity.products || [{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
     } else {
@@ -179,7 +183,10 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         city: '',
         pipeline: 'sales',
         notes: '',
-        products: []
+        products: [],
+        status: 'active',
+        lossReason: '',
+        lossDescription: ''
       });
       setProducts([{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
     }
