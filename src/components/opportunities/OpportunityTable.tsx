@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -26,7 +27,9 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck } from 'lucide-react';
+import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
+import { OpportunityStatusDialog } from './OpportunityStatusDialog';
 
 interface Opportunity {
   id: string;
@@ -49,6 +52,13 @@ interface Opportunity {
   painPoints?: string;
   proposalSent?: boolean;
   contractSent?: boolean;
+  status?: 'active' | 'abandon' | 'won' | 'lost';
+  activities?: Array<{
+    type: 'whatsapp' | 'email' | 'call' | 'activity';
+    title: string;
+    timestamp: string;
+    count: number;
+  }>;
   createdAt: string;
   lastActivity: string;
 }
@@ -87,6 +97,21 @@ const getStageColor = (stage: string) => {
   }
 };
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active':
+      return 'bg-green-100 text-green-800';
+    case 'abandon':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'won':
+      return 'bg-green-100 text-green-800';
+    case 'lost':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 export const OpportunityTable = ({
   opportunities,
   selectedOpportunities,
@@ -101,11 +126,100 @@ export const OpportunityTable = ({
   onPageChange,
   onPageSizeChange,
 }: OpportunityTableProps) => {
+  const [communicationDialog, setCommunicationDialog] = useState<{
+    isOpen: boolean;
+    type: 'whatsapp' | 'email' | 'call' | 'activity';
+    opportunityIds: string[];
+  }>({
+    isOpen: false,
+    type: 'whatsapp',
+    opportunityIds: []
+  });
+
+  const [statusDialog, setStatusDialog] = useState<{
+    isOpen: boolean;
+    opportunityId: string | null;
+    currentStatus: string;
+  }>({
+    isOpen: false,
+    opportunityId: null,
+    currentStatus: 'active'
+  });
+
   const allSelected = opportunities.length > 0 && opportunities.every(opp => selectedOpportunities.includes(opp.id));
   const someSelected = selectedOpportunities.length > 0 && !allSelected;
 
+  const handleCommunication = (type: 'whatsapp' | 'email' | 'call' | 'activity', opportunityIds: string[]) => {
+    setCommunicationDialog({
+      isOpen: true,
+      type,
+      opportunityIds
+    });
+  };
+
+  const handleStatusChange = (opportunityId: string, currentStatus: string) => {
+    setStatusDialog({
+      isOpen: true,
+      opportunityId,
+      currentStatus
+    });
+  };
+
+  const handleCommunicationSend = (type: string, data: any) => {
+    console.log('Communication sent:', { type, data });
+    // Here you would implement the actual communication logic
+  };
+
+  const handleStatusUpdate = (status: string, reason?: string, description?: string) => {
+    console.log('Status updated:', { opportunityId: statusDialog.opportunityId, status, reason, description });
+    // Here you would implement the actual status update logic
+  };
+
   return (
     <div className="space-y-4">
+      {/* Bulk Actions */}
+      {selectedOpportunities.length > 0 && (
+        <div className="flex items-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <span className="text-sm font-medium text-blue-800">
+            {selectedOpportunities.length} opportunity(ies) selected
+          </span>
+          <div className="flex gap-2 ml-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleCommunication('whatsapp', selectedOpportunities)}
+            >
+              <MessageSquare className="h-4 w-4 mr-1" />
+              WhatsApp
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleCommunication('email', selectedOpportunities)}
+            >
+              <Mail className="h-4 w-4 mr-1" />
+              Email
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleCommunication('call', selectedOpportunities)}
+            >
+              <Phone className="h-4 w-4 mr-1" />
+              Call
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleCommunication('activity', selectedOpportunities)}
+            >
+              <Activity className="h-4 w-4 mr-1" />
+              Activity
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header with entries selector and pagination */}
       <div className="flex items-center justify-between bg-white px-4 py-3 border-b">
         <div className="flex items-center space-x-4">
@@ -172,12 +286,13 @@ export const OpportunityTable = ({
               <TableHead>Opportunity</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Contact</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Stage</TableHead>
               <TableHead>Deal Value</TableHead>
               <TableHead>Win Probability</TableHead>
               <TableHead>Expected Close</TableHead>
               <TableHead>Sales Rep</TableHead>
-              <TableHead>Weighted Value</TableHead>
+              <TableHead>Activities</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -207,6 +322,39 @@ export const OpportunityTable = ({
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleStatusChange(opportunity.id, opportunity.status || 'active')}
+                        >
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          Change Status
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleCommunication('whatsapp', [opportunity.id])}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Send WhatsApp
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleCommunication('email', [opportunity.id])}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Email
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleCommunication('call', [opportunity.id])}
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Log Call
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleCommunication('activity', [opportunity.id])}
+                        >
+                          <Activity className="h-4 w-4 mr-2" />
+                          Add Activity
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem 
                           className="text-red-600"
                           onClick={() => onDelete(opportunity.id)}
@@ -220,6 +368,11 @@ export const OpportunityTable = ({
                 </TableCell>
                 <TableCell>{opportunity.company}</TableCell>
                 <TableCell>{opportunity.contact}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={getStatusColor(opportunity.status || 'active')}>
+                    {(opportunity.status || 'active').charAt(0).toUpperCase() + (opportunity.status || 'active').slice(1)}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   <Badge variant="outline" className={getStageColor(opportunity.stage)}>
                     {opportunity.stage.replace('-', ' ')}
@@ -252,10 +405,20 @@ export const OpportunityTable = ({
                 </TableCell>
                 <TableCell>{opportunity.assignedTo}</TableCell>
                 <TableCell>
-                  <div className="font-medium text-purple-600">
-                    ${Math.round(opportunity.value * (opportunity.probability / 100)).toLocaleString()}
+                  <div className="flex items-center space-x-1">
+                    {opportunity.activities?.map((activity, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {activity.type === 'whatsapp' && <MessageSquare className="h-3 w-3 mr-1" />}
+                        {activity.type === 'email' && <Mail className="h-3 w-3 mr-1" />}
+                        {activity.type === 'call' && <Phone className="h-3 w-3 mr-1" />}
+                        {activity.type === 'activity' && <Activity className="h-3 w-3 mr-1" />}
+                        {activity.count}
+                      </Badge>
+                    ))}
+                    {(!opportunity.activities || opportunity.activities.length === 0) && (
+                      <span className="text-xs text-gray-400">No activities</span>
+                    )}
                   </div>
-                  <div className="text-xs text-gray-500">weighted</div>
                 </TableCell>
               </TableRow>
             ))}
@@ -263,7 +426,24 @@ export const OpportunityTable = ({
         </Table>
       </div>
 
+      <OpportunityCommunicationDialog
+        isOpen={communicationDialog.isOpen}
+        onClose={() => setCommunicationDialog(prev => ({ ...prev, isOpen: false }))}
+        type={communicationDialog.type}
+        opportunityIds={communicationDialog.opportunityIds}
+        onSend={handleCommunicationSend}
+      />
 
+      <OpportunityStatusDialog
+        isOpen={statusDialog.isOpen}
+        onClose={() => setStatusDialog(prev => ({ ...prev, isOpen: false }))}
+        currentStatus={statusDialog.currentStatus}
+        onStatusChange={handleStatusUpdate}
+        onOpenDealForm={() => {
+          // Handle opening deal form for won opportunities
+          console.log('Opening deal form for opportunity:', statusDialog.opportunityId);
+        }}
+      />
     </div>
   );
 };

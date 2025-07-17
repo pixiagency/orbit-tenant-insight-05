@@ -8,6 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Save, GripVertical, Target, Workflow } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface Stage {
   id: string;
@@ -38,6 +46,18 @@ export const PipelinesPage: React.FC = () => {
         { id: '5', name: 'Closed Won', probability: 100, color: 'bg-green-500', order: 5 },
         { id: '6', name: 'Closed Lost', probability: 0, color: 'bg-red-500', order: 6 }
       ]
+    },
+    {
+      id: '2',
+      name: 'Marketing Pipeline',
+      isDefault: false,
+      stages: [
+        { id: '7', name: 'Lead Generation', probability: 5, color: 'bg-purple-500', order: 1 },
+        { id: '8', name: 'Lead Nurturing', probability: 15, color: 'bg-blue-500', order: 2 },
+        { id: '9', name: 'Qualified Lead', probability: 30, color: 'bg-yellow-500', order: 3 },
+        { id: '10', name: 'Closed Won', probability: 100, color: 'bg-green-500', order: 4 },
+        { id: '11', name: 'Closed Lost', probability: 0, color: 'bg-red-500', order: 5 }
+      ]
     }
   ]);
 
@@ -46,8 +66,48 @@ export const PipelinesPage: React.FC = () => {
   const [newStageProbability, setNewStageProbability] = useState(50);
   const [editingStage, setEditingStage] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState({ name: '', probability: 0 });
+  const [newPipelineName, setNewPipelineName] = useState('');
+  const [showAddPipelineDialog, setShowAddPipelineDialog] = useState(false);
 
   const currentPipeline = pipelines.find(p => p.id === selectedPipeline);
+
+  const handleAddPipeline = () => {
+    if (!newPipelineName.trim()) return;
+
+    const newPipeline: Pipeline = {
+      id: Date.now().toString(),
+      name: newPipelineName.trim(),
+      isDefault: false,
+      stages: [
+        { id: Date.now().toString() + '1', name: 'New Stage', probability: 10, color: 'bg-gray-500', order: 1 }
+      ]
+    };
+
+    setPipelines([...pipelines, newPipeline]);
+    setNewPipelineName('');
+    setShowAddPipelineDialog(false);
+    setSelectedPipeline(newPipeline.id);
+    toast.success('Pipeline added successfully');
+  };
+
+  const handleDeletePipeline = (pipelineId: string) => {
+    const pipeline = pipelines.find(p => p.id === pipelineId);
+    if (pipeline?.isDefault) {
+      toast.error('Cannot delete default pipeline');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this pipeline?')) return;
+
+    const updatedPipelines = pipelines.filter(p => p.id !== pipelineId);
+    setPipelines(updatedPipelines);
+    
+    if (selectedPipeline === pipelineId) {
+      setSelectedPipeline(updatedPipelines[0]?.id || '');
+    }
+    
+    toast.success('Pipeline deleted successfully');
+  };
 
   const handleAddStage = () => {
     if (!newStageName.trim() || !currentPipeline) return;
@@ -117,11 +177,48 @@ export const PipelinesPage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Workflow className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">Pipelines & Stages</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Workflow className="h-6 w-6 text-blue-600" />
+            <h1 className="text-2xl font-bold text-gray-900">Pipelines & Stages</h1>
+          </div>
         </div>
+        <Dialog open={showAddPipelineDialog} onOpenChange={setShowAddPipelineDialog}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Pipeline
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Pipeline</DialogTitle>
+              <DialogDescription>
+                Create a new sales pipeline with custom stages
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="pipelineName">Pipeline Name</Label>
+                <Input
+                  id="pipelineName"
+                  value={newPipelineName}
+                  onChange={(e) => setNewPipelineName(e.target.value)}
+                  placeholder="Enter pipeline name..."
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowAddPipelineDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddPipeline}>
+                  Create Pipeline
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <p className="text-gray-600">
         Configure sales pipelines and their stages for opportunity management
@@ -144,13 +241,28 @@ export const PipelinesPage: React.FC = () => {
             {/* Pipeline Overview */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  {pipeline.name}
-                </CardTitle>
-                <CardDescription>
-                  Manage stages for this pipeline. Stages represent the progression of opportunities.
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5" />
+                      {pipeline.name}
+                    </CardTitle>
+                    <CardDescription>
+                      Manage stages for this pipeline. Stages represent the progression of opportunities.
+                    </CardDescription>
+                  </div>
+                  {!pipeline.isDefault && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeletePipeline(pipeline.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Pipeline
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 text-sm">
