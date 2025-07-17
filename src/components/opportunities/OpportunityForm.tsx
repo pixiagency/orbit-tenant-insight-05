@@ -1,16 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, User, Building2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { DrawerForm } from '@/components/layout/DrawerForm';
 import { ContactSearchSelect } from '@/components/shared/ContactSearchSelect';
@@ -18,7 +11,6 @@ import { CountrySelect } from '@/components/shared/CountrySelect';
 import { CitySelect } from '@/components/shared/CitySelect';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
 import { EnhancedDealDrawerForm } from '../deals/EnhancedDealDrawerForm';
-
 interface Opportunity {
   id: string;
   name: string;
@@ -52,7 +44,6 @@ interface Opportunity {
   createdAt: string;
   lastActivity: string;
 }
-
 interface ProductItem {
   id: string;
   name: string;
@@ -60,7 +51,6 @@ interface ProductItem {
   quantity: number;
   total: number;
 }
-
 interface OpportunityFormProps {
   isOpen: boolean;
   opportunity?: Opportunity | null;
@@ -69,17 +59,47 @@ interface OpportunityFormProps {
 }
 
 // Mock products/services data
-const AVAILABLE_PRODUCTS = [
-  { id: '1', name: 'Website Design', price: 2500, type: 'service' },
-  { id: '2', name: 'Mobile App Development', price: 5000, type: 'service' },
-  { id: '3', name: 'Software License', price: 199, type: 'product' },
-  { id: '4', name: 'Consulting Hours', price: 150, type: 'service' },
-  { id: '5', name: 'Hardware Equipment', price: 800, type: 'product' },
-  { id: '6', name: 'SEO Optimization', price: 800, type: 'service' },
-  { id: '7', name: 'Cloud Hosting', price: 50, type: 'service' },
-  { id: '8', name: 'Training Program', price: 1200, type: 'service' },
-];
-
+const AVAILABLE_PRODUCTS = [{
+  id: '1',
+  name: 'Website Design',
+  price: 2500,
+  type: 'service'
+}, {
+  id: '2',
+  name: 'Mobile App Development',
+  price: 5000,
+  type: 'service'
+}, {
+  id: '3',
+  name: 'Software License',
+  price: 199,
+  type: 'product'
+}, {
+  id: '4',
+  name: 'Consulting Hours',
+  price: 150,
+  type: 'service'
+}, {
+  id: '5',
+  name: 'Hardware Equipment',
+  price: 800,
+  type: 'product'
+}, {
+  id: '6',
+  name: 'SEO Optimization',
+  price: 800,
+  type: 'service'
+}, {
+  id: '7',
+  name: 'Cloud Hosting',
+  price: 50,
+  type: 'service'
+}, {
+  id: '8',
+  name: 'Training Program',
+  price: 1200,
+  type: 'service'
+}];
 export const OpportunityForm: React.FC<OpportunityFormProps> = ({
   isOpen,
   opportunity,
@@ -116,14 +136,15 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
     lossReason: '',
     lossDescription: ''
   });
-
-  const [products, setProducts] = useState<ProductItem[]>([
-    { id: '1', name: '', price: 0, quantity: 1, total: 0 }
-  ]);
-
+  const [products, setProducts] = useState<ProductItem[]>([{
+    id: '1',
+    name: '',
+    price: 0,
+    quantity: 1,
+    total: 0
+  }]);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showDealForm, setShowDealForm] = useState(false);
-
   useEffect(() => {
     if (opportunity) {
       setFormData({
@@ -156,7 +177,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         lossReason: opportunity.lossReason || '',
         lossDescription: opportunity.lossDescription || ''
       });
-      setProducts(opportunity.products || [{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
+      setProducts(opportunity.products || [{
+        id: '1',
+        name: '',
+        price: 0,
+        quantity: 1,
+        total: 0
+      }]);
     } else {
       setFormData({
         name: '',
@@ -188,17 +215,21 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
         lossReason: '',
         lossDescription: ''
       });
-      setProducts([{ id: '1', name: '', price: 0, quantity: 1, total: 0 }]);
+      setProducts([{
+        id: '1',
+        name: '',
+        price: 0,
+        quantity: 1,
+        total: 0
+      }]);
     }
   }, [opportunity, isOpen]);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const handleContactSelect = (contactId: string, contact: any) => {
     setFormData(prev => ({
       ...prev,
@@ -213,24 +244,18 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       name: prev.name || `${contact.company || 'Opportunity'} - ${contact.firstName} ${contact.lastName}`
     }));
   };
-
   const handleProductSelect = (index: number, productId: string) => {
     const selectedProduct = AVAILABLE_PRODUCTS.find(p => p.id === productId);
     if (selectedProduct) {
-      const updatedProducts = products.map((product, i) =>
-        i === index 
-          ? { 
-              ...product, 
-              name: selectedProduct.name, 
-              price: selectedProduct.price,
-              total: selectedProduct.price * product.quantity
-            }
-          : product
-      );
+      const updatedProducts = products.map((product, i) => i === index ? {
+        ...product,
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        total: selectedProduct.price * product.quantity
+      } : product);
       setProducts(updatedProducts);
     }
   };
-
   const handleStatusChange = (status: string, reason?: string, description?: string) => {
     setFormData(prev => ({
       ...prev,
@@ -239,7 +264,6 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       lossDescription: description || ''
     }));
   };
-
   const handleSave = () => {
     onSave({
       ...formData,
@@ -249,17 +273,8 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
       products
     });
   };
-
-  return (
-    <>
-      <DrawerForm
-        isOpen={isOpen}
-        onClose={onClose}
-        title={opportunity ? 'Edit Opportunity' : 'Add New Opportunity'}
-        description="Enter the opportunity details below"
-        onSave={handleSave}
-        saveText={opportunity ? 'Update Opportunity' : 'Create Opportunity'}
-      >
+  return <>
+      <DrawerForm isOpen={isOpen} onClose={onClose} title={opportunity ? 'Edit Opportunity' : 'Add New Opportunity'} description="Enter the opportunity details below" onSave={handleSave} saveText={opportunity ? 'Update Opportunity' : 'Create Opportunity'}>
         <div className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
@@ -268,63 +283,35 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="name">Opportunity Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="Enter opportunity name"
-                  required
-                />
+                <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter opportunity name" required />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="company">Company *</Label>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="company"
-                    className="pl-10"
-                    value={formData.company}
-                    onChange={(e) => handleInputChange('company', e.target.value)}
-                    placeholder="Enter company name"
-                    required
-                  />
+                  <Input id="company" className="pl-10" value={formData.company} onChange={e => handleInputChange('company', e.target.value)} placeholder="Enter company name" required />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="contact">Contact Person *</Label>
-                <ContactSearchSelect
-                  value={formData.contactId}
-                  onValueChange={handleContactSelect}
-                  placeholder="Search for contact..."
-                />
+                <ContactSearchSelect value={formData.contactId} onValueChange={handleContactSelect} placeholder="Search for contact..." />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter email address"
-                />
+                <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange('email', e.target.value)} placeholder="Enter email address" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  placeholder="Enter phone number"
-                />
+                <Input id="phone" value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} placeholder="Enter phone number" />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="source">Source</Label>
-                <Select value={formData.source} onValueChange={(value) => handleInputChange('source', value)}>
+                <Select value={formData.source} onValueChange={value => handleInputChange('source', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
@@ -341,21 +328,12 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
-                <CountrySelect
-                  value={formData.country}
-                  onValueChange={(value) => handleInputChange('country', value)}
-                  placeholder="Select country"
-                />
+                <CountrySelect value={formData.country} onValueChange={value => handleInputChange('country', value)} placeholder="Select country" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
-                <CitySelect
-                  value={formData.city}
-                  onValueChange={(value) => handleInputChange('city', value)}
-                  country={formData.country}
-                  placeholder="Select city"
-                />
+                <CitySelect value={formData.city} onValueChange={value => handleInputChange('city', value)} country={formData.country} placeholder="Select city" />
               </div>
             </div>
           </div>
@@ -368,7 +346,7 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="status">Status *</Label>
                 <div className="flex gap-2">
-                  <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <Select value={formData.status} onValueChange={value => handleInputChange('status', value)}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -379,19 +357,13 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                       <SelectItem value="lost">Lost</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowStatusDialog(true)}
-                  >
-                    Change
-                  </Button>
+                  
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="pipeline">Pipeline *</Label>
-                <Select value={formData.pipeline} onValueChange={(value) => handleInputChange('pipeline', value)}>
+                <Select value={formData.pipeline} onValueChange={value => handleInputChange('pipeline', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select pipeline" />
                   </SelectTrigger>
@@ -405,41 +377,35 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="stage">Stage *</Label>
-                <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
+                <Select value={formData.stage} onValueChange={value => handleInputChange('stage', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select stage" />
                   </SelectTrigger>
                   <SelectContent>
-                    {formData.pipeline === 'sales' && (
-                      <>
+                    {formData.pipeline === 'sales' && <>
                         <SelectItem value="prospecting">Prospecting</SelectItem>
                         <SelectItem value="qualification">Qualification</SelectItem>
                         <SelectItem value="proposal">Proposal</SelectItem>
                         <SelectItem value="negotiation">Negotiation</SelectItem>
                         <SelectItem value="closed-won">Closed Won</SelectItem>
                         <SelectItem value="closed-lost">Closed Lost</SelectItem>
-                      </>
-                    )}
-                    {formData.pipeline === 'marketing' && (
-                      <>
+                      </>}
+                    {formData.pipeline === 'marketing' && <>
                         <SelectItem value="lead-qualification">Lead Qualification</SelectItem>
                         <SelectItem value="nurturing">Nurturing</SelectItem>
                         <SelectItem value="content-creation">Content Creation</SelectItem>
                         <SelectItem value="proposal-review">Proposal Review</SelectItem>
                         <SelectItem value="closed-won">Closed Won</SelectItem>
                         <SelectItem value="closed-lost">Closed Lost</SelectItem>
-                      </>
-                    )}
-                    {formData.pipeline === 'customer-success' && (
-                      <>
+                      </>}
+                    {formData.pipeline === 'customer-success' && <>
                         <SelectItem value="requirements-gathering">Requirements Gathering</SelectItem>
                         <SelectItem value="implementation">Implementation</SelectItem>
                         <SelectItem value="delivery">Delivery</SelectItem>
                         <SelectItem value="monitoring">Monitoring</SelectItem>
                         <SelectItem value="closed-won">Closed Won</SelectItem>
                         <SelectItem value="closed-lost">Closed Lost</SelectItem>
-                      </>
-                    )}
+                      </>}
                   </SelectContent>
                 </Select>
               </div>
@@ -448,48 +414,26 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                 <Label htmlFor="value">Deal Value ($) *</Label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="value"
-                    type="number"
-                    className="pl-10"
-                    value={formData.value}
-                    onChange={(e) => handleInputChange('value', e.target.value)}
-                    placeholder="0"
-                    required
-                  />
+                  <Input id="value" type="number" className="pl-10" value={formData.value} onChange={e => handleInputChange('value', e.target.value)} placeholder="0" required />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="probability">Win Probability (%)</Label>
-                <Input
-                  id="probability"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.probability}
-                  onChange={(e) => handleInputChange('probability', e.target.value)}
-                  placeholder="0"
-                />
+                <Input id="probability" type="number" min="0" max="100" value={formData.probability} onChange={e => handleInputChange('probability', e.target.value)} placeholder="0" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="expectedCloseDate">Expected Close Date</Label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    id="expectedCloseDate"
-                    type="date"
-                    className="pl-10"
-                    value={formData.expectedCloseDate}
-                    onChange={(e) => handleInputChange('expectedCloseDate', e.target.value)}
-                  />
+                  <Input id="expectedCloseDate" type="date" className="pl-10" value={formData.expectedCloseDate} onChange={e => handleInputChange('expectedCloseDate', e.target.value)} />
                 </div>
               </div>
               
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="assignedTo">Assigned To</Label>
-                <Select value={formData.assignedTo} onValueChange={(value) => handleInputChange('assignedTo', value)}>
+                <Select value={formData.assignedTo} onValueChange={value => handleInputChange('assignedTo', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select assignee" />
                   </SelectTrigger>
@@ -508,79 +452,60 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium text-gray-900">Products/Services</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newProduct = {
-                    id: Date.now().toString(),
-                    name: '',
-                    price: 0,
-                    quantity: 1,
-                    total: 0
-                  };
-                  setProducts([...products, newProduct]);
-                }}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => {
+              const newProduct = {
+                id: Date.now().toString(),
+                name: '',
+                price: 0,
+                quantity: 1,
+                total: 0
+              };
+              setProducts([...products, newProduct]);
+            }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
             </div>
             
-            {products.map((product, index) => (
-              <div key={product.id} className="grid grid-cols-5 gap-4 p-4 border rounded-lg">
+            {products.map((product, index) => <div key={product.id} className="grid grid-cols-5 gap-4 p-4 border rounded-lg">
                 <div className="col-span-2 space-y-2">
                   <Label htmlFor={`product-name-${index}`}>Product/Service Name</Label>
-                  <Select
-                    value={AVAILABLE_PRODUCTS.find(p => p.name === product.name)?.id || ''}
-                    onValueChange={(value) => handleProductSelect(index, value)}
-                  >
+                  <Select value={AVAILABLE_PRODUCTS.find(p => p.name === product.name)?.id || ''} onValueChange={value => handleProductSelect(index, value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select product/service" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AVAILABLE_PRODUCTS.map((availableProduct) => (
-                        <SelectItem key={availableProduct.id} value={availableProduct.id}>
+                      {AVAILABLE_PRODUCTS.map(availableProduct => <SelectItem key={availableProduct.id} value={availableProduct.id}>
                           {availableProduct.name} - ${availableProduct.price} ({availableProduct.type})
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor={`product-price-${index}`}>Price ($)</Label>
-                  <Input
-                    id={`product-price-${index}`}
-                    type="number"
-                    value={product.price}
-                    onChange={(e) => {
-                      const price = parseFloat(e.target.value) || 0;
-                      const updatedProducts = products.map((p, i) =>
-                        i === index ? { ...p, price, total: price * p.quantity } : p
-                      );
-                      setProducts(updatedProducts);
-                    }}
-                    placeholder="0.00"
-                  />
+                  <Input id={`product-price-${index}`} type="number" value={product.price} onChange={e => {
+                const price = parseFloat(e.target.value) || 0;
+                const updatedProducts = products.map((p, i) => i === index ? {
+                  ...p,
+                  price,
+                  total: price * p.quantity
+                } : p);
+                setProducts(updatedProducts);
+              }} placeholder="0.00" />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor={`product-quantity-${index}`}>Quantity</Label>
-                  <Input
-                    id={`product-quantity-${index}`}
-                    type="number"
-                    min="1"
-                    value={product.quantity}
-                    onChange={(e) => {
-                      const quantity = parseInt(e.target.value) || 1;
-                      const updatedProducts = products.map((p, i) =>
-                        i === index ? { ...p, quantity, total: p.price * quantity } : p
-                      );
-                      setProducts(updatedProducts);
-                    }}
-                  />
+                  <Input id={`product-quantity-${index}`} type="number" min="1" value={product.quantity} onChange={e => {
+                const quantity = parseInt(e.target.value) || 1;
+                const updatedProducts = products.map((p, i) => i === index ? {
+                  ...p,
+                  quantity,
+                  total: p.price * quantity
+                } : p);
+                setProducts(updatedProducts);
+              }} />
                 </div>
                 
                 <div className="flex items-end space-x-2">
@@ -590,25 +515,17 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
                       ${(product.price * product.quantity).toFixed(2)}
                     </div>
                   </div>
-                  {products.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setProducts(products.filter((_, i) => i !== index));
-                      }}
-                    >
+                  {products.length > 1 && <Button type="button" variant="outline" size="sm" onClick={() => {
+                setProducts(products.filter((_, i) => i !== index));
+              }}>
                       <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
-              </div>
-            ))}
+              </div>)}
             
             <div className="text-right">
               <div className="text-lg font-semibold">
-                Total: ${products.reduce((sum, product) => sum + (product.price * product.quantity), 0).toFixed(2)}
+                Total: ${products.reduce((sum, product) => sum + product.price * product.quantity, 0).toFixed(2)}
               </div>
             </div>
           </div>
@@ -619,45 +536,22 @@ export const OpportunityForm: React.FC<OpportunityFormProps> = ({
             
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="Internal notes and comments..."
-                rows={3}
-              />
+              <Textarea id="notes" value={formData.notes} onChange={e => handleInputChange('notes', e.target.value)} placeholder="Internal notes and comments..." rows={3} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Detailed opportunity description..."
-                rows={4}
-              />
+              <Textarea id="description" value={formData.description} onChange={e => handleInputChange('description', e.target.value)} placeholder="Detailed opportunity description..." rows={4} />
             </div>
           </div>
         </div>
       </DrawerForm>
 
-      <OpportunityStatusDialog
-        isOpen={showStatusDialog}
-        onClose={() => setShowStatusDialog(false)}
-        currentStatus={formData.status}
-        onStatusChange={handleStatusChange}
-        onOpenDealForm={() => setShowDealForm(true)}
-      />
+      <OpportunityStatusDialog isOpen={showStatusDialog} onClose={() => setShowStatusDialog(false)} currentStatus={formData.status} onStatusChange={handleStatusChange} onOpenDealForm={() => setShowDealForm(true)} />
 
-      <EnhancedDealDrawerForm
-        isOpen={showDealForm}
-        onClose={() => setShowDealForm(false)}
-        onSave={(dealData) => {
-          console.log('Deal created:', dealData);
-          setShowDealForm(false);
-        }}
-      />
-    </>
-  );
+      <EnhancedDealDrawerForm isOpen={showDealForm} onClose={() => setShowDealForm(false)} onSave={dealData => {
+      console.log('Deal created:', dealData);
+      setShowDealForm(false);
+    }} />
+    </>;
 };
