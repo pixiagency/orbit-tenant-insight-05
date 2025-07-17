@@ -1,21 +1,15 @@
+
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  User, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  Mail, 
-  Phone, 
-  MessageSquare,
-  UserPlus,
-  Plus,
-  Handshake
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { Calendar, DollarSign, User, Building2, Mail, Phone, MapPin, Percent } from 'lucide-react';
 
 interface Opportunity {
   id: string;
@@ -30,6 +24,28 @@ interface Opportunity {
   expectedCloseDate: string;
   assignedTo: string;
   source: string;
+  description?: string;
+  competitorInfo?: string;
+  decisionMakers?: string;
+  budget?: number;
+  timeline?: string;
+  painPoints?: string;
+  proposalSent?: boolean;
+  contractSent?: boolean;
+  country?: string;
+  city?: string;
+  pipeline?: string;
+  notes?: string;
+  products?: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    total: number;
+  }>;
+  status?: 'active' | 'abandon' | 'won' | 'lost';
+  lossReason?: string;
+  lossDescription?: string;
   createdAt: string;
   lastActivity: string;
 }
@@ -40,95 +56,126 @@ interface OpportunityDetailsModalProps {
   opportunity: Opportunity | null;
 }
 
+const getStageColor = (stage: string) => {
+  switch (stage) {
+    case 'prospecting':
+      return 'bg-gray-100 text-gray-800';
+    case 'qualification':
+      return 'bg-blue-100 text-blue-800';
+    case 'proposal':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'negotiation':
+      return 'bg-orange-100 text-orange-800';
+    case 'closed-won':
+      return 'bg-green-100 text-green-800';
+    case 'closed-lost':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active':
+      return 'bg-green-100 text-green-800';
+    case 'abandon':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'won':
+      return 'bg-green-100 text-green-800';
+    case 'lost':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 export const OpportunityDetailsModal: React.FC<OpportunityDetailsModalProps> = ({
   isOpen,
   onClose,
-  opportunity
+  opportunity,
 }) => {
   if (!opportunity) return null;
 
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'prospecting': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'qualification': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'proposal': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'negotiation': return 'bg-orange-100 text-orange-700 border-orange-200';
-      case 'closed-won': return 'bg-green-100 text-green-700 border-green-200';
-      case 'closed-lost': return 'bg-red-100 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
-
-  const handleSendEmail = () => {
-    toast.success('Email composer opened');
-  };
-
-  const handleCall = () => {
-    toast.success('Initiating call...');
-  };
-
-  const handleSendWhatsApp = () => {
-    toast.success('Opening WhatsApp...');
-  };
-
-  const handleAssign = () => {
-    toast.success('Assignment dialog opened');
-  };
-
-  const handleAddTask = () => {
-    toast.success('Task creation opened');
-  };
-
-  const handleConvertToDeal = () => {
-    toast.success('Converting to deal...');
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>{opportunity.name}</span>
-            <Badge variant="outline" className={getStageColor(opportunity.stage)}>
-              {opportunity.stage.replace('-', ' ')}
-            </Badge>
+            <div className="flex space-x-2">
+              <Badge variant="outline" className={getStatusColor(opportunity.status || 'active')}>
+                {(opportunity.status || 'active').charAt(0).toUpperCase() + (opportunity.status || 'active').slice(1)}
+              </Badge>
+              <Badge variant="outline" className={getStageColor(opportunity.stage)}>
+                {opportunity.stage.replace('-', ' ')}
+              </Badge>
+            </div>
           </DialogTitle>
+          <DialogDescription>
+            Opportunity details and information
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Company Information</h3>
-              <p className="text-lg font-medium">{opportunity.company}</p>
-              <p className="text-gray-600">{opportunity.contact}</p>
-              <div className="flex items-center space-x-2 mt-1">
-                <Mail className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-600">{opportunity.email}</span>
-              </div>
-              <div className="flex items-center space-x-2 mt-1">
-                <Phone className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-600">{opportunity.phone}</span>
+          {/* Basic Information */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Contact Information</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Building2 className="h-4 w-4 text-gray-500" />
+                  <span className="font-medium">{opportunity.company}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span>{opportunity.contact}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span>{opportunity.email}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span>{opportunity.phone}</span>
+                </div>
+                {(opportunity.country || opportunity.city) && (
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span>{[opportunity.city, opportunity.country].filter(Boolean).join(', ')}</span>
+                  </div>
+                )}
               </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Opportunity Details</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Value:</span>
-                  <span className="font-semibold text-green-600">${opportunity.value.toLocaleString()}</span>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Opportunity Details</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-gray-500" />
+                  <span className="font-semibold text-green-600">
+                    ${opportunity.value.toLocaleString()}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Probability:</span>
-                  <span className="font-semibold">{opportunity.probability}%</span>
+                <div className="flex items-center space-x-2">
+                  <Percent className="h-4 w-4 text-gray-500" />
+                  <span>{opportunity.probability}% probability</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Expected Close:</span>
-                  <span className="font-semibold">{new Date(opportunity.expectedCloseDate).toLocaleDateString()}</span>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span>Expected close: {new Date(opportunity.expectedCloseDate).toLocaleDateString()}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Source:</span>
-                  <span className="font-semibold">{opportunity.source}</span>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span>Assigned to: {opportunity.assignedTo}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Source: </span>
+                  <span>{opportunity.source}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Pipeline: </span>
+                  <span className="capitalize">{opportunity.pipeline}</span>
                 </div>
               </div>
             </div>
@@ -136,78 +183,104 @@ export const OpportunityDetailsModal: React.FC<OpportunityDetailsModalProps> = (
 
           <Separator />
 
-          {/* Assignment & Timeline */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Assignment</h3>
-              <div className="flex items-center space-x-2">
-                <User className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-700">{opportunity.assignedTo}</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Timeline</h3>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Created:</span>
-                  <span>{new Date(opportunity.createdAt).toLocaleDateString()}</span>
+          {/* Products/Services */}
+          {opportunity.products && opportunity.products.length > 0 && (
+            <>
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Products/Services</h3>
+                <div className="space-y-2">
+                  {opportunity.products.map((product, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <span className="font-medium">{product.name}</span>
+                        <span className="text-sm text-gray-500 ml-2">
+                          {product.quantity > 1 && `Qty: ${product.quantity} × `}
+                          ${product.price.toFixed(2)}
+                        </span>
+                      </div>
+                      <span className="font-semibold">${product.total.toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg font-semibold">
+                    <span>Total:</span>
+                    <span>${opportunity.products.reduce((sum, p) => sum + p.total, 0).toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Last Activity:</span>
-                  <span>{new Date(opportunity.lastActivity).toLocaleDateString()}</span>
-                </div>
               </div>
-            </div>
-          </div>
+              <Separator />
+            </>
+          )}
 
-          <Separator />
+          {/* Description and Notes */}
+          {(opportunity.description || opportunity.notes) && (
+            <>
+              <div className="space-y-4">
+                {opportunity.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Description</h3>
+                    <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{opportunity.description}</p>
+                  </div>
+                )}
+                {opportunity.notes && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Notes</h3>
+                    <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{opportunity.notes}</p>
+                  </div>
+                )}
+              </div>
+              <Separator />
+            </>
+          )}
 
-          {/* Progress Bar */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Progress</span>
-              <span className="text-sm text-gray-600">{opportunity.probability}%</span>
+          {/* Additional Information */}
+          {(opportunity.competitorInfo || opportunity.decisionMakers || opportunity.painPoints || opportunity.timeline) && (
+            <div className="grid grid-cols-2 gap-6">
+              {opportunity.competitorInfo && (
+                <div>
+                  <h4 className="font-medium mb-2">Competitor Information</h4>
+                  <p className="text-sm text-gray-600">{opportunity.competitorInfo}</p>
+                </div>
+              )}
+              {opportunity.decisionMakers && (
+                <div>
+                  <h4 className="font-medium mb-2">Decision Makers</h4>
+                  <p className="text-sm text-gray-600">{opportunity.decisionMakers}</p>
+                </div>
+              )}
+              {opportunity.painPoints && (
+                <div>
+                  <h4 className="font-medium mb-2">Pain Points</h4>
+                  <p className="text-sm text-gray-600">{opportunity.painPoints}</p>
+                </div>
+              )}
+              {opportunity.timeline && (
+                <div>
+                  <h4 className="font-medium mb-2">Timeline</h4>
+                  <p className="text-sm text-gray-600">{opportunity.timeline}</p>
+                </div>
+              )}
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${opportunity.probability}%` }}
-              />
-            </div>
-          </div>
+          )}
 
-          <Separator />
-
-          {/* Actions */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Quick Actions</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={handleSendEmail} className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Send Email
-              </Button>
-              <Button variant="outline" onClick={handleCall} className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                Call
-              </Button>
-              <Button variant="outline" onClick={handleSendWhatsApp} className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                WhatsApp
-              </Button>
-              <Button variant="outline" onClick={handleAssign} className="flex items-center gap-2">
-                <UserPlus className="h-4 w-4" />
-                Assign
-              </Button>
-              <Button variant="outline" onClick={handleAddTask} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Task
-              </Button>
-              <Button onClick={handleConvertToDeal} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
-                <Handshake className="h-4 w-4" />
-                Convert to Deal
-              </Button>
-            </div>
-          </div>
+          {/* Loss Information */}
+          {opportunity.status === 'lost' && (opportunity.lossReason || opportunity.lossDescription) && (
+            <>
+              <Separator />
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-red-800 mb-2">Loss Information</h3>
+                {opportunity.lossReason && (
+                  <p className="text-red-700 mb-2">
+                    <span className="font-medium">Reason:</span> {opportunity.lossReason}
+                  </p>
+                )}
+                {opportunity.lossDescription && (
+                  <p className="text-red-700">
+                    <span className="font-medium">Description:</span> {opportunity.lossDescription}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

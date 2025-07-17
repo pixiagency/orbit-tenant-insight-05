@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,9 +26,12 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3 } from 'lucide-react';
 import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
+import { OpportunityActivityDialog } from './OpportunityActivityDialog';
+import { OpportunityDetailsModal } from './OpportunityDetailsModal';
+import { EnhancedDealDrawerForm } from '../deals/EnhancedDealDrawerForm';
 
 interface Opportunity {
   id: string;
@@ -146,6 +148,26 @@ export const OpportunityTable = ({
     currentStatus: 'active'
   });
 
+  const [activityDialog, setActivityDialog] = useState<{
+    isOpen: boolean;
+    opportunityId: string | null;
+    opportunityName: string;
+  }>({
+    isOpen: false,
+    opportunityId: null,
+    opportunityName: ''
+  });
+
+  const [detailsModal, setDetailsModal] = useState<{
+    isOpen: boolean;
+    opportunity: Opportunity | null;
+  }>({
+    isOpen: false,
+    opportunity: null
+  });
+
+  const [showDealForm, setShowDealForm] = useState(false);
+
   const allSelected = opportunities.length > 0 && opportunities.every(opp => selectedOpportunities.includes(opp.id));
   const someSelected = selectedOpportunities.length > 0 && !allSelected;
 
@@ -165,6 +187,21 @@ export const OpportunityTable = ({
     });
   };
 
+  const handleViewActivity = (opportunityId: string, opportunityName: string) => {
+    setActivityDialog({
+      isOpen: true,
+      opportunityId,
+      opportunityName
+    });
+  };
+
+  const handleViewDetails = (opportunity: Opportunity) => {
+    setDetailsModal({
+      isOpen: true,
+      opportunity
+    });
+  };
+
   const handleCommunicationSend = (type: string, data: any) => {
     console.log('Communication sent:', { type, data });
     // Here you would implement the actual communication logic
@@ -173,6 +210,34 @@ export const OpportunityTable = ({
   const handleStatusUpdate = (status: string, reason?: string, description?: string) => {
     console.log('Status updated:', { opportunityId: statusDialog.opportunityId, status, reason, description });
     // Here you would implement the actual status update logic
+  };
+
+  const getOpportunityActivities = (opportunityId: string) => {
+    return [
+      {
+        id: '1',
+        type: 'whatsapp' as const,
+        title: 'Follow-up message sent',
+        description: 'Hi {name}, I wanted to check if you had a chance to review our proposal...',
+        timestamp: new Date().toISOString(),
+        template: 'Follow-up Template'
+      },
+      {
+        id: '2',
+        type: 'email' as const,
+        title: 'Proposal sent',
+        description: 'Detailed proposal document sent via email',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        template: 'Proposal Email Template'
+      },
+      {
+        id: '3',
+        type: 'call' as const,
+        title: 'Discovery call completed',
+        description: 'Discussed requirements and pain points',
+        timestamp: new Date(Date.now() - 172800000).toISOString(),
+      }
+    ];
   };
 
   return (
@@ -314,9 +379,13 @@ export const OpportunityTable = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-white">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDetails(opportunity)}>
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewActivity(opportunity.id, opportunity.name)}>
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          View Activity
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(opportunity)}>
                           <Edit className="h-4 w-4 mr-2" />
@@ -439,9 +508,29 @@ export const OpportunityTable = ({
         onClose={() => setStatusDialog(prev => ({ ...prev, isOpen: false }))}
         currentStatus={statusDialog.currentStatus}
         onStatusChange={handleStatusUpdate}
-        onOpenDealForm={() => {
-          // Handle opening deal form for won opportunities
-          console.log('Opening deal form for opportunity:', statusDialog.opportunityId);
+        onOpenDealForm={() => setShowDealForm(true)}
+      />
+
+      <OpportunityActivityDialog
+        isOpen={activityDialog.isOpen}
+        onClose={() => setActivityDialog(prev => ({ ...prev, isOpen: false }))}
+        opportunityId={activityDialog.opportunityId || ''}
+        opportunityName={activityDialog.opportunityName}
+        activities={activityDialog.opportunityId ? getOpportunityActivities(activityDialog.opportunityId) : []}
+      />
+
+      <OpportunityDetailsModal
+        isOpen={detailsModal.isOpen}
+        onClose={() => setDetailsModal(prev => ({ ...prev, isOpen: false }))}
+        opportunity={detailsModal.opportunity}
+      />
+
+      <EnhancedDealDrawerForm
+        isOpen={showDealForm}
+        onClose={() => setShowDealForm(false)}
+        onSave={(dealData) => {
+          console.log('Deal created:', dealData);
+          setShowDealForm(false);
         }}
       />
     </div>
