@@ -26,11 +26,12 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3 } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap } from 'lucide-react';
 import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
 import { OpportunityActivityDialog } from './OpportunityActivityDialog';
 import { OpportunityDetailsModal } from './OpportunityDetailsModal';
+import { AutomationApplyDialog } from './AutomationApplyDialog';
 import { EnhancedDealDrawerForm } from '../deals/EnhancedDealDrawerForm';
 
 interface Opportunity {
@@ -168,6 +169,14 @@ export const OpportunityTable = ({
 
   const [showDealForm, setShowDealForm] = useState(false);
 
+  const [automationDialog, setAutomationDialog] = useState<{
+    isOpen: boolean;
+    opportunityIds: string[];
+  }>({
+    isOpen: false,
+    opportunityIds: []
+  });
+
   const allSelected = opportunities.length > 0 && opportunities.every(opp => selectedOpportunities.includes(opp.id));
   const someSelected = selectedOpportunities.length > 0 && !allSelected;
 
@@ -210,6 +219,18 @@ export const OpportunityTable = ({
   const handleStatusUpdate = (status: string, reason?: string, description?: string) => {
     console.log('Status updated:', { opportunityId: statusDialog.opportunityId, status, reason, description });
     // Here you would implement the actual status update logic
+  };
+
+  const handleApplyAutomation = (opportunityIds: string[]) => {
+    setAutomationDialog({
+      isOpen: true,
+      opportunityIds
+    });
+  };
+
+  const handleAutomationApply = (automationId: string, action: 'apply' | 'pause_and_apply' | 'cancel') => {
+    console.log('Automation action:', { automationId, action, opportunityIds: automationDialog.opportunityIds });
+    // Here you would implement the actual automation logic
   };
 
   const getOpportunityActivities = (opportunityId: string) => {
@@ -280,6 +301,15 @@ export const OpportunityTable = ({
             >
               <Activity className="h-4 w-4 mr-1" />
               Activity
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleApplyAutomation(selectedOpportunities)}
+              className="text-blue-600 border-blue-600 hover:bg-blue-50"
+            >
+              <Zap className="h-4 w-4 mr-1" />
+              Apply Automation
             </Button>
           </div>
         </div>
@@ -397,6 +427,12 @@ export const OpportunityTable = ({
                         >
                           <UserCheck className="h-4 w-4 mr-2" />
                           Change Status
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleApplyAutomation([opportunity.id])}
+                        >
+                          <Zap className="h-4 w-4 mr-2" />
+                          Apply Automation
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
@@ -532,6 +568,13 @@ export const OpportunityTable = ({
           console.log('Deal created:', dealData);
           setShowDealForm(false);
         }}
+      />
+
+      <AutomationApplyDialog
+        isOpen={automationDialog.isOpen}
+        onClose={() => setAutomationDialog(prev => ({ ...prev, isOpen: false }))}
+        opportunityIds={automationDialog.opportunityIds}
+        onApply={handleAutomationApply}
       />
     </div>
   );

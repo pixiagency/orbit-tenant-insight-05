@@ -16,8 +16,6 @@ import {
   Mail,
   Phone,
   MessageSquare,
-  Download,
-  Upload,
   UserPlus,
   X
 } from 'lucide-react';
@@ -36,8 +34,6 @@ import { OpportunityKanbanView } from '../../components/opportunities/Opportunit
 import { OpportunityFilters } from '../../components/opportunities/OpportunityFilters';
 import { OpportunityAdvancedFilters } from '../../components/opportunities/OpportunityAdvancedFilters';
 import { OpportunityDetailsModal } from '../../components/opportunities/OpportunityDetailsModal';
-import { OpportunityImportModal } from '../../components/opportunities/OpportunityImportModal';
-import { OpportunityExportModal } from '../../components/opportunities/OpportunityExportModal';
 import { FilterDrawer } from '../../components/shared/FilterDrawer';
 import {
   AlertDialog,
@@ -534,8 +530,6 @@ export const OpportunitiesPage = () => {
   const [pageSize, setPageSize] = useState(3);
   const [selectedOpportunityForDetails, setSelectedOpportunityForDetails] = useState<Opportunity | null>(null);
   const [showOpportunityDetails, setShowOpportunityDetails] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState({
     dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
     valueRange: { min: '', max: '' },
@@ -638,11 +632,6 @@ export const OpportunitiesPage = () => {
     toast.success(`${selectedOpportunities.length} opportunities deleted successfully`);
   };
 
-  const handleImportOpportunities = (importedOpportunities: Opportunity[]) => {
-    setOpportunities(prev => [...prev, ...importedOpportunities]);
-    setShowImportModal(false);
-  };
-
   const handleStageChange = (opportunityId: string, newStage: string) => {
     setOpportunities(prev => prev.map(opp => 
       opp.id === opportunityId 
@@ -692,14 +681,6 @@ export const OpportunitiesPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Opportunities</h1>
         </div>
         <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" onClick={() => setShowImportModal(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
           <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAddOpportunity}>
             <Plus className="h-4 w-4 mr-2" />
             New Opportunity
@@ -970,21 +951,6 @@ export const OpportunitiesPage = () => {
           setSelectedOpportunityForDetails(null);
         }}
         opportunity={selectedOpportunityForDetails}
-      />
-
-      {/* Import Modal */}
-      <OpportunityImportModal
-        isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImport={handleImportOpportunities}
-      />
-
-      {/* Export Modal */}
-      <OpportunityExportModal
-        isOpen={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        opportunities={filteredOpportunities}
-        selectedOpportunities={selectedOpportunities}
       />
 
       {/* Bulk Delete Dialog */}
