@@ -1,4 +1,3 @@
-
 export interface GeneralSettings {
   companyName: string;
   companyEmail: string;
@@ -69,6 +68,7 @@ export interface Pipeline {
   stages: PipelineStage[];
   teamIds: string[];
   isDefault: boolean;
+  lossReasons: LossReason[];
 }
 
 export interface PipelineStage {
@@ -76,6 +76,13 @@ export interface PipelineStage {
   name: string;
   color: string;
   order: number;
+}
+
+export interface LossReason {
+  id: string;
+  value: string;
+  label: string;
+  description?: string;
 }
 
 export interface IntegrationSettings {
