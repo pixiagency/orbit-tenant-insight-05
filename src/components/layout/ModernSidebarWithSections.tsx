@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -34,7 +35,8 @@ import {
   FileSpreadsheet,
   Code,
   Globe,
-  Megaphone
+  Megaphone,
+  Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,7 +62,7 @@ const superAdminMenuItems: MenuItem[] = [
   { title: 'Activation Codes', url: '/super-admin/activation-codes', icon: Key },
   { title: 'Discount Codes', url: '/super-admin/discount-codes', icon: Megaphone },
   { title: 'Users Management', url: '/super-admin/users', icon: Users },
-  { title: 'Billing Logs', url: '/super-admin/billing', icon: FileSpreadsheet },
+  { title: 'Invoices', url: '/super-admin/billing', icon: Receipt },
   { title: 'Website', url: '/website', icon: Globe, external: true },
 ];
 

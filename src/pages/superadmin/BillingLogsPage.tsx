@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -16,7 +14,6 @@ import {
 import { 
   Download, 
   RefreshCw, 
-  Plus, 
   Search, 
   Filter, 
   X,
@@ -30,6 +27,8 @@ import { BillingLog } from '../../types/superadmin';
 import { BillingLogFilters } from '../../types/superadmin';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
+import { BillingInvoiceModal } from '../../components/billing/BillingInvoiceModal';
+import { useToast } from '@/hooks/use-toast';
 
 const MOCK_BILLING_LOGS: BillingLog[] = [
   {
@@ -143,6 +142,7 @@ const initialFilters: BillingLogFilters = {
 };
 
 export const BillingLogsPage: React.FC = () => {
+  const { toast } = useToast();
   const [billingLogs, setBillingLogs] = useState<BillingLog[]>(MOCK_BILLING_LOGS);
   const [filters, setFilters] = useState<BillingLogFilters>(initialFilters);
   const [searchTerm, setSearchTerm] = useState('');
@@ -150,6 +150,7 @@ export const BillingLogsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [clientFilter, setClientFilter] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<BillingLog | null>(null);
 
   // Calculate statistics
   const totalLogs = billingLogs.length;
@@ -197,29 +198,39 @@ export const BillingLogsPage: React.FC = () => {
   };
 
   const handleExport = () => {
-    // Export billing logs logic
+    toast({
+      title: "Export Started",
+      description: "Your invoice data is being exported to CSV format.",
+    });
     console.log('Exporting billing logs...');
   };
 
   const handleRefresh = () => {
-    // Refresh billing logs logic
+    toast({
+      title: "Data Refreshed",
+      description: "Invoice data has been updated successfully.",
+    });
     console.log('Refreshing billing logs...');
   };
 
-  const handleAddBillingLog = () => {
-    // Add billing log logic
-    console.log('Adding billing log...');
-  };
-
   const handleDownloadInvoice = (log: BillingLog) => {
+    toast({
+      title: "Download Started",
+      description: `Downloading invoice ${log.invoiceNumber} as PDF`,
+    });
     console.log('Downloading invoice for:', log.invoiceNumber);
   };
 
   const handleViewInvoice = (log: BillingLog) => {
     console.log('Viewing invoice for:', log.invoiceNumber);
+    setSelectedInvoice(log);
   };
 
   const handleSendInvoice = (log: BillingLog) => {
+    toast({
+      title: "Invoice Sent",
+      description: `Invoice ${log.invoiceNumber} has been sent to ${log.clientName}`,
+    });
     console.log('Sending invoice for:', log.invoiceNumber);
   };
 
@@ -252,16 +263,13 @@ export const BillingLogsPage: React.FC = () => {
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-full">
       <PageHeader
-        title="Billing Logs"
+        title="Invoices"
         description="Monitor and manage all billing transactions, payments, and invoices"
         breadcrumbs={[
           { label: 'Super Admin', href: '/super-admin' },
-          { label: 'Billing Logs' },
+          { label: 'Invoices' },
         ]}
-        badge={`${filteredLogs.length} logs`}
-        showAddButton={true}
-        addButtonText="Add Billing Log"
-        onAddClick={handleAddBillingLog}
+        badge={`${filteredLogs.length} invoices`}
         showExportButton={true}
         onExportClick={handleExport}
       />
@@ -454,7 +462,25 @@ export const BillingLogsPage: React.FC = () => {
         onViewInvoice={handleViewInvoice}
         onSendInvoice={handleSendInvoice}
       />
+
+      {/* Invoice Modal */}
+      {selectedInvoice && (
+        <BillingInvoiceModal
+          isOpen={!!selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+          invoice={{
+            id: selectedInvoice.id,
+            date: selectedInvoice.billingDate,
+            amount: selectedInvoice.amount,
+            status: selectedInvoice.status,
+            invoiceNumber: selectedInvoice.invoiceNumber || '',
+            description: selectedInvoice.description,
+            dueDate: selectedInvoice.dueDate,
+          }}
+          clientName={selectedInvoice.clientName}
+          clientEmail={`${selectedInvoice.clientName.toLowerCase().replace(/\s+/g, '.')}@example.com`}
+        />
+      )}
     </div>
   );
 };
-
