@@ -356,17 +356,8 @@ export const DiscountCodeTable: React.FC<DiscountCodeTableProps> = ({
                   onClick={() => handleSort('usageCount')}
                 >
                   <div className="flex items-center">
-                    Usage
+                    Times Used
                     {renderSortIcon('usageCount')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="font-semibold text-gray-900 dark:text-gray-100 h-12 cursor-pointer select-none"
-                  onClick={() => handleSort('expirationDate')}
-                >
-                  <div className="flex items-center">
-                    Expires
-                    {renderSortIcon('expirationDate')}
                   </div>
                 </TableHead>
                 <TableHead 
@@ -452,21 +443,15 @@ export const DiscountCodeTable: React.FC<DiscountCodeTableProps> = ({
                   </TableCell>
                   <TableCell className="h-16">
                     <div className="text-sm">
-                      <span className="text-gray-900 dark:text-gray-100">
-                        {code.usageCount}/{code.usageLimit || '∞'}
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">
+                        {code.usageCount} {code.usageCount === 1 ? 'time' : 'times'}
                       </span>
                       {code.usageLimit && (
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-1">
-                          <div
-                            className="bg-purple-600 h-1.5 rounded-full"
-                            style={{ width: `${(code.usageCount / code.usageLimit) * 100}%` }}
-                          ></div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          of {code.usageLimit} max
                         </div>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="h-16 text-gray-600 dark:text-gray-300">
-                    {code.expirationDate ? formatDate(code.expirationDate) : 'No expiration'}
                   </TableCell>
                   <TableCell className="h-16 text-gray-600 dark:text-gray-300">
                     {formatDate(code.createdAt)}

@@ -432,26 +432,6 @@ export const DiscountCodeDrawerForm: React.FC<DiscountCodeDrawerFormProps> = ({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="expirationDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expiration Date (Optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Specific expiration date (optional)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
