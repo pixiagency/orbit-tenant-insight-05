@@ -105,15 +105,15 @@ export const DiscountCodeDrawerForm: React.FC<DiscountCodeDrawerFormProps> = ({
   const form = useForm<any>({
     resolver: zodResolver(discountCodeSchema),
     defaultValues: {
-      code: code?.code || '',
-      packageId: code?.packageId || '',
-      usageType: code?.usageType || 'multi-use',
-      usageLimit: code?.usageLimit || 100,
-      usersLimit: code?.usersLimit || 5,
-      expirationDate: code?.expirationDate ? code.expirationDate.split('T')[0] : '',
-      status: code?.status === 'used' ? 'active' : (code?.status || 'active'),
-      discountPercentage: code?.discountPercentage || 10,
-      sources: code?.source ? [code.source] : [],
+      code: '',
+      packageId: '',
+      usageType: 'multi-use',
+      usageLimit: 100,
+      usersLimit: 5,
+      expirationDate: '',
+      status: 'active',
+      discountPercentage: 10,
+      sources: [],
     },
   });
 
@@ -135,6 +135,20 @@ export const DiscountCodeDrawerForm: React.FC<DiscountCodeDrawerFormProps> = ({
         status: code.status === 'used' ? 'active' : (code.status === 'expired' ? 'expired' : 'active'),
         discountPercentage: code.discountPercentage,
         sources: initialSources,
+      });
+    } else {
+      // Reset to default values when creating new
+      setSelectedSources([]);
+      form.reset({
+        code: '',
+        packageId: '',
+        usageType: 'multi-use',
+        usageLimit: 100,
+        usersLimit: 5,
+        expirationDate: '',
+        status: 'active',
+        discountPercentage: 10,
+        sources: [],
       });
     }
   }, [code, form]);
