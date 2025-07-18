@@ -82,13 +82,13 @@ export const ModernAdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Good morning, Admin</h1>
-            <p className="text-gray-600 mt-1">Here's what's happening with your sales today</p>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Good morning, Admin</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Here's what's happening with your sales today</p>
           </div>
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
@@ -111,6 +111,7 @@ export const ModernAdminDashboard = () => {
         </div>
       </div>
 
+      {/* Main Content Area - This should fill the remaining space */}
       <div className="p-6 space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,11 +195,11 @@ export const ModernAdminDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <div key={activity.id} className="flex items-start space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                   <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{activity.description}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.time}</p>
                   </div>
                   <Badge variant="secondary" className={getStatusColor(activity.status)}>
                     {activity.type}
@@ -217,9 +218,9 @@ export const ModernAdminDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {upcomingEvents.map((event) => (
-                <div key={event.id} className={`p-4 bg-gray-50 rounded-xl border-l-4 ${getPriorityColor(event.priority)} hover:bg-gray-100 transition-colors`}>
-                  <p className="font-medium text-sm text-gray-900">{event.title}</p>
-                  <p className="text-xs text-gray-600 mt-1">{event.time}</p>
+                <div key={event.id} className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border-l-4 ${getPriorityColor(event.priority)} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}>
+                  <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{event.title}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{event.time}</p>
                   <Badge variant="outline" className="mt-2 text-xs">
                     {event.type}
                   </Badge>
@@ -240,14 +241,14 @@ export const ModernAdminDashboard = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {topPerformers.map((performer, index) => (
-                <div key={index} className="p-6 bg-gradient-to-br from-white to-gray-50 rounded-xl border border-gray-100 hover:shadow-md transition-all">
+                <div key={index} className="p-6 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
                       {performer.avatar}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{performer.name}</p>
-                      <p className="text-sm text-gray-600">{performer.deals} deals closed</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">{performer.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{performer.deals} deals closed</p>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
