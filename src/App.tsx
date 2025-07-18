@@ -16,6 +16,7 @@ import { ClientsPage } from "./pages/superadmin/ClientsPage";
 import { ClientProfilePage } from "./pages/superadmin/ClientProfilePage";
 import { SubscriptionsPage } from "./pages/superadmin/SubscriptionsPage";
 import { ActivationCodesPage } from "./pages/superadmin/ActivationCodesPage";
+import { DiscountCodesPage } from "./pages/superadmin/DiscountCodesPage";
 import { BillingLogsPage } from "./pages/superadmin/BillingLogsPage";
 import { SystemSettingsPage } from "./pages/superadmin/SystemSettingsPage";
 import { EnhancedModernAdminDashboard } from "./pages/admin/EnhancedModernAdminDashboard";
@@ -105,6 +106,7 @@ const App = () => {
                         <Route path="/clients/:clientId" element={<ClientProfilePage />} />
                         <Route path="/subscriptions" element={<SubscriptionsPage />} />
                         <Route path="/activation-codes" element={<ActivationCodesPage />} />
+                        <Route path="/discount-codes" element={<DiscountCodesPage />} />
                         <Route path="/billing" element={<BillingLogsPage />} />
                         <Route path="/users" element={<UsersManagementPage />} />
                         <Route path="/settings" element={<SystemSettingsPage />} />
