@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit2, Trash2, Users, Target, Clock, Activity } from 'lucide-react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Plus, Edit2, Trash2, Users, Target, Clock, Save, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Team {
   id: string;
@@ -28,7 +30,6 @@ interface TeamMember {
   role: string;
   goals: IndividualGoals;
   shift: WorkShift;
-  clockActivities: ClockActivity[];
 }
 
 interface TeamGoals {
@@ -64,17 +65,8 @@ interface WorkShift {
   timezone: string;
 }
 
-interface ClockActivity {
-  id: string;
-  date: string;
-  clockIn: string;
-  clockOut?: string;
-  breakTime: number; // in minutes
-  totalHours: number;
-  status: 'completed' | 'in-progress' | 'missed';
-}
-
 export const TeamsManagementPage: React.FC = () => {
+  const { toast } = useToast();
   const [teams, setTeams] = useState<Team[]>([
     {
       id: '1',
@@ -95,18 +87,7 @@ export const TeamsManagementPage: React.FC = () => {
             endTime: '18:00',
             workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
             timezone: 'UTC'
-          },
-          clockActivities: [
-            {
-              id: '1',
-              date: '2024-01-15',
-              clockIn: '09:00',
-              clockOut: '18:00',
-              breakTime: 60,
-              totalHours: 8,
-              status: 'completed'
-            }
-          ]
+          }
         }
       ],
       goals: {
@@ -120,30 +101,164 @@ export const TeamsManagementPage: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [activeTab, setActiveTab] = useState('teams');
+  const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
+  const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
+  const [isEditGoalsOpen, setIsEditGoalsOpen] = useState(false);
+  const [isEditShiftOpen, setIsEditShiftOpen] = useState(false);
 
-  const form = useForm();
+  // Form states
+  const [teamForm, setTeamForm] = useState({
+    name: '',
+    description: '',
+    leadDistribution: 'round-robin' as const
+  });
+
+  const [goalForm, setGoalForm] = useState<TeamGoals>({
+    monthly: { sales: 0, revenue: 0, leads: 0 },
+    quarterly: { sales: 0, revenue: 0, leads: 0 }
+  });
+
+  const [shiftForm, setShiftForm] = useState<WorkShift>({
+    startTime: '09:00',
+    endTime: '18:00',
+    workingDays: [],
+    timezone: 'UTC'
+  });
+
+  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const timezones = ['UTC', 'EST', 'PST', 'CET', 'JST'];
 
   const handleCreateTeam = () => {
-    // Team creation logic
-    console.log('Creating new team');
+    if (!teamForm.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Team name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTeam: Team = {
+      id: Date.now().toString(),
+      name: teamForm.name,
+      description: teamForm.description,
+      leadDistribution: teamForm.leadDistribution,
+      members: [],
+      goals: {
+        monthly: { sales: 0, revenue: 0, leads: 0 },
+        quarterly: { sales: 0, revenue: 0, leads: 0 }
+      }
+    };
+
+    setTeams([...teams, newTeam]);
+    setTeamForm({ name: '', description: '', leadDistribution: 'round-robin' });
+    setIsCreateTeamOpen(false);
+
+    toast({
+      title: "Success",
+      description: "Team created successfully"
+    });
   };
 
   const handleEditTeam = (team: Team) => {
     setSelectedTeam(team);
+    setTeamForm({
+      name: team.name,
+      description: team.description,
+      leadDistribution: team.leadDistribution
+    });
+    setIsEditTeamOpen(true);
+  };
+
+  const handleUpdateTeam = () => {
+    if (!selectedTeam) return;
+
+    setTeams(teams.map(team => 
+      team.id === selectedTeam.id 
+        ? { ...team, ...teamForm }
+        : team
+    ));
+
+    setIsEditTeamOpen(false);
+    setSelectedTeam(null);
+
+    toast({
+      title: "Success",
+      description: "Team updated successfully"
+    });
   };
 
   const handleDeleteTeam = (teamId: string) => {
     setTeams(teams.filter(team => team.id !== teamId));
+    toast({
+      title: "Success",
+      description: "Team deleted successfully"
+    });
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      'completed': 'default',
-      'in-progress': 'secondary',
-      'missed': 'destructive'
-    } as const;
-    
-    return <Badge variant={variants[status as keyof typeof variants]}>{status}</Badge>;
+  const handleEditGoals = (team: Team) => {
+    setSelectedTeam(team);
+    setGoalForm(team.goals);
+    setIsEditGoalsOpen(true);
+  };
+
+  const handleUpdateGoals = () => {
+    if (!selectedTeam) return;
+
+    setTeams(teams.map(team =>
+      team.id === selectedTeam.id
+        ? { ...team, goals: goalForm }
+        : team
+    ));
+
+    setIsEditGoalsOpen(false);
+    setSelectedTeam(null);
+
+    toast({
+      title: "Success",
+      description: "Goals updated successfully"
+    });
+  };
+
+  const handleEditShift = (member: TeamMember) => {
+    setSelectedMember(member);
+    setShiftForm(member.shift);
+    setIsEditShiftOpen(true);
+  };
+
+  const handleUpdateShift = () => {
+    if (!selectedMember) return;
+
+    setTeams(teams.map(team => ({
+      ...team,
+      members: team.members.map(member =>
+        member.id === selectedMember.id
+          ? { ...member, shift: shiftForm }
+          : member
+      )
+    })));
+
+    setIsEditShiftOpen(false);
+    setSelectedMember(null);
+
+    toast({
+      title: "Success",
+      description: "Shift updated successfully"
+    });
+  };
+
+  const handleWorkingDayChange = (day: string, checked: boolean) => {
+    if (checked) {
+      setShiftForm({
+        ...shiftForm,
+        workingDays: [...shiftForm.workingDays, day]
+      });
+    } else {
+      setShiftForm({
+        ...shiftForm,
+        workingDays: shiftForm.workingDays.filter(d => d !== day)
+      });
+    }
   };
 
   return (
@@ -151,16 +266,63 @@ export const TeamsManagementPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Teams Management</h1>
-          <p className="text-muted-foreground">Manage teams, goals, shifts, and track clock-in/out activities</p>
+          <p className="text-muted-foreground">Manage teams, goals, and work shifts</p>
         </div>
-        <Button onClick={handleCreateTeam} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Create Team
-        </Button>
+        <Dialog open={isCreateTeamOpen} onOpenChange={setIsCreateTeamOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Create Team
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Team</DialogTitle>
+              <DialogDescription>Add a new sales team to your organization</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="teamName">Team Name</Label>
+                <Input
+                  id="teamName"
+                  value={teamForm.name}
+                  onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                  placeholder="Enter team name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="teamDescription">Description</Label>
+                <Textarea
+                  id="teamDescription"
+                  value={teamForm.description}
+                  onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })}
+                  placeholder="Enter team description"
+                />
+              </div>
+              <div>
+                <Label>Lead Distribution</Label>
+                <Select value={teamForm.leadDistribution} onValueChange={(value: any) => setTeamForm({ ...teamForm, leadDistribution: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="round-robin">Round Robin</SelectItem>
+                    <SelectItem value="availability">Availability</SelectItem>
+                    <SelectItem value="workload">Workload</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateTeamOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateTeam}>Create Team</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="teams" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Teams
@@ -172,10 +334,6 @@ export const TeamsManagementPage: React.FC = () => {
           <TabsTrigger value="shifts" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Shifts
-          </TabsTrigger>
-          <TabsTrigger value="activities" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Clock Activities
           </TabsTrigger>
         </TabsList>
 
@@ -229,71 +387,43 @@ export const TeamsManagementPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="goals" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Goals</CardTitle>
-                <CardDescription>Set and track team performance goals</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {teams.map((team) => (
-                  <div key={team.id} className="border rounded-lg p-4 space-y-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Team Goals</CardTitle>
+              <CardDescription>Set and track team performance goals</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {teams.map((team) => (
+                <div key={team.id} className="border rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-center">
                     <h4 className="font-medium">{team.name}</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Monthly Goals</Label>
-                        <div className="space-y-1">
-                          <div>Sales: {team.goals.monthly.sales}</div>
-                          <div>Revenue: ${team.goals.monthly.revenue.toLocaleString()}</div>
-                          <div>Leads: {team.goals.monthly.leads}</div>
-                        </div>
+                    <Button variant="outline" size="sm" onClick={() => handleEditGoals(team)}>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit Goals
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Monthly Goals</Label>
+                      <div className="space-y-1">
+                        <div>Sales: {team.goals.monthly.sales}</div>
+                        <div>Revenue: ${team.goals.monthly.revenue.toLocaleString()}</div>
+                        <div>Leads: {team.goals.monthly.leads}</div>
                       </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Quarterly Goals</Label>
-                        <div className="space-y-1">
-                          <div>Sales: {team.goals.quarterly.sales}</div>
-                          <div>Revenue: ${team.goals.quarterly.revenue.toLocaleString()}</div>
-                          <div>Leads: {team.goals.quarterly.leads}</div>
-                        </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Quarterly Goals</Label>
+                      <div className="space-y-1">
+                        <div>Sales: {team.goals.quarterly.sales}</div>
+                        <div>Revenue: ${team.goals.quarterly.revenue.toLocaleString()}</div>
+                        <div>Leads: {team.goals.quarterly.leads}</div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Individual Goals</CardTitle>
-                <CardDescription>Set personal goals for team members</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {teams.flatMap(team => team.members).map((member) => (
-                  <div key={member.id} className="border rounded-lg p-4 space-y-3">
-                    <h4 className="font-medium">{member.name}</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Monthly Goals</Label>
-                        <div className="space-y-1">
-                          <div>Sales: {member.goals.monthly.sales}</div>
-                          <div>Revenue: ${member.goals.monthly.revenue.toLocaleString()}</div>
-                          <div>Calls: {member.goals.monthly.calls}</div>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Quarterly Goals</Label>
-                        <div className="space-y-1">
-                          <div>Sales: {member.goals.quarterly.sales}</div>
-                          <div>Revenue: ${member.goals.quarterly.revenue.toLocaleString()}</div>
-                          <div>Calls: {member.goals.quarterly.calls}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="shifts" className="space-y-4">
@@ -336,7 +466,7 @@ export const TeamsManagementPage: React.FC = () => {
                       </TableCell>
                       <TableCell>{member.shift.timezone}</TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditShift(member)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
@@ -347,67 +477,202 @@ export const TeamsManagementPage: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
-        <TabsContent value="activities" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Clock-in/out Activities</CardTitle>
-              <CardDescription>Track attendance and working hours</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <Select>
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Select employee" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teams.flatMap(team => team.members).map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Input type="date" className="w-48" />
-                  <Button variant="outline">Filter</Button>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Clock In</TableHead>
-                      <TableHead>Clock Out</TableHead>
-                      <TableHead>Break Time</TableHead>
-                      <TableHead>Total Hours</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {teams.flatMap(team => 
-                      team.members.flatMap(member =>
-                        member.clockActivities.map(activity => (
-                          <TableRow key={`${member.id}-${activity.id}`}>
-                            <TableCell>{member.name}</TableCell>
-                            <TableCell>{activity.date}</TableCell>
-                            <TableCell>{activity.clockIn}</TableCell>
-                            <TableCell>{activity.clockOut || 'In Progress'}</TableCell>
-                            <TableCell>{activity.breakTime} min</TableCell>
-                            <TableCell>{activity.totalHours}h</TableCell>
-                            <TableCell>{getStatusBadge(activity.status)}</TableCell>
-                          </TableRow>
-                        ))
-                      )
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
+
+      {/* Edit Team Dialog */}
+      <Dialog open={isEditTeamOpen} onOpenChange={setIsEditTeamOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Team</DialogTitle>
+            <DialogDescription>Update team information</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="editTeamName">Team Name</Label>
+              <Input
+                id="editTeamName"
+                value={teamForm.name}
+                onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="editTeamDescription">Description</Label>
+              <Textarea
+                id="editTeamDescription"
+                value={teamForm.description}
+                onChange={(e) => setTeamForm({ ...teamForm, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Lead Distribution</Label>
+              <Select value={teamForm.leadDistribution} onValueChange={(value: any) => setTeamForm({ ...teamForm, leadDistribution: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="round-robin">Round Robin</SelectItem>
+                  <SelectItem value="availability">Availability</SelectItem>
+                  <SelectItem value="workload">Workload</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditTeamOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdateTeam}>Update Team</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Goals Dialog */}
+      <Dialog open={isEditGoalsOpen} onOpenChange={setIsEditGoalsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Team Goals</DialogTitle>
+            <DialogDescription>Set monthly and quarterly goals for {selectedTeam?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium">Monthly Goals</h4>
+              <div>
+                <Label>Sales Target</Label>
+                <Input
+                  type="number"
+                  value={goalForm.monthly.sales}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    monthly: { ...goalForm.monthly, sales: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Revenue Target ($)</Label>
+                <Input
+                  type="number"
+                  value={goalForm.monthly.revenue}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    monthly: { ...goalForm.monthly, revenue: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Leads Target</Label>
+                <Input
+                  type="number"
+                  value={goalForm.monthly.leads}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    monthly: { ...goalForm.monthly, leads: Number(e.target.value) }
+                  })}
+                />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium">Quarterly Goals</h4>
+              <div>
+                <Label>Sales Target</Label>
+                <Input
+                  type="number"
+                  value={goalForm.quarterly.sales}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    quarterly: { ...goalForm.quarterly, sales: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Revenue Target ($)</Label>
+                <Input
+                  type="number"
+                  value={goalForm.quarterly.revenue}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    quarterly: { ...goalForm.quarterly, revenue: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label>Leads Target</Label>
+                <Input
+                  type="number"
+                  value={goalForm.quarterly.leads}
+                  onChange={(e) => setGoalForm({
+                    ...goalForm,
+                    quarterly: { ...goalForm.quarterly, leads: Number(e.target.value) }
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditGoalsOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdateGoals}>Update Goals</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Shift Dialog */}
+      <Dialog open={isEditShiftOpen} onOpenChange={setIsEditShiftOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Work Shift</DialogTitle>
+            <DialogDescription>Update shift schedule for {selectedMember?.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Time</Label>
+                <Input
+                  type="time"
+                  value={shiftForm.startTime}
+                  onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>End Time</Label>
+                <Input
+                  type="time"
+                  value={shiftForm.endTime}
+                  onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Timezone</Label>
+              <Select value={shiftForm.timezone} onValueChange={(value) => setShiftForm({ ...shiftForm, timezone: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {timezones.map((tz) => (
+                    <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Working Days</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {weekDays.map((day) => (
+                  <div key={day} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={day}
+                      checked={shiftForm.workingDays.includes(day)}
+                      onCheckedChange={(checked) => handleWorkingDayChange(day, !!checked)}
+                    />
+                    <Label htmlFor={day} className="text-sm">{day}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditShiftOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdateShift}>Update Shift</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
