@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -270,6 +271,7 @@ export const BillingLogsPage: React.FC = () => {
           { label: 'Invoices' },
         ]}
         badge={`${filteredLogs.length} invoices`}
+        showAddButton={false}
         showExportButton={true}
         onExportClick={handleExport}
       />
