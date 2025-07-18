@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,8 @@ import {
   AlertCircle,
   CheckCircle,
   Info,
-  Users
+  Users,
+  MessageCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CountrySelect } from '@/components/shared/CountrySelect';
@@ -436,7 +438,7 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
           </div>
 
           {/* Communication Permissions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-3">
               <Label className="text-sm font-medium text-green-700 dark:text-green-400">Email Permissions</Label>
               <div className="flex items-center space-x-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -464,6 +466,20 @@ export const EnhancedLeadDrawerForm: React.FC<EnhancedLeadDrawerFormProps> = ({
                     onCheckedChange={(checked) => setValue('do_not_call', checked as boolean)}
                   />
                   <Label className="text-sm cursor-pointer text-red-700 dark:text-red-400">Do Not Call (Legal flag)</Label>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-emerald-700 dark:text-emerald-400">WhatsApp Permissions</Label>
+              <div className="flex items-center space-x-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <Checkbox
+                  checked={watch('whatsapp_opt_in') || false}
+                  onCheckedChange={(checked) => setValue('whatsapp_opt_in', checked as boolean)}
+                />
+                <div className="flex items-center space-x-2">
+                  <MessageCircle className="h-4 w-4 text-emerald-600" />
+                  <Label className="text-sm cursor-pointer">Permission to send WhatsApp messages</Label>
                 </div>
               </div>
             </div>

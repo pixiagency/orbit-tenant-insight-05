@@ -1,3 +1,4 @@
+
 export interface Lead {
   id?: string;
   
@@ -18,6 +19,7 @@ export interface Lead {
   // Communication Preferences
   email_opt_in: boolean;
   phone_opt_in: boolean;
+  whatsapp_opt_in?: boolean;
   preferred_contact_method: string;
   do_not_call: boolean;
   
@@ -72,6 +74,7 @@ export const transformLegacyLead = (legacyLead: any): Lead => ({
                legacyLead.source || 'Website',
   email_opt_in: true,
   phone_opt_in: true,
+  whatsapp_opt_in: false,
   preferred_contact_method: 'Email',
   do_not_call: false,
   contact_owner: legacyLead.assignedTo || legacyLead.contact_owner || '',
