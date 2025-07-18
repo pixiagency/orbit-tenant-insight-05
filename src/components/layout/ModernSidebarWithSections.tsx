@@ -58,6 +58,7 @@ const superAdminMenuItems: MenuItem[] = [
   { title: 'Clients', url: '/super-admin/clients', icon: Building2 },
   { title: 'Subscriptions', url: '/super-admin/subscriptions', icon: CreditCard },
   { title: 'Activation Codes', url: '/super-admin/activation-codes', icon: Key },
+  { title: 'Discount Codes', url: '/super-admin/discount-codes', icon: Megaphone },
   { title: 'Users Management', url: '/super-admin/users', icon: Users },
   { title: 'Billing Logs', url: '/super-admin/billing', icon: FileSpreadsheet },
   { title: 'Website', url: '/website', icon: Globe, external: true },
