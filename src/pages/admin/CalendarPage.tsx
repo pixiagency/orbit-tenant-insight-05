@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
@@ -322,9 +323,9 @@ const CalendarPage: React.FC = () => {
                   defaultView="month"
                   views={['month', 'week', 'day', 'agenda']}
                   formats={{
-                    timeGutterFormat: 'h:mm A',
+                    timeGutterFormat: 'h:mm a',
                     eventTimeRangeFormat: ({ start, end }, culture, local) =>
-                      local.format(start, 'h:mm A', culture) + ' - ' + local.format(end, 'h:mm A', culture)
+                      local.format(start, 'h:mm a', culture) + ' - ' + local.format(end, 'h:mm a', culture)
                   }}
                 />
               </div>
