@@ -1224,325 +1224,327 @@ export const LeadsPage = () => {
     });
     setAppliedFilters([]);
   };
-  return <div className="p-6 space-y-6 bg-gray-50 min-h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm" onClick={() => navigate('/admin/leads/import')}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAddLead}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Contact
-          </Button>
-        </div>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ModernKPICard 
-          title="Total Contacts" 
-          value={leadStats.total.toString()} 
-          icon={Users} 
-          change={{
-            value: "+8 this week",
-            trend: "up"
-          }} 
-          gradient="from-blue-500 to-blue-600" 
-        />
-        <ModernKPICard 
-          title="Active Leads" 
-          value={leadStats.qualified.toString()} 
-          icon={Star} 
-          change={{
-            value: "High quality leads",
-            trend: "up"
-          }} 
-          gradient="from-green-500 to-green-600" 
-        />
-        <ModernKPICard 
-          title="Conversions" 
-          value={leadStats.converted.toString()} 
-          icon={TrendingUp} 
-          change={{
-            value: "Great results!",
-            trend: "up"
-          }} 
-          gradient="from-purple-500 to-purple-600" 
-        />
-        <ModernKPICard 
-          title="Pipeline Value" 
-          value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} 
-          icon={TrendingUp} 
-          change={{
-            value: "Strong pipeline",
-            trend: "up"
-          }} 
-          gradient="from-orange-500 to-orange-600" 
-        />
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Contact Filters</CardTitle>
-              <CardDescription>Filter and search your contacts</CardDescription>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
-                <Filter className="h-4 w-4 mr-2" />
-                Advanced Filters
-              </Button>
-              {getActiveFiltersCount() > 0 && <Button variant="outline" size="sm" onClick={clearFilters}>
-                  Clear Filters ({getActiveFiltersCount()})
-                </Button>}
-            </div>
+  return <div className="min-h-full bg-gray-50 dark:bg-gray-900">
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Contacts</h1>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div className="lg:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Search contacts..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/leads/import')}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAddLead}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Contact
+            </Button>
+          </div>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ModernKPICard 
+            title="Total Contacts" 
+            value={leadStats.total.toString()} 
+            icon={Users} 
+            change={{
+              value: "+8 this week",
+              trend: "up"
+            }} 
+            gradient="from-blue-500 to-blue-600" 
+          />
+          <ModernKPICard 
+            title="Active Leads" 
+            value={leadStats.qualified.toString()} 
+            icon={Star} 
+            change={{
+              value: "High quality leads",
+              trend: "up"
+            }} 
+            gradient="from-green-500 to-green-600" 
+          />
+          <ModernKPICard 
+            title="Conversions" 
+            value={leadStats.converted.toString()} 
+            icon={TrendingUp} 
+            change={{
+              value: "Great results!",
+              trend: "up"
+            }} 
+            gradient="from-purple-500 to-purple-600" 
+          />
+          <ModernKPICard 
+            title="Pipeline Value" 
+            value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} 
+            icon={TrendingUp} 
+            change={{
+              value: "Strong pipeline",
+              trend: "up"
+            }} 
+            gradient="from-orange-500 to-orange-600" 
+          />
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Contact Filters</CardTitle>
+                <CardDescription>Filter and search your contacts</CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
+                  <Filter className="h-4 w-4 mr-2" />
+                  Advanced Filters
+                </Button>
+                {getActiveFiltersCount() > 0 && <Button variant="outline" size="sm" onClick={clearFilters}>
+                    Clear Filters ({getActiveFiltersCount()})
+                  </Button>}
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="contacted">Contacted</SelectItem>
-                <SelectItem value="qualified">Qualified</SelectItem>
-                <SelectItem value="unqualified">Unqualified</SelectItem>
-                <SelectItem value="converted">Converted</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Sources" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="Website Form">Website Form</SelectItem>
-                <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                <SelectItem value="Trade Show">Trade Show</SelectItem>
-                <SelectItem value="Referral">Referral</SelectItem>
-                <SelectItem value="Cold Call">Cold Call</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Assignees" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assignees</SelectItem>
-                <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
-                <SelectItem value="Mike Chen">Mike Chen</SelectItem>
-                <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
-                <SelectItem value="David Brown">David Brown</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={scoreFilter} onValueChange={setScoreFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Scores" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Scores</SelectItem>
-                <SelectItem value="hot">Hot (80+)</SelectItem>
-                <SelectItem value="warm">Warm (60-79)</SelectItem>
-                <SelectItem value="cold">Cold (&lt;60)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Applied Filters Tags */}
-      {appliedFilters.length > 0 && <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-sm">Applied Filters</h3>
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Clear All
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {appliedFilters.map(filter => <Badge key={filter.id} variant="secondary" className="px-3 py-1">
-                  {filter.label}
-                  <button onClick={() => removeAppliedFilter(filter.id)} className="ml-2 hover:text-red-600">
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>)}
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+              <div className="lg:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input placeholder="Search contacts..." className="pl-10" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="qualified">Qualified</SelectItem>
+                  <SelectItem value="unqualified">Unqualified</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Sources" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="Website Form">Website Form</SelectItem>
+                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                  <SelectItem value="Trade Show">Trade Show</SelectItem>
+                  <SelectItem value="Referral">Referral</SelectItem>
+                  <SelectItem value="Cold Call">Cold Call</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Assignees" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Assignees</SelectItem>
+                  <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
+                  <SelectItem value="Mike Chen">Mike Chen</SelectItem>
+                  <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
+                  <SelectItem value="David Brown">David Brown</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Scores" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Scores</SelectItem>
+                  <SelectItem value="hot">Hot (80+)</SelectItem>
+                  <SelectItem value="warm">Warm (60-79)</SelectItem>
+                  <SelectItem value="cold">Cold (&lt;60)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
-        </Card>}
+        </Card>
 
-      {/* Advanced Filters Drawer */}
-      <FilterDrawer isOpen={showAdvancedFilters} onClose={() => setShowAdvancedFilters(false)} title="Advanced Lead Filters" filters={advancedFilters} onFiltersChange={setAdvancedFilters} onApplyFilters={() => {
-      console.log('Applying advanced filters:', advancedFilters);
-      const newAppliedFilters = [];
-
-      // Add basic filters
-      if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) {
-        newAppliedFilters.push({
-          id: 'dateRange',
-          label: `Date: ${advancedFilters.dateRange.from?.toLocaleDateString() || ''} - ${advancedFilters.dateRange.to?.toLocaleDateString() || ''}`,
-          type: 'dateRange'
-        });
-      }
-      if (advancedFilters.valueRange.min || advancedFilters.valueRange.max) {
-        newAppliedFilters.push({
-          id: 'valueRange',
-          label: `Value: $${advancedFilters.valueRange.min || '0'} - $${advancedFilters.valueRange.max || '∞'}`,
-          type: 'valueRange'
-        });
-      }
-      if (advancedFilters.scoreRange.min || advancedFilters.scoreRange.max) {
-        newAppliedFilters.push({
-          id: 'scoreRange',
-          label: `Score: ${advancedFilters.scoreRange.min || '0'} - ${advancedFilters.scoreRange.max || '100'}`,
-          type: 'scoreRange'
-        });
-      }
-      if (advancedFilters.assignedTo !== 'all') {
-        newAppliedFilters.push({
-          id: 'assignedTo',
-          label: `Assigned: ${advancedFilters.assignedTo}`,
-          type: 'assignedTo'
-        });
-      }
-      if (advancedFilters.source !== 'all') {
-        newAppliedFilters.push({
-          id: 'source',
-          label: `Source: ${advancedFilters.source}`,
-          type: 'source'
-        });
-      }
-      if (advancedFilters.lastActivity !== 'all') {
-        newAppliedFilters.push({
-          id: 'lastActivity',
-          label: `Activity: ${advancedFilters.lastActivity}`,
-          type: 'lastActivity'
-        });
-      }
-
-      // Add filter rules
-      if (advancedFilters.filterRules && advancedFilters.filterRules.length > 0) {
-        advancedFilters.filterRules.forEach((rule: any, index: number) => {
-          if (rule.field && rule.operator && rule.value) {
-            const fieldLabel = fieldOptions.find(f => f.value === rule.field)?.label || rule.field;
-            const operatorLabel = operatorOptions.find(o => o.value === rule.operator)?.label || rule.operator;
-            newAppliedFilters.push({
-              id: `rule_${rule.id}`,
-              label: `${fieldLabel} ${operatorLabel} "${rule.value}"`,
-              type: 'filterRule',
-              ruleId: rule.id
-            });
-          }
-        });
-      }
-      setAppliedFilters(newAppliedFilters);
-      setShowAdvancedFilters(false);
-    }}>
-        <LeadsAdvancedFilters isOpen={true} onClose={() => {}} filters={advancedFilters} onFiltersChange={setAdvancedFilters} onApplyFilters={() => {}} onClearFilters={() => {}} />
-      </FilterDrawer>
-
-      {/* Main Content */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div></div>
-            <div className="flex items-center space-x-2">
-              {/* Bulk Actions */}
-              {selectedLeads.length > 0 && <div className="flex items-center space-x-2 mr-4">
-                  <Badge variant="secondary">{selectedLeads.length} selected</Badge>
-                  <Button size="sm" variant="outline" onClick={handleBulkEmail}>
-                    <Mail className="h-4 w-4 mr-1" />
-                    Email
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={handleBulkAssign}>
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Assign
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => setShowBulkDeleteDialog(true)}>
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </div>}
-
-              {/* View Toggle - Two separate buttons */}
-              <div className="flex items-center space-x-1">
-                <Button
-                  variant={viewMode === 'table' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('table')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid3X3 className="h-4 w-4" />
+        {/* Applied Filters Tags */}
+        {appliedFilters.length > 0 && <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-sm">Applied Filters</h3>
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Clear All
                 </Button>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {appliedFilters.map(filter => <Badge key={filter.id} variant="secondary" className="px-3 py-1">
+                    {filter.label}
+                    <button onClick={() => removeAppliedFilter(filter.id)} className="ml-2 hover:text-red-600">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>)}
+              </div>
+            </CardContent>
+          </Card>}
+
+        {/* Advanced Filters Drawer */}
+        <FilterDrawer isOpen={showAdvancedFilters} onClose={() => setShowAdvancedFilters(false)} title="Advanced Lead Filters" filters={advancedFilters} onFiltersChange={setAdvancedFilters} onApplyFilters={() => {
+        console.log('Applying advanced filters:', advancedFilters);
+        const newAppliedFilters = [];
+
+        // Add basic filters
+        if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) {
+          newAppliedFilters.push({
+            id: 'dateRange',
+            label: `Date: ${advancedFilters.dateRange.from?.toLocaleDateString() || ''} - ${advancedFilters.dateRange.to?.toLocaleDateString() || ''}`,
+            type: 'dateRange'
+          });
+        }
+        if (advancedFilters.valueRange.min || advancedFilters.valueRange.max) {
+          newAppliedFilters.push({
+            id: 'valueRange',
+            label: `Value: $${advancedFilters.valueRange.min || '0'} - $${advancedFilters.valueRange.max || '∞'}`,
+            type: 'valueRange'
+          });
+        }
+        if (advancedFilters.scoreRange.min || advancedFilters.scoreRange.max) {
+          newAppliedFilters.push({
+            id: 'scoreRange',
+            label: `Score: ${advancedFilters.scoreRange.min || '0'} - ${advancedFilters.scoreRange.max || '100'}`,
+            type: 'scoreRange'
+          });
+        }
+        if (advancedFilters.assignedTo !== 'all') {
+          newAppliedFilters.push({
+            id: 'assignedTo',
+            label: `Assigned: ${advancedFilters.assignedTo}`,
+            type: 'assignedTo'
+          });
+        }
+        if (advancedFilters.source !== 'all') {
+          newAppliedFilters.push({
+            id: 'source',
+            label: `Source: ${advancedFilters.source}`,
+            type: 'source'
+          });
+        }
+        if (advancedFilters.lastActivity !== 'all') {
+          newAppliedFilters.push({
+            id: 'lastActivity',
+            label: `Activity: ${advancedFilters.lastActivity}`,
+            type: 'lastActivity'
+          });
+        }
+
+        // Add filter rules
+        if (advancedFilters.filterRules && advancedFilters.filterRules.length > 0) {
+          advancedFilters.filterRules.forEach((rule: any, index: number) => {
+            if (rule.field && rule.operator && rule.value) {
+              const fieldLabel = fieldOptions.find(f => f.value === rule.field)?.label || rule.field;
+              const operatorLabel = operatorOptions.find(o => o.value === rule.operator)?.label || rule.operator;
+              newAppliedFilters.push({
+                id: `rule_${rule.id}`,
+                label: `${fieldLabel} ${operatorLabel} "${rule.value}"`,
+                type: 'filterRule',
+                ruleId: rule.id
+              });
+            }
+          });
+        }
+        setAppliedFilters(newAppliedFilters);
+        setShowAdvancedFilters(false);
+      }}>
+          <LeadsAdvancedFilters isOpen={true} onClose={() => {}} filters={advancedFilters} onFiltersChange={setAdvancedFilters} onApplyFilters={() => {}} onClearFilters={() => {}} />
+        </FilterDrawer>
+
+        {/* Main Content */}
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div></div>
+              <div className="flex items-center space-x-2">
+                {/* Bulk Actions */}
+                {selectedLeads.length > 0 && <div className="flex items-center space-x-2 mr-4">
+                    <Badge variant="secondary">{selectedLeads.length} selected</Badge>
+                    <Button size="sm" variant="outline" onClick={handleBulkEmail}>
+                      <Mail className="h-4 w-4 mr-1" />
+                      Email
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleBulkAssign}>
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Assign
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setShowBulkDeleteDialog(true)}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>}
+
+                {/* View Toggle - Two separate buttons */}
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant={viewMode === 'table' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('table')}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {viewMode === 'table' ? <LeadsTable leads={filteredLeads} onEditLead={handleEditLead} onDeleteLead={handleDeleteLead} onConvertLead={handleConvertLead} selectedLeads={selectedLeads} onSelectLead={handleSelectLead} onSelectAll={handleSelectAll} /> : <LeadsGrid leads={filteredLeads} onEditLead={handleEditLead} onDeleteLead={handleDeleteLead} onConvertLead={handleConvertLead} />}
+          </CardHeader>
+          <CardContent>
+            {viewMode === 'table' ? <LeadsTable leads={filteredLeads} onEditLead={handleEditLead} onDeleteLead={handleDeleteLead} onConvertLead={handleConvertLead} selectedLeads={selectedLeads} onSelectLead={handleSelectLead} onSelectAll={handleSelectAll} /> : <LeadsGrid leads={filteredLeads} onEditLead={handleEditLead} onDeleteLead={handleDeleteLead} onConvertLead={handleConvertLead} />}
 
-          {filteredLeads.length === 0 && <div className="text-center py-12">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No leads found matching your filters</p>
-              <Button onClick={clearFilters} variant="outline" className="mt-2">
-                Clear Filters
-              </Button>
-            </div>}
-        </CardContent>
-      </Card>
+            {filteredLeads.length === 0 && <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No leads found matching your filters</p>
+                <Button onClick={clearFilters} variant="outline" className="mt-2">
+                  Clear Filters
+                </Button>
+              </div>}
+          </CardContent>
+        </Card>
 
-      {/* Lead Drawer Form */}
-      <LeadDrawerForm isOpen={showLeadForm} onClose={() => {
-      setShowLeadForm(false);
-      setSelectedLead(null);
-    }} onSubmit={handleSaveLead} lead={selectedLead} />
+        {/* Lead Drawer Form */}
+        <LeadDrawerForm isOpen={showLeadForm} onClose={() => {
+        setShowLeadForm(false);
+        setSelectedLead(null);
+      }} onSubmit={handleSaveLead} lead={selectedLead} />
 
-      {/* Export Modal */}
-      <LeadsExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} leads={filteredLeads} selectedLeads={selectedLeads} />
+        {/* Export Modal */}
+        <LeadsExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} leads={filteredLeads} selectedLeads={selectedLeads} />
 
-      {/* Import Modal */}
-      <LeadsImportModal isOpen={showImportModal} onClose={() => setShowImportModal(false)} onImport={handleImportLeads} />
- {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Selected Leads</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {selectedLeads.length} selected leads? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700">
-              Delete Leads
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Import Modal */}
+        <LeadsImportModal isOpen={showImportModal} onClose={() => setShowImportModal(false)} onImport={handleImportLeads} />
+   {/* Bulk Delete Confirmation Dialog */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Selected Leads</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {selectedLeads.length} selected leads? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700">
+                Delete Leads
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>;
 };
