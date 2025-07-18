@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -107,10 +106,14 @@ export const TeamsManagementPage: React.FC = () => {
   const [isEditShiftOpen, setIsEditShiftOpen] = useState(false);
 
   // Form states
-  const [teamForm, setTeamForm] = useState({
+  const [teamForm, setTeamForm] = useState<{
+    name: string;
+    description: string;
+    leadDistribution: 'round-robin' | 'availability' | 'workload';
+  }>({
     name: '',
     description: '',
-    leadDistribution: 'round-robin' as const
+    leadDistribution: 'round-robin'
   });
 
   const [goalForm, setGoalForm] = useState<TeamGoals>({
@@ -301,7 +304,7 @@ export const TeamsManagementPage: React.FC = () => {
               </div>
               <div>
                 <Label>Lead Distribution</Label>
-                <Select value={teamForm.leadDistribution} onValueChange={(value: any) => setTeamForm({ ...teamForm, leadDistribution: value })}>
+                <Select value={teamForm.leadDistribution} onValueChange={(value: 'round-robin' | 'availability' | 'workload') => setTeamForm({ ...teamForm, leadDistribution: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -505,7 +508,7 @@ export const TeamsManagementPage: React.FC = () => {
             </div>
             <div>
               <Label>Lead Distribution</Label>
-              <Select value={teamForm.leadDistribution} onValueChange={(value: any) => setTeamForm({ ...teamForm, leadDistribution: value })}>
+              <Select value={teamForm.leadDistribution} onValueChange={(value: 'round-robin' | 'availability' | 'workload') => setTeamForm({ ...teamForm, leadDistribution: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
