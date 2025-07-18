@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { Percent, Users, CheckCircle, Clock, Filter, Search, X } from 'lucide-react';
 import { PageHeader } from '../../components/layout/PageHeader';
-import { ActivationCodeTable } from '../../components/activation-codes/ActivationCodeTable';
-import { ActivationCodeDrawerForm } from '../../components/activation-codes/ActivationCodeDrawerForm';
+import { DiscountCodeTable } from '../../components/activation-codes/DiscountCodeTable';
+import { DiscountCodeDrawerForm } from '../../components/activation-codes/DiscountCodeDrawerForm';
 import { ActivationCodeAdvancedFilters } from '../../components/activation-codes/ActivationCodeAdvancedFilters';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
 import { ActivationCode } from '../../types/superadmin';
@@ -150,17 +150,9 @@ export const DiscountCodesPage = () => {
     const matchesUsageRange = (!advancedFilters.usageRange.min || code.usageCount >= parseInt(advancedFilters.usageRange.min)) &&
       (!advancedFilters.usageRange.max || code.usageCount <= parseInt(advancedFilters.usageRange.max));
 
-    // Validity period filter
-    const matchesValidityPeriod = advancedFilters.validityPeriod === 'all' || 
-      (advancedFilters.validityPeriod === '7-days' && code.validityDays === 7) ||
-      (advancedFilters.validityPeriod === '30-days' && code.validityDays === 30) ||
-      (advancedFilters.validityPeriod === '90-days' && code.validityDays === 90) ||
-      (advancedFilters.validityPeriod === '1-year' && code.validityDays === 365) ||
-      (advancedFilters.validityPeriod === 'unlimited' && code.validityDays === 0);
-
     return matchesSearch && matchesStatus && matchesUsageType && matchesPackage &&
            matchesAdvancedStatus && matchesAdvancedPackage && matchesAdvancedUsageType &&
-           matchesCreatedBy && matchesSource && matchesDateRange && matchesUsageRange && matchesValidityPeriod;
+           matchesCreatedBy && matchesSource && matchesDateRange && matchesUsageRange;
   });
 
   const activeFiltersCount = [
@@ -174,7 +166,6 @@ export const DiscountCodesPage = () => {
       advancedFilters.usageType !== 'all' ||
       advancedFilters.createdBy !== 'all' ||
       advancedFilters.source !== 'all' ||
-      advancedFilters.validityPeriod !== 'all' ||
       advancedFilters.dateRange.from ||
       advancedFilters.dateRange.to ||
       advancedFilters.usageRange.min ||
@@ -225,7 +216,7 @@ export const DiscountCodesPage = () => {
           { label: 'Super Admin', href: '/super-admin' },
           { label: 'Discount Codes' },
         ]}
-        addButtonText="Generate Codes"
+        addButtonText="Create Discount Code"
         onAddClick={handleGenerateCodes}
         badge={`${filteredCodes.length} codes`}
       />
@@ -337,8 +328,6 @@ export const DiscountCodesPage = () => {
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="used">Used</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
-                    <SelectItem value="revoked">Revoked</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -388,7 +377,7 @@ export const DiscountCodesPage = () => {
       />
 
       {/* Discount Codes Table */}
-      <ActivationCodeTable
+      <DiscountCodeTable
         codes={filteredCodes}
         selectedCodes={selectedCodes}
         onSelectionChange={setSelectedCodes}
@@ -396,12 +385,12 @@ export const DiscountCodesPage = () => {
         onBulkStatusChange={handleBulkStatusChange}
       />
 
-      {/* Generate Codes Drawer */}
-      <ActivationCodeDrawerForm
+      {/* Create Discount Code Drawer */}
+      <DiscountCodeDrawerForm
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onSave={(data) => {
-          console.log('Generate discount codes:', data);
+          console.log('Create discount code:', data);
           setIsDrawerOpen(false);
         }}
       />
