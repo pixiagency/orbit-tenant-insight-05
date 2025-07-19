@@ -39,11 +39,6 @@ import {
 const activationCodeSchema = z.object({
   code: z.string().min(1, 'Activation code is required').min(6, 'Code must be at least 6 characters'),
   packageId: z.string().min(1, 'Package is required'),
-  usageType: z.enum(['one-time', 'multi-use', 'unlimited'], {
-    required_error: 'Usage type is required',
-  }).optional(),
-  usageLimit: z.number().min(1, 'Usage limit must be at least 1').optional(),
-  usersLimit: z.number().min(1, 'Users limit must be at least 1').optional(),
   validityDays: z.number().min(1, 'Validity days must be at least 1').optional(),
   expirationDate: z.string().optional(),
   status: z.enum(['active', 'expired'], {
@@ -54,14 +49,6 @@ const activationCodeSchema = z.object({
   codeCount: z.number().min(1, 'Must generate at least 1 code').max(1000, 'Cannot generate more than 1000 codes at once').optional(),
   codeParts: z.number().min(3, 'Code must have at least 3 parts').max(6, 'Code cannot have more than 6 parts').optional(),
   partLength: z.number().min(3, 'Each part must be at least 3 characters').max(6, 'Each part cannot be more than 6 characters').optional(),
-}).refine((data) => {
-  if (data.usageType === 'multi-use' && !data.usageLimit) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Usage limit is required for multi-use codes',
-  path: ['usageLimit'],
 });
 
 interface ActivationCodeDrawerFormProps {
@@ -111,9 +98,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
     defaultValues: {
       code: code?.code || '',
       packageId: code?.packageId || '',
-      usageType: code?.usageType || 'one-time',
-      usageLimit: code?.usageLimit || undefined,
-      usersLimit: code?.usersLimit || 1,
       validityDays: code?.validityDays || undefined,
       expirationDate: code?.expirationDate ? code.expirationDate.split('T')[0] : '',
       status: code?.status === 'used' ? 'active' : (code?.status || 'active'),
@@ -125,7 +109,7 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
     },
   });
 
-  const watchUsageType = form.watch('usageType');
+  
   const watchCodeParts = form.watch('codeParts');
   const watchPartLength = form.watch('partLength');
 
@@ -139,9 +123,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
       form.reset({
         code: code.code,
         packageId: code.packageId || '',
-        usageType: code.usageType,
-        usageLimit: code.usageLimit,
-        usersLimit: code.usersLimit,
         validityDays: code.validityDays,
         expirationDate: code.expirationDate ? code.expirationDate.split('T')[0] : '',
         status: code.status === 'used' ? 'active' : (code.status === 'expired' ? 'expired' : 'active'),
@@ -155,12 +136,8 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
   }, [code, form]);
 
   const handleSubmit = (data: any, shouldDownload: boolean = false) => {
-    // Clean up data based on usage type - always set to activation type
+    // Clean up data - always set to activation type
     const cleanedData = { ...data, type: 'activation' };
-    
-    if (data.usageType !== 'multi-use') {
-      cleanedData.usageLimit = undefined;
-    }
     
     // Convert array back to single value for backward compatibility
     cleanedData.source = data.sources[0];
@@ -411,86 +388,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="usageType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Usage Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select usage type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="one-time">One-time Use</SelectItem>
-                    <SelectItem value="multi-use">Multi-use (Limited)</SelectItem>
-                    <SelectItem value="unlimited">Unlimited Use</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  {watchUsageType === 'one-time' && 'Code can only be used once'}
-                  {watchUsageType === 'multi-use' && 'Code can be used multiple times up to the limit'}
-                  {watchUsageType === 'unlimited' && 'Code can be used unlimited times'}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {watchUsageType === 'multi-use' && (
-            <FormField
-              control={form.control}
-              name="usageLimit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Usage Limit</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      min="1"
-                      placeholder="Enter maximum uses"
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Maximum number of times this code can be used
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          <FormField
-            control={form.control}
-            name="usersLimit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Users Limit</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="number"
-                    min="1"
-                    placeholder="Enter users limit"
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                    disabled={watchUsageType === 'unlimited'}
-                  />
-                </FormControl>
-                <FormDescription>
-                  {watchUsageType === 'unlimited' 
-                    ? 'Users limit is disabled for unlimited usage'
-                    : 'Maximum number of users allowed for activated subscriptions'
-                  }
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
