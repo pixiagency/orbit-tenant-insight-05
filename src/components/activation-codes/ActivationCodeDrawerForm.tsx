@@ -49,10 +49,6 @@ const activationCodeSchema = z.object({
   status: z.enum(['active', 'expired'], {
     required_error: 'Status is required',
   }),
-  type: z.enum(['activation', 'discount'], {
-    required_error: 'Type is required',
-  }),
-  discountPercentage: z.number().min(1, 'Discount must be at least 1%').max(100, 'Discount cannot exceed 100%').optional(),
   trialDays: z.number().min(1, 'Trial days must be at least 1').optional(),
   sources: z.array(z.string()).min(1, 'At least one source is required'),
   codeCount: z.number().min(1, 'Must generate at least 1 code').max(1000, 'Cannot generate more than 1000 codes at once').optional(),
@@ -66,14 +62,6 @@ const activationCodeSchema = z.object({
 }, {
   message: 'Usage limit is required for multi-use codes',
   path: ['usageLimit'],
-}).refine((data) => {
-  if (data.type === 'discount' && !data.discountPercentage) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Discount percentage is required for discount codes',
-  path: ['discountPercentage'],
 });
 
 interface ActivationCodeDrawerFormProps {
@@ -129,8 +117,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
       validityDays: code?.validityDays || undefined,
       expirationDate: code?.expirationDate ? code.expirationDate.split('T')[0] : '',
       status: code?.status === 'used' ? 'active' : (code?.status || 'active'),
-      type: code?.type || 'activation',
-      discountPercentage: code?.discountPercentage || undefined,
       trialDays: code?.trialDays || undefined,
       sources: code?.source ? [code.source] : [],
       codeCount: 1,
@@ -140,7 +126,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
   });
 
   const watchUsageType = form.watch('usageType');
-  const watchType = form.watch('type');
   const watchCodeParts = form.watch('codeParts');
   const watchPartLength = form.watch('partLength');
 
@@ -160,8 +145,6 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
         validityDays: code.validityDays,
         expirationDate: code.expirationDate ? code.expirationDate.split('T')[0] : '',
         status: code.status === 'used' ? 'active' : (code.status === 'expired' ? 'expired' : 'active'),
-        type: code.type || 'activation',
-        discountPercentage: code.discountPercentage,
         trialDays: code.trialDays,
         sources: initialSources,
         codeCount: 1,
@@ -172,20 +155,11 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
   }, [code, form]);
 
   const handleSubmit = (data: any, shouldDownload: boolean = false) => {
-    // Clean up data based on usage type and code type
-    const cleanedData = { ...data };
+    // Clean up data based on usage type - always set to activation type
+    const cleanedData = { ...data, type: 'activation' };
     
     if (data.usageType !== 'multi-use') {
       cleanedData.usageLimit = undefined;
-    }
-    
-    if (data.type !== 'discount') {
-      cleanedData.discountPercentage = undefined;
-    }
-
-    if (data.type === 'activation') {
-      delete cleanedData.usageType;
-      delete cleanedData.usersLimit;
     }
     
     // Convert array back to single value for backward compatibility
@@ -195,11 +169,7 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
   };
 
   const generateRandomCode = () => {
-    if (watchType === 'discount') {
-      // Generate single part code for discount
-      const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-      form.setValue('code', random);
-    } else if (isBulkGeneration) {
+    if (isBulkGeneration) {
       // Generate a sample code with parts for activation codes
       const parts = [];
       for (let i = 0; i < watchCodeParts; i++) {
@@ -244,16 +214,16 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
 
   const getFormTitle = () => {
     if (code) {
-      return watchType === 'discount' ? 'Edit Discount Code' : 'Edit Activation Code';
+      return 'Edit Activation Code';
     }
-    return watchType === 'discount' ? 'Create Discount Code' : 'Create Activation Code';
+    return 'Create Activation Code';
   };
 
   const getFormDescription = () => {
     if (code) {
-      return watchType === 'discount' ? 'Update discount code details' : 'Update activation code details';
+      return 'Update activation code details';
     }
-    return watchType === 'discount' ? 'Create a new discount code for packages' : 'Create a new activation code for packages';
+    return 'Create a new activation code for packages';
   };
 
   return (
@@ -264,39 +234,13 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
       description={getFormDescription()}
       onSave={() => form.handleSubmit((data) => handleSubmit(data, false))()}
       isLoading={isLoading}
-      saveButtonText={isBulkGeneration && watchType === 'activation' ? 'Save & Download' : 'Save'}
-      onAlternateSave={isBulkGeneration && watchType === 'activation' ? () => form.handleSubmit((data) => handleSubmit(data, true))() : undefined}
+      saveButtonText={isBulkGeneration ? 'Save & Download' : 'Save'}
+      onAlternateSave={isBulkGeneration ? () => form.handleSubmit((data) => handleSubmit(data, true))() : undefined}
       alternateSaveText="Save & Download"
     >
       <Form {...form}>
         <form className="space-y-6">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Code Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select code type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="activation">Activation Code</SelectItem>
-                    <SelectItem value="discount">Discount Code</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  {watchType === 'activation' && 'Standard activation code for package access'}
-                  {watchType === 'discount' && 'Discount code with percentage off pricing'}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {!code && watchType === 'activation' && (
+          {!code && (
             <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <Checkbox
                 checked={isBulkGeneration}
@@ -308,7 +252,7 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
             </div>
           )}
 
-          {isBulkGeneration && !code && watchType === 'activation' && (
+          {isBulkGeneration && !code && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <FormField
                 control={form.control}
@@ -416,7 +360,7 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {isBulkGeneration ? 'Sample Code' : (watchType === 'discount' ? 'Discount Code' : 'Activation Code')}
+                  {isBulkGeneration ? 'Sample Code' : 'Activation Code'}
                 </FormLabel>
                 <div className="flex space-x-2">
                   <FormControl>
@@ -439,7 +383,7 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
                 <FormDescription>
                   {isBulkGeneration 
                     ? 'This shows the format for generated codes. Actual codes will have random characters.'
-                    : `This code will be used by customers to ${watchType === 'discount' ? 'get a discount on' : 'activate'} their subscription`
+                    : 'This code will be used by customers to activate their subscription'
                   }
                 </FormDescription>
                 <FormMessage />
@@ -472,113 +416,85 @@ export const ActivationCodeDrawerForm: React.FC<ActivationCodeDrawerFormProps> =
             )}
           />
 
-          {watchType === 'discount' && (
-            <>
-              <FormField
-                control={form.control}
-                name="discountPercentage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Discount Percentage</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        min="1"
-                        max="100"
-                        placeholder="Enter discount percentage"
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Discount percentage (1-100%)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <FormField
+            control={form.control}
+            name="usageType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Usage Type</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select usage type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="one-time">One-time Use</SelectItem>
+                    <SelectItem value="multi-use">Multi-use (Limited)</SelectItem>
+                    <SelectItem value="unlimited">Unlimited Use</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {watchUsageType === 'one-time' && 'Code can only be used once'}
+                  {watchUsageType === 'multi-use' && 'Code can be used multiple times up to the limit'}
+                  {watchUsageType === 'unlimited' && 'Code can be used unlimited times'}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              <FormField
-                control={form.control}
-                name="usageType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usage Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select usage type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="one-time">One-time Use</SelectItem>
-                        <SelectItem value="multi-use">Multi-use (Limited)</SelectItem>
-                        <SelectItem value="unlimited">Unlimited Use</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      {watchUsageType === 'one-time' && 'Code can only be used once'}
-                      {watchUsageType === 'multi-use' && 'Code can be used multiple times up to the limit'}
-                      {watchUsageType === 'unlimited' && 'Code can be used unlimited times'}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {watchUsageType === 'multi-use' && (
-                <FormField
-                  control={form.control}
-                  name="usageLimit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Usage Limit</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min="1"
-                          placeholder="Enter maximum uses"
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Maximum number of times this code can be used
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          {watchUsageType === 'multi-use' && (
+            <FormField
+              control={form.control}
+              name="usageLimit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Usage Limit</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      min="1"
+                      placeholder="Enter maximum uses"
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Maximum number of times this code can be used
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
               )}
-
-              <FormField
-                control={form.control}
-                name="usersLimit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Users Limit</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="number"
-                        min="1"
-                        placeholder="Enter users limit"
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        disabled={watchUsageType === 'unlimited'}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {watchUsageType === 'unlimited' 
-                        ? 'Users limit is disabled for unlimited usage'
-                        : 'Maximum number of users allowed for activated subscriptions'
-                      }
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
+            />
           )}
+
+          <FormField
+            control={form.control}
+            name="usersLimit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Users Limit</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="number"
+                    min="1"
+                    placeholder="Enter users limit"
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    disabled={watchUsageType === 'unlimited'}
+                  />
+                </FormControl>
+                <FormDescription>
+                  {watchUsageType === 'unlimited' 
+                    ? 'Users limit is disabled for unlimited usage'
+                    : 'Maximum number of users allowed for activated subscriptions'
+                  }
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
