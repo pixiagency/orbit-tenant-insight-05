@@ -38,7 +38,8 @@ import { InboxPage } from "./pages/admin/InboxPage";
 import { CallLogsPage } from "./pages/admin/CallLogsPage";
 import AdsAIPage from "./pages/admin/AdsAIPage";
 import AutomationPage from "./pages/admin/AutomationPage";
-import { FormsPage } from "./pages/admin/FormsPage";
+import { FormsPage } from "./pages/admin/settings/FormsPage";
+import { FormPublicPage } from "./components/forms/FormPublicPage";
 import { AIAssistantPage } from "./pages/admin/AIAssistantPage";
 import { ReportsPage } from "./pages/admin/ReportsPage";
 import { NotificationsPage } from "./pages/admin/NotificationsPage";
@@ -94,6 +95,7 @@ const App = () => {
                 
                 {/* Public Routes */}
                 <Route path="/signup" element={<SignupForm onSuccess={() => {}} />} />
+                <Route path="/forms/:formId" element={<FormPublicPage />} />
                 
                 {/* Super Admin Routes */}
                 <Route path="/super-admin/*" element={

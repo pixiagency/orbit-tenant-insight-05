@@ -9,8 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Plus, Edit, Eye, Copy, Trash2, ExternalLink, Settings } from 'lucide-react';
+import { FormActionsConfig } from '@/components/forms/FormActionsConfig';
+import { FormPreview } from '@/components/forms/FormPreview';
+import { Plus, Edit, Eye, Copy, Trash2, ExternalLink, Settings, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FormField {
@@ -22,11 +25,20 @@ interface FormField {
   options?: string[];
 }
 
+interface FormAction {
+  id: string;
+  type: 'email' | 'webhook' | 'redirect' | 'notification';
+  name: string;
+  config: Record<string, any>;
+  enabled: boolean;
+}
+
 interface LeadForm {
   id: string;
   name: string;
   description: string;
   fields: FormField[];
+  actions: FormAction[];
   isActive: boolean;
   embedCode: string;
   submissions: number;
@@ -46,6 +58,8 @@ export const FormsPage: React.FC = () => {
     { id: '3', name: 'phone', label: 'Phone', type: 'phone', required: false }
   ]);
 
+  const [formActions, setFormActions] = useState<FormAction[]>([]);
+
   const [existingForms] = useState<LeadForm[]>([
     {
       id: '1',
@@ -55,6 +69,9 @@ export const FormsPage: React.FC = () => {
         { id: '1', name: 'name', label: 'Full Name', type: 'text', required: true },
         { id: '2', name: 'email', label: 'Email', type: 'email', required: true },
         { id: '3', name: 'message', label: 'Message', type: 'textarea', required: true }
+      ],
+      actions: [
+        { id: '1', type: 'email', name: 'Email Notification', config: { to: 'admin@example.com', subject: 'New contact form submission' }, enabled: true }
       ],
       isActive: true,
       embedCode: '<iframe src="https://forms.yoursite.com/contact-us" width="100%" height="500px"></iframe>',
@@ -71,6 +88,10 @@ export const FormsPage: React.FC = () => {
         { id: '2', name: 'email', label: 'Business Email', type: 'email', required: true },
         { id: '3', name: 'company', label: 'Company', type: 'text', required: true },
         { id: '4', name: 'phone', label: 'Phone', type: 'phone', required: false }
+      ],
+      actions: [
+        { id: '1', type: 'email', name: 'Demo Team Notification', config: { to: 'demo@example.com', subject: 'New demo request' }, enabled: true },
+        { id: '2', type: 'webhook', name: 'CRM Integration', config: { url: 'https://api.crm.com/leads', method: 'POST' }, enabled: true }
       ],
       isActive: true,
       embedCode: '<iframe src="https://forms.yoursite.com/demo-request" width="100%" height="600px"></iframe>',
@@ -98,6 +119,12 @@ export const FormsPage: React.FC = () => {
     setShowCreateForm(false);
     setFormName('');
     setFormDescription('');
+    setFormActions([]);
+    setFormFields([
+      { id: '1', name: 'name', label: 'Full Name', type: 'text', required: true },
+      { id: '2', name: 'email', label: 'Email', type: 'email', required: true },
+      { id: '3', name: 'phone', label: 'Phone', type: 'phone', required: false }
+    ]);
   };
 
   const addField = () => {
@@ -143,83 +170,112 @@ export const FormsPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle>Create New Form</CardTitle>
-            <CardDescription>Build a custom lead capture form</CardDescription>
+            <CardDescription>Build a custom lead capture form with automated actions</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="formName">Form Name</Label>
-                <Input
-                  id="formName"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Enter form name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="formDesc">Description</Label>
-                <Input
-                  id="formDesc"
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Brief description"
-                />
-              </div>
-            </div>
+          <CardContent>
+            <Tabs defaultValue="basic" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="actions">Actions</TabsTrigger>
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+              </TabsList>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-lg font-medium">Form Fields</h4>
-                <Button onClick={addField} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Field
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {formFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                    <div className="flex-1 grid grid-cols-4 gap-3">
-                      <Input
-                        value={field.label}
-                        onChange={(e) => updateField(field.id, { label: e.target.value })}
-                        placeholder="Field Label"
-                      />
-                      <Select value={field.type} onValueChange={(value: any) => updateField(field.id, { type: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="text">Text</SelectItem>
-                          <SelectItem value="email">Email</SelectItem>
-                          <SelectItem value="phone">Phone</SelectItem>
-                          <SelectItem value="textarea">Textarea</SelectItem>
-                          <SelectItem value="dropdown">Dropdown</SelectItem>
-                          <SelectItem value="checkbox">Checkbox</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={field.required}
-                          onCheckedChange={(checked) => updateField(field.id, { required: checked })}
-                        />
-                        <Label>Required</Label>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeField(field.id)}
-                        disabled={formFields.length === 1}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              <TabsContent value="basic" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="formName">Form Name</Label>
+                    <Input
+                      id="formName"
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      placeholder="Enter form name"
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="formDesc">Description</Label>
+                    <Input
+                      id="formDesc"
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="Brief description"
+                    />
+                  </div>
+                </div>
 
-            <div className="flex justify-end space-x-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-medium">Form Fields</h4>
+                    <Button onClick={addField} size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Field
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {formFields.map((field) => (
+                      <div key={field.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                        <div className="flex-1 grid grid-cols-4 gap-3">
+                          <Input
+                            value={field.label}
+                            onChange={(e) => updateField(field.id, { label: e.target.value })}
+                            placeholder="Field Label"
+                          />
+                          <Select value={field.type} onValueChange={(value: any) => updateField(field.id, { type: value })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="email">Email</SelectItem>
+                              <SelectItem value="phone">Phone</SelectItem>
+                              <SelectItem value="textarea">Textarea</SelectItem>
+                              <SelectItem value="dropdown">Dropdown</SelectItem>
+                              <SelectItem value="checkbox">Checkbox</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={field.required}
+                              onCheckedChange={(checked) => updateField(field.id, { required: checked })}
+                            />
+                            <Label>Required</Label>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeField(field.id)}
+                            disabled={formFields.length === 1}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="actions">
+                <FormActionsConfig 
+                  actions={formActions} 
+                  onChange={setFormActions} 
+                />
+              </TabsContent>
+
+              <TabsContent value="preview">
+                <FormPreview 
+                  form={{
+                    id: 'preview',
+                    name: formName || 'New Form',
+                    description: formDescription,
+                    fields: formFields,
+                    actions: formActions
+                  }}
+                />
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-end space-x-2 pt-6 border-t">
               <Button variant="outline" onClick={() => setShowCreateForm(false)}>
                 Cancel
               </Button>
@@ -244,8 +300,8 @@ export const FormsPage: React.FC = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Submissions</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead>Automation</TableHead>
                 <TableHead>Actions</TableHead>
+                <TableHead>Manage</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -265,11 +321,17 @@ export const FormsPage: React.FC = () => {
                   <TableCell>{form.submissions}</TableCell>
                   <TableCell>{form.createdAt}</TableCell>
                   <TableCell>
-                    {form.automation && (
-                      <Badge variant="outline" className="text-xs">
-                        {form.automation}
-                      </Badge>
-                    )}
+                    <div className="flex flex-wrap gap-1">
+                      {form.actions.filter(action => action.enabled).map(action => (
+                        <Badge key={action.id} variant="outline" className="text-xs">
+                          <Zap className="h-3 w-3 mr-1" />
+                          {action.type}
+                        </Badge>
+                      ))}
+                      {form.actions.filter(action => action.enabled).length === 0 && (
+                        <span className="text-sm text-muted-foreground">None</span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
