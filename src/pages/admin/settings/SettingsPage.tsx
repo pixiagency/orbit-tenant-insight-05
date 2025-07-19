@@ -12,6 +12,7 @@ import { IntegrationsPage } from './IntegrationsPage';
 import { NotificationsPage } from './NotificationsPage';
 import { AutomationPage } from './AutomationPage';
 import { FormsPage } from './FormsPage';
+import { FormCreatePage } from './FormCreatePage';
 import { ReportingAIPage } from './ReportingAIPage';
 import { AIModulePage } from './AIModulePage';
 import { CallLogsSettingsPage } from './CallLogsSettingsPage';
@@ -34,6 +35,7 @@ export const SettingsPage: React.FC = () => {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/automation" element={<AutomationPage />} />
         <Route path="/forms" element={<FormsPage />} />
+        <Route path="/forms/create" element={<FormCreatePage />} />
         <Route path="/ai-module" element={<AIModulePage />} />
         <Route path="/reporting" element={<ReportingAIPage />} />
         <Route path="/calls" element={<CallLogsSettingsPage />} />

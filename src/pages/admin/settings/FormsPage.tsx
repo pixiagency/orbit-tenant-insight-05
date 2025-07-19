@@ -1,19 +1,14 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { FormActionsConfig } from '@/components/forms/FormActionsConfig';
-import { FormPreview } from '@/components/forms/FormPreview';
-import { Plus, Edit, Eye, Copy, Trash2, ExternalLink, Settings, Zap } from 'lucide-react';
+import { Edit, Eye, Copy, ExternalLink, Settings, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FormField {
@@ -47,18 +42,9 @@ interface LeadForm {
 }
 
 export const FormsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedForm, setSelectedForm] = useState<LeadForm | null>(null);
-  const [formName, setFormName] = useState('');
-  const [formDescription, setFormDescription] = useState('');
-  const [formFields, setFormFields] = useState<FormField[]>([
-    { id: '1', name: 'name', label: 'Full Name', type: 'text', required: true },
-    { id: '2', name: 'email', label: 'Email', type: 'email', required: true },
-    { id: '3', name: 'phone', label: 'Phone', type: 'phone', required: false }
-  ]);
-
-  const [formActions, setFormActions] = useState<FormAction[]>([]);
 
   const [existingForms] = useState<LeadForm[]>([
     {
@@ -101,53 +87,6 @@ export const FormsPage: React.FC = () => {
     }
   ]);
 
-  const handleCreateForm = () => {
-    if (!formName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a form name",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Form created successfully",
-    });
-    
-    setShowCreateForm(false);
-    setFormName('');
-    setFormDescription('');
-    setFormActions([]);
-    setFormFields([
-      { id: '1', name: 'name', label: 'Full Name', type: 'text', required: true },
-      { id: '2', name: 'email', label: 'Email', type: 'email', required: true },
-      { id: '3', name: 'phone', label: 'Phone', type: 'phone', required: false }
-    ]);
-  };
-
-  const addField = () => {
-    const newField: FormField = {
-      id: Date.now().toString(),
-      name: `field_${Date.now()}`,
-      label: 'New Field',
-      type: 'text',
-      required: false
-    };
-    setFormFields([...formFields, newField]);
-  };
-
-  const updateField = (fieldId: string, updates: Partial<FormField>) => {
-    setFormFields(formFields.map(field => 
-      field.id === fieldId ? { ...field, ...updates } : field
-    ));
-  };
-
-  const removeField = (fieldId: string) => {
-    setFormFields(formFields.filter(field => field.id !== fieldId));
-  };
-
   const copyEmbedCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast({
@@ -157,135 +96,14 @@ export const FormsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <PageHeader
         title="Forms Settings"
         description="Create and manage embedded lead capture forms"
         showAddButton={true}
         addButtonText="Create New Form"
-        onAddClick={() => setShowCreateForm(true)}
+        onAddClick={() => navigate('/admin/settings/forms/create')}
       />
-
-      {showCreateForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Form</CardTitle>
-            <CardDescription>Build a custom lead capture form with automated actions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="basic" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                <TabsTrigger value="actions">Actions</TabsTrigger>
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="basic" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="formName">Form Name</Label>
-                    <Input
-                      id="formName"
-                      value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                      placeholder="Enter form name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="formDesc">Description</Label>
-                    <Input
-                      id="formDesc"
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      placeholder="Brief description"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-medium">Form Fields</h4>
-                    <Button onClick={addField} size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Field
-                    </Button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {formFields.map((field) => (
-                      <div key={field.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                        <div className="flex-1 grid grid-cols-4 gap-3">
-                          <Input
-                            value={field.label}
-                            onChange={(e) => updateField(field.id, { label: e.target.value })}
-                            placeholder="Field Label"
-                          />
-                          <Select value={field.type} onValueChange={(value: any) => updateField(field.id, { type: value })}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="email">Email</SelectItem>
-                              <SelectItem value="phone">Phone</SelectItem>
-                              <SelectItem value="textarea">Textarea</SelectItem>
-                              <SelectItem value="dropdown">Dropdown</SelectItem>
-                              <SelectItem value="checkbox">Checkbox</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <div className="flex items-center space-x-2">
-                            <Switch
-                              checked={field.required}
-                              onCheckedChange={(checked) => updateField(field.id, { required: checked })}
-                            />
-                            <Label>Required</Label>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeField(field.id)}
-                            disabled={formFields.length === 1}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="actions">
-                <FormActionsConfig 
-                  actions={formActions} 
-                  onChange={setFormActions} 
-                />
-              </TabsContent>
-
-              <TabsContent value="preview">
-                <FormPreview 
-                  form={{
-                    id: 'preview',
-                    name: formName || 'New Form',
-                    description: formDescription,
-                    fields: formFields,
-                    actions: formActions
-                  }}
-                />
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex justify-end space-x-2 pt-6 border-t">
-              <Button variant="outline" onClick={() => setShowCreateForm(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateForm}>
-                Create Form
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <CardHeader>
@@ -310,7 +128,7 @@ export const FormsPage: React.FC = () => {
                   <TableCell>
                     <div>
                       <div className="font-medium">{form.name}</div>
-                      <div className="text-sm text-gray-500">{form.description}</div>
+                      <div className="text-sm text-muted-foreground">{form.description}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -335,10 +153,10 @@ export const FormsPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedForm(form)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => navigate(`/admin/settings/forms/edit/${form.id}`)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
@@ -348,7 +166,7 @@ export const FormsPage: React.FC = () => {
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => window.open(`/forms/${form.id}`, '_blank')}>
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm">
@@ -370,13 +188,13 @@ export const FormsPage: React.FC = () => {
             <CardDescription>This is how your form will appear to users</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+            <div className="bg-muted/30 p-6 rounded-lg">
+              <div className="max-w-md mx-auto bg-background p-6 rounded-lg shadow border">
                 <h3 className="text-lg font-semibold mb-4">{selectedForm.name}</h3>
                 <div className="space-y-4">
                   {selectedForm.fields.map((field) => (
                     <div key={field.id} className="space-y-2">
-                      <Label>{field.label} {field.required && <span className="text-red-500">*</span>}</Label>
+                      <Label>{field.label} {field.required && <span className="text-destructive ml-1">*</span>}</Label>
                       {field.type === 'textarea' ? (
                         <Textarea placeholder={`Enter ${field.label.toLowerCase()}`} />
                       ) : (
