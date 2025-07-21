@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, User, Flag, Clock, Tag, Phone, Mail, Users, FileText } from 'lucide-react';
+import { Calendar, User, Flag, Clock, Tag, Phone, Mail, Users, FileText, Check, ChevronsUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -15,6 +15,9 @@ import { DrawerForm } from '@/components/layout/DrawerForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
 interface Task {
@@ -410,26 +413,51 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                       ))}
                     </div>
                   )}
-                  <div className="border rounded-md p-2 max-h-32 overflow-y-auto">
-                    {mockRelatedData[formData.relatedType as keyof typeof mockRelatedData]?.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-2 py-1">
-                        <Checkbox
-                          id={`related-${item.id}`}
-                          checked={formData.relatedTo.includes(item.name)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              handleRelatedToChange([...formData.relatedTo, item.name]);
-                            } else {
-                              handleRelatedToChange(formData.relatedTo.filter(i => i !== item.name));
-                            }
-                          }}
-                        />
-                        <Label htmlFor={`related-${item.id}`} className="text-sm font-normal cursor-pointer">
-                          {item.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between"
+                      >
+                        {formData.relatedTo.length > 0
+                          ? `${formData.relatedTo.length} selected`
+                          : "Select related records..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search records..." />
+                        <CommandList>
+                          <CommandEmpty>No records found.</CommandEmpty>
+                          <CommandGroup>
+                            {mockRelatedData[formData.relatedType as keyof typeof mockRelatedData]?.map((item) => (
+                              <CommandItem
+                                key={item.id}
+                                onSelect={() => {
+                                  if (formData.relatedTo.includes(item.name)) {
+                                    handleRelatedToChange(formData.relatedTo.filter(i => i !== item.name));
+                                  } else {
+                                    handleRelatedToChange([...formData.relatedTo, item.name]);
+                                  }
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.relatedTo.includes(item.name) ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {item.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </div>
