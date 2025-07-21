@@ -288,6 +288,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   // Predefined reminder options
   const reminderOptions = [
+    'On time',
+    '5 minutes before',
     '15 minutes before',
     '30 minutes before',
     '1 hour before',
