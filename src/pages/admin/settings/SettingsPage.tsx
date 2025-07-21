@@ -7,6 +7,8 @@ import { TeamsManagementPage } from './TeamsManagementPage';
 import { ContactSettingsPage } from './ContactSettingsPage';
 import { CustomFieldsPage } from './CustomFieldsPage';
 import { PipelinesPage } from './PipelinesPage';
+import { DealsSettingsPage } from './DealsSettingsPage';
+import { TasksSettingsPage } from './TasksSettingsPage';
 import { ClockInOutPage } from './ClockInOutPage';
 import { IntegrationsPage } from './IntegrationsPage';
 import { NotificationsPage } from './NotificationsPage';
@@ -29,6 +31,8 @@ export const SettingsPage: React.FC = () => {
         <Route path="/contacts" element={<ContactSettingsPage />} />
         <Route path="/fields" element={<CustomFieldsPage />} />
         <Route path="/pipelines" element={<PipelinesPage />} />
+        <Route path="/deals" element={<DealsSettingsPage />} />
+        <Route path="/tasks" element={<TasksSettingsPage />} />
         <Route path="/clock" element={<ClockInOutPage />} />
         <Route path="/maps" element={<MapsLocationPage />} />
         <Route path="/integrations" element={<IntegrationsPage />} />

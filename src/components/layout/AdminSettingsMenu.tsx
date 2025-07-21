@@ -17,7 +17,9 @@ import {
   Phone,
   MapPin,
   Brain,
-  UserCheck
+  UserCheck,
+  CheckSquare,
+  HandHeart
 } from 'lucide-react';
 
 const settingsItems = [
@@ -27,6 +29,8 @@ const settingsItems = [
   { title: 'Contact Settings', url: '/admin/settings/contacts', icon: UserCheck },
   { title: 'Custom Fields', url: '/admin/settings/fields', icon: FormInput },
   { title: 'Pipelines', url: '/admin/settings/pipelines', icon: Share2 },
+  { title: 'Deals Settings', url: '/admin/settings/deals', icon: HandHeart },
+  { title: 'Tasks Settings', url: '/admin/settings/tasks', icon: CheckSquare },
   { title: 'Clock-in/Clock-out', url: '/admin/settings/clock', icon: Clock },
   { title: 'Call Logs & Recording', url: '/admin/settings/calls', icon: Phone },
   { title: 'Maps & Location', url: '/admin/settings/maps', icon: MapPin },
