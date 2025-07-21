@@ -26,13 +26,14 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap, CheckSquare } from 'lucide-react';
 import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
 import { OpportunityActivityDialog } from './OpportunityActivityDialog';
 import { OpportunityDetailsModal } from './OpportunityDetailsModal';
 import { AutomationApplyDialog } from './AutomationApplyDialog';
 import { EnhancedDealDrawerForm } from '../deals/EnhancedDealDrawerForm';
+import { TaskForm } from '../tasks/TaskForm';
 
 interface Opportunity {
   id: string;
@@ -177,6 +178,14 @@ export const OpportunityTable = ({
     opportunityIds: []
   });
 
+  const [taskForm, setTaskForm] = useState<{
+    isOpen: boolean;
+    selectedOpportunities: string[];
+  }>({
+    isOpen: false,
+    selectedOpportunities: []
+  });
+
   const allSelected = opportunities.length > 0 && opportunities.every(opp => selectedOpportunities.includes(opp.id));
   const someSelected = selectedOpportunities.length > 0 && !allSelected;
 
@@ -231,6 +240,19 @@ export const OpportunityTable = ({
   const handleAutomationApply = (automationId: string, action: 'apply' | 'pause_and_apply' | 'cancel') => {
     console.log('Automation action:', { automationId, action, opportunityIds: automationDialog.opportunityIds });
     // Here you would implement the actual automation logic
+  };
+
+  const handleAddTask = (opportunityIds: string[]) => {
+    setTaskForm({
+      isOpen: true,
+      selectedOpportunities: opportunityIds
+    });
+  };
+
+  const handleTaskSave = (taskData: any) => {
+    console.log('Task created:', { taskData, relatedOpportunities: taskForm.selectedOpportunities });
+    // Here you would implement the actual task creation logic
+    setTaskForm({ isOpen: false, selectedOpportunities: [] });
   };
 
   const getOpportunityActivities = (opportunityId: string) => {
@@ -310,6 +332,15 @@ export const OpportunityTable = ({
             >
               <Zap className="h-4 w-4 mr-1" />
               Apply Automation
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleAddTask(selectedOpportunities)}
+              className="text-green-600 border-green-600 hover:bg-green-50"
+            >
+              <CheckSquare className="h-4 w-4 mr-1" />
+              Add Task
             </Button>
           </div>
         </div>
@@ -433,6 +464,12 @@ export const OpportunityTable = ({
                         >
                           <Zap className="h-4 w-4 mr-2" />
                           Apply Automation
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleAddTask([opportunity.id])}
+                        >
+                          <CheckSquare className="h-4 w-4 mr-2" />
+                          Add Task
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem 
@@ -572,9 +609,22 @@ export const OpportunityTable = ({
 
       <AutomationApplyDialog
         isOpen={automationDialog.isOpen}
-        onClose={() => setAutomationDialog(prev => ({ ...prev, isOpen: false }))}
-        opportunityIds={automationDialog.opportunityIds}
+        onClose={() => setAutomationDialog({ isOpen: false, opportunityIds: [] })}
         onApply={handleAutomationApply}
+        opportunityIds={automationDialog.opportunityIds}
+      />
+
+      <TaskForm
+        isOpen={taskForm.isOpen}
+        onClose={() => setTaskForm({ isOpen: false, selectedOpportunities: [] })}
+        onSave={handleTaskSave}
+        preSelectedOpportunities={taskForm.selectedOpportunities}
+      />
+
+      <EnhancedDealDrawerForm
+        isOpen={showDealForm}
+        onClose={() => setShowDealForm(false)}
+        onSave={(data) => console.log('Deal saved:', data)}
       />
     </div>
   );

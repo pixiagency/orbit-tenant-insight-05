@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { DrawerForm } from '@/components/layout/DrawerForm';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { X } from 'lucide-react';
 
 interface Task {
@@ -35,6 +36,7 @@ interface TaskFormProps {
   task?: Task | null;
   onClose: () => void;
   onSave: (data: any) => void;
+  preSelectedOpportunities?: string[];
 }
 
 // Mock data for related items based on type
@@ -71,7 +73,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   isOpen,
   task,
   onClose,
-  onSave
+  onSave,
+  preSelectedOpportunities = []
 }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -81,8 +84,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     assignedTo: '',
     dueDate: '',
     dueTime: '',
-    relatedTo: '',
-    relatedType: 'lead',
+    relatedTo: [] as string[],
+    relatedType: 'opportunity',
     taskType: 'call',
     tags: [] as string[],
     notes: ''
@@ -101,13 +104,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         assignedTo: task.assignedTo,
         dueDate: task.dueDate,
         dueTime: '',
-        relatedTo: task.relatedTo,
+        relatedTo: Array.isArray(task.relatedTo) ? task.relatedTo : [task.relatedTo],
         relatedType: task.relatedType,
         taskType: 'call',
         tags: [],
         notes: ''
       });
     } else {
+      // Pre-populate with opportunities if provided
+      const selectedOpportunityNames = preSelectedOpportunities.map(oppId => {
+        const opportunity = mockRelatedData.opportunity.find(opp => opp.id === oppId);
+        return opportunity ? opportunity.name : oppId;
+      });
+      
       setFormData({
         title: '',
         description: '',
@@ -116,14 +125,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         assignedTo: '',
         dueDate: '',
         dueTime: '',
-        relatedTo: '',
-        relatedType: 'lead',
+        relatedTo: selectedOpportunityNames,
+        relatedType: 'opportunity',
         taskType: 'call',
         tags: [],
         notes: ''
       });
     }
-  }, [task, isOpen]);
+  }, [task, isOpen, preSelectedOpportunities]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -136,7 +145,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     setFormData(prev => ({
       ...prev,
       relatedType: value,
-      relatedTo: '' // Reset related to when type changes
+      relatedTo: [] // Reset related to when type changes
+    }));
+  };
+
+  const handleRelatedToChange = (selectedItems: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      relatedTo: selectedItems
     }));
   };
 
@@ -372,19 +388,49 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="relatedTo">Related To</Label>
-                <Select value={formData.relatedTo} onValueChange={(value) => handleInputChange('relatedTo', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select related record" />
-                  </SelectTrigger>
-                  <SelectContent>
+                <Label htmlFor="relatedTo">Related To (Multiple Selection)</Label>
+                <div className="space-y-2">
+                  {formData.relatedTo.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.relatedTo.map((item) => (
+                        <Badge key={item} variant="outline" className="flex items-center gap-1">
+                          {item}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => {
+                              const updated = formData.relatedTo.filter(i => i !== item);
+                              handleRelatedToChange(updated);
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="border rounded-md p-2 max-h-32 overflow-y-auto">
                     {mockRelatedData[formData.relatedType as keyof typeof mockRelatedData]?.map((item) => (
-                      <SelectItem key={item.id} value={item.name}>
-                        {item.name}
-                      </SelectItem>
+                      <div key={item.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`related-${item.id}`}
+                          checked={formData.relatedTo.includes(item.name)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              handleRelatedToChange([...formData.relatedTo, item.name]);
+                            } else {
+                              handleRelatedToChange(formData.relatedTo.filter(i => i !== item.name));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`related-${item.id}`} className="text-sm font-normal cursor-pointer">
+                          {item.name}
+                        </Label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                </div>
               </div>
             </div>
             
