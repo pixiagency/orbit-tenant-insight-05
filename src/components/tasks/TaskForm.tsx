@@ -144,8 +144,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     followers: [] as string[],
     dueDate: '',
     dueTime: '',
-    reminderDate: '',
-    reminderTime: '',
+    reminders: [] as string[],
     opportunity: '',
     taskType: 'call',
     tags: [] as string[],
@@ -155,6 +154,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [tagInput, setTagInput] = useState('');
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
   const [opportunityOpen, setOpportunityOpen] = useState(false);
+  const [remindersOpen, setRemindersOpen] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -167,8 +167,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: task.dueDate,
         dueTime: '',
-        reminderDate: '',
-        reminderTime: '',
+        reminders: [],
         opportunity: task.relatedTo || '',
         taskType: 'call',
         tags: [],
@@ -189,8 +188,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: '',
         dueTime: '',
-        reminderDate: '',
-        reminderTime: '',
+        reminders: [],
         opportunity: opportunityName,
         taskType: 'call',
         tags: [],
@@ -212,6 +210,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       opportunity: opportunityName
     }));
     setOpportunityOpen(false);
+  };
+
+  const handleReminderToggle = (reminder: string) => {
+    setFormData(prev => ({
+      ...prev,
+      reminders: prev.reminders.includes(reminder)
+        ? prev.reminders.filter(r => r !== reminder)
+        : [...prev.reminders, reminder]
+    }));
+  };
+
+  const removeReminder = (reminder: string) => {
+    setFormData(prev => ({
+      ...prev,
+      reminders: prev.reminders.filter(r => r !== reminder)
+    }));
   };
 
   const handleTagInputChange = (value: string) => {
@@ -271,6 +285,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const opportunities = mockRelatedData.opportunity;
+
+  // Predefined reminder options
+  const reminderOptions = [
+    '15 minutes before',
+    '30 minutes before',
+    '1 hour before',
+    '2 hours before',
+    '1 day before',
+    '2 days before',
+    '1 week before'
+  ];
 
   return (
     <DrawerForm 
@@ -427,34 +452,76 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="reminderDate">Reminder Date</Label>
-              <div className="relative">
-                <Bell className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input 
-                  id="reminderDate" 
-                  type="date" 
-                  className="pl-10" 
-                  value={formData.reminderDate} 
-                  onChange={e => handleInputChange('reminderDate', e.target.value)} 
-                />
+          <div className="space-y-2">
+            <Label>Reminders</Label>
+            <Popover open={remindersOpen} onOpenChange={setRemindersOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={remindersOpen}
+                  className="w-full justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-gray-400" />
+                    <span className="truncate">
+                      {formData.reminders.length === 0
+                        ? 'Select reminders...'
+                        : `${formData.reminders.length} reminder${formData.reminders.length > 1 ? 's' : ''} selected`
+                      }
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[300px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search reminders..." />
+                  <CommandList>
+                    <CommandEmpty>No reminders found.</CommandEmpty>
+                    <CommandGroup>
+                      {reminderOptions.map((reminder) => (
+                        <CommandItem
+                          key={reminder}
+                          value={reminder}
+                          onSelect={() => handleReminderToggle(reminder)}
+                          className="flex items-center gap-2"
+                        >
+                          <Bell className="h-4 w-4 text-gray-400" />
+                          <span className="flex-1">{reminder}</span>
+                          <Check
+                            className={cn(
+                              "h-4 w-4",
+                              formData.reminders.includes(reminder) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* Display selected reminders */}
+            {formData.reminders.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.reminders.map((reminder) => (
+                  <Badge
+                    key={reminder}
+                    variant="secondary"
+                    className="flex items-center gap-1 py-1"
+                  >
+                    <Bell className="h-3 w-3" />
+                    <span className="text-xs">{reminder}</span>
+                    <X
+                      className="h-3 w-3 cursor-pointer hover:text-destructive"
+                      onClick={() => removeReminder(reminder)}
+                    />
+                  </Badge>
+                ))}
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="reminderTime">Reminder Time</Label>
-              <div className="relative">
-                <Bell className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input 
-                  id="reminderTime" 
-                  type="time" 
-                  className="pl-10" 
-                  value={formData.reminderTime} 
-                  onChange={e => handleInputChange('reminderTime', e.target.value)} 
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
