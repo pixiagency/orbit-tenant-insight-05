@@ -407,7 +407,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Assignment & Timeline</h3>
           
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Assigned To</Label>
               <UserSearchSelect
@@ -430,34 +430,34 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 excludeUsers={formData.assignedTo}
               />
             </div>
+          </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="dueDate" 
-                    type="date" 
-                    className="pl-10" 
-                    value={formData.dueDate} 
-                    onChange={e => handleInputChange('dueDate', e.target.value)} 
-                  />
-                </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Due Date</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input 
+                  id="dueDate" 
+                  type="date" 
+                  className="pl-10" 
+                  value={formData.dueDate} 
+                  onChange={e => handleInputChange('dueDate', e.target.value)} 
+                />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="dueTime">Due Time</Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    id="dueTime" 
-                    type="time" 
-                    className="pl-10" 
-                    value={formData.dueTime} 
-                    onChange={e => handleInputChange('dueTime', e.target.value)} 
-                  />
-                </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="dueTime">Due Time</Label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input 
+                  id="dueTime" 
+                  type="time" 
+                  className="pl-10" 
+                  value={formData.dueTime} 
+                  onChange={e => handleInputChange('dueTime', e.target.value)} 
+                />
               </div>
             </div>
           </div>
@@ -508,7 +508,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
+                <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[300px] p-0" align="start">
                   <Command>
                     <CommandInput placeholder={`Search ${formData.relatedType}...`} />
                     <CommandList>
