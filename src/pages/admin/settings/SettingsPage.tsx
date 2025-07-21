@@ -9,6 +9,7 @@ import { CustomFieldsPage } from './CustomFieldsPage';
 import { PipelinesPage } from './PipelinesPage';
 import { DealsSettingsPage } from './DealsSettingsPage';
 import { TasksSettingsPage } from './TasksSettingsPage';
+import { ProductsSettingsPage } from './ProductsSettingsPage';
 import { ClockInOutPage } from './ClockInOutPage';
 import { IntegrationsPage } from './IntegrationsPage';
 import { NotificationsPage } from './NotificationsPage';
@@ -33,6 +34,7 @@ export const SettingsPage: React.FC = () => {
         <Route path="/pipelines" element={<PipelinesPage />} />
         <Route path="/deals" element={<DealsSettingsPage />} />
         <Route path="/tasks" element={<TasksSettingsPage />} />
+        <Route path="/products" element={<ProductsSettingsPage />} />
         <Route path="/clock" element={<ClockInOutPage />} />
         <Route path="/maps" element={<MapsLocationPage />} />
         <Route path="/integrations" element={<IntegrationsPage />} />

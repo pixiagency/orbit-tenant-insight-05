@@ -19,7 +19,8 @@ import {
   Brain,
   UserCheck,
   CheckSquare,
-  HandHeart
+  HandHeart,
+  Package
 } from 'lucide-react';
 
 const settingsItems = [
@@ -31,6 +32,7 @@ const settingsItems = [
   { title: 'Pipelines', url: '/admin/settings/pipelines', icon: Share2 },
   { title: 'Deals Settings', url: '/admin/settings/deals', icon: HandHeart },
   { title: 'Tasks Settings', url: '/admin/settings/tasks', icon: CheckSquare },
+  { title: 'Products Settings', url: '/admin/settings/products', icon: Package },
   { title: 'Clock-in/Clock-out', url: '/admin/settings/clock', icon: Clock },
   { title: 'Call Logs & Recording', url: '/admin/settings/calls', icon: Phone },
   { title: 'Maps & Location', url: '/admin/settings/maps', icon: MapPin },
