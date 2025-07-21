@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, Download, FileText, Users, Handshake, Calendar, BarChart3, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, Download, FileText, Users, Handshake, Calendar, BarChart3, AlertCircle, CheckCircle, Target } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -9,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OpportunityImportModal } from '@/components/opportunities/OpportunityImportModal';
 
 const ImportExportPage = () => {
   const [importProgress, setImportProgress] = useState<{[key: string]: number}>({});
   const [activeImports, setActiveImports] = useState<string[]>([]);
   const [importResults, setImportResults] = useState<{[key: string]: any}>({});
+  const [showOpportunityImport, setShowOpportunityImport] = useState(false);
 
   const handleFileUpload = (type: string, file: File) => {
     setActiveImports(prev => [...prev, type]);
@@ -55,11 +57,12 @@ const ImportExportPage = () => {
     }, 1000);
   };
 
-  const ImportCard = ({ type, icon: Icon, title, description }: {
+  const ImportCard = ({ type, icon: Icon, title, description, onClick }: {
     type: string;
     icon: React.ComponentType<any>;
     title: string;
     description: string;
+    onClick?: () => void;
   }) => (
     <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer border-2 border-dashed border-gray-200 hover:border-primary">
       <div className="flex flex-col items-center text-center space-y-2">
@@ -76,21 +79,30 @@ const ImportExportPage = () => {
           </div>
         ) : (
           <div className="w-full">
-            <Input
-              type="file"
-              accept=".csv,.xlsx"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileUpload(type, file);
-              }}
-              className="hidden"
-              id={`file-${type}`}
-            />
-            <Label htmlFor={`file-${type}`} className="cursor-pointer">
-              <Button size="sm" variant="outline" className="w-full" asChild>
-                <span>Select File</span>
+            {onClick ? (
+              <Button size="sm" variant="outline" className="w-full" onClick={onClick}>
+                <Upload className="h-3 w-3 mr-1" />
+                Import Data
               </Button>
-            </Label>
+            ) : (
+              <>
+                <Input
+                  type="file"
+                  accept=".csv,.xlsx"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(type, file);
+                  }}
+                  className="hidden"
+                  id={`file-${type}`}
+                />
+                <Label htmlFor={`file-${type}`} className="cursor-pointer">
+                  <Button size="sm" variant="outline" className="w-full" asChild>
+                    <span>Select File</span>
+                  </Button>
+                </Label>
+              </>
+            )}
           </div>
         )}
         
@@ -105,6 +117,11 @@ const ImportExportPage = () => {
       </div>
     </Card>
   );
+
+  const handleOpportunityImport = (opportunities: any[]) => {
+    toast.success(`${opportunities.length} opportunities imported successfully!`);
+    setShowOpportunityImport(false);
+  };
 
   const ExportCard = ({ type, icon: Icon, title, description }: {
     type: string;
@@ -182,22 +199,17 @@ const ImportExportPage = () => {
                   description="Upload task lists and activities"
                 />
                 <ImportCard 
-                  type="leads" 
-                  icon={Users} 
-                  title="Import Leads" 
-                  description="Upload lead data and prospects"
+                  type="opportunities" 
+                  icon={Target} 
+                  title="Import Opportunities" 
+                  description="Upload opportunity data and prospects"
+                  onClick={() => setShowOpportunityImport(true)}
                 />
                 <ImportCard 
                   type="products" 
                   icon={FileText} 
                   title="Import Products" 
                   description="Upload product catalogs"
-                />
-                <ImportCard 
-                  type="custom" 
-                  icon={FileText} 
-                  title="Custom Import" 
-                  description="Import other data types"
                 />
               </div>
             </CardContent>
