@@ -144,8 +144,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     followers: [] as string[],
     dueDate: '',
     dueTime: '',
-    relatedTo: [] as string[],
-    relatedType: 'opportunity',
+    opportunity: '',
     taskType: 'call',
     tags: [] as string[],
     notes: ''
@@ -153,7 +152,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   const [tagInput, setTagInput] = useState('');
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
-  const [relatedToOpen, setRelatedToOpen] = useState(false);
+  const [opportunityOpen, setOpportunityOpen] = useState(false);
 
   useEffect(() => {
     if (task) {
@@ -166,18 +165,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: task.dueDate,
         dueTime: '',
-        relatedTo: Array.isArray(task.relatedTo) ? task.relatedTo : [task.relatedTo],
-        relatedType: task.relatedType,
+        opportunity: task.relatedTo || '',
         taskType: 'call',
         tags: [],
         notes: ''
       });
     } else {
       // Pre-populate with opportunities if provided
-      const selectedOpportunityNames = preSelectedOpportunities.map(oppId => {
-        const opportunity = mockRelatedData.opportunity.find(opp => opp.id === oppId);
-        return opportunity ? opportunity.name : oppId;
-      });
+      const selectedOpportunity = preSelectedOpportunities.length > 0 ? preSelectedOpportunities[0] : '';
+      const opportunityName = selectedOpportunity ? 
+        mockRelatedData.opportunity.find(opp => opp.id === selectedOpportunity)?.name || selectedOpportunity 
+        : '';
       setFormData({
         title: '',
         description: '',
@@ -187,8 +185,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: '',
         dueTime: '',
-        relatedTo: selectedOpportunityNames,
-        relatedType: 'opportunity',
+        opportunity: opportunityName,
         taskType: 'call',
         tags: [],
         notes: ''
@@ -203,35 +200,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }));
   };
 
-  const handleRelatedTypeChange = (value: string) => {
+  const handleOpportunityChange = (opportunityName: string) => {
     setFormData(prev => ({
       ...prev,
-      relatedType: value,
-      relatedTo: [] // Reset related to when type changes
+      opportunity: opportunityName
     }));
-  };
-
-  const handleRelatedToChange = (selectedItems: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      relatedTo: selectedItems
-    }));
-  };
-
-  const addRelatedItem = (itemName: string) => {
-    if (!formData.relatedTo.includes(itemName)) {
-      setFormData(prev => ({
-        ...prev,
-        relatedTo: [...prev.relatedTo, itemName]
-      }));
-    }
-  };
-
-  const removeRelatedItem = (itemToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      relatedTo: prev.relatedTo.filter(item => item !== itemToRemove)
-    }));
+    setOpportunityOpen(false);
   };
 
   const handleTagInputChange = (value: string) => {
@@ -290,22 +264,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }
   };
 
-  const getRelatedTypeIcon = (type: string) => {
-    switch (type) {
-      case 'opportunity':
-        return Target;
-      case 'contact':
-        return User;
-      case 'deal':
-        return Building2;
-      case 'lead':
-        return UserCheck;
-      default:
-        return FileText;
-    }
-  };
-
-  const currentRelatedData = mockRelatedData[formData.relatedType as keyof typeof mockRelatedData] || [];
+  const opportunities = mockRelatedData.opportunity;
 
   return (
     <DrawerForm 
@@ -464,103 +423,55 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Related Items</h3>
+          <h3 className="text-lg font-medium text-gray-900">Opportunity</h3>
           
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Related Type</Label>
-              <Select value={formData.relatedType} onValueChange={handleRelatedTypeChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select related type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="opportunity">Opportunity</SelectItem>
-                  <SelectItem value="contact">Contact</SelectItem>
-                  <SelectItem value="deal">Deal</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Related To</Label>
-              <Popover open={relatedToOpen} onOpenChange={setRelatedToOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={relatedToOpen}
-                    className="w-full justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      {React.createElement(getRelatedTypeIcon(formData.relatedType), {
-                        className: "h-4 w-4 text-gray-400"
-                      })}
-                      <span className="truncate">
-                        {formData.relatedTo.length === 0
-                          ? `Select ${formData.relatedType}...`
-                          : formData.relatedTo.length === 1
-                          ? formData.relatedTo[0]
-                          : `${formData.relatedTo.length} items selected`
-                        }
-                      </span>
-                    </div>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[300px] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder={`Search ${formData.relatedType}...`} />
-                    <CommandList>
-                      <CommandEmpty>No {formData.relatedType} found.</CommandEmpty>
-                      <CommandGroup>
-                        {currentRelatedData.map((item) => (
-                          <CommandItem
-                            key={item.id}
-                            value={item.name}
-                            onSelect={() => addRelatedItem(item.name)}
-                            className="flex items-center gap-2"
-                          >
-                            {React.createElement(getRelatedTypeIcon(formData.relatedType), {
-                              className: "h-4 w-4 text-gray-400"
-                            })}
-                            <span className="flex-1">{item.name}</span>
-                            <Check
-                              className={cn(
-                                "h-4 w-4",
-                                formData.relatedTo.includes(item.name) ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
-              {/* Display selected related items */}
-              {formData.relatedTo.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.relatedTo.map((item) => (
-                    <Badge
-                      key={item}
-                      variant="secondary"
-                      className="flex items-center gap-1 py-1"
-                    >
-                      {React.createElement(getRelatedTypeIcon(formData.relatedType), {
-                        className: "h-3 w-3"
-                      })}
-                      <span className="text-xs">{item}</span>
-                      <X
-                        className="h-3 w-3 cursor-pointer hover:text-destructive"
-                        onClick={() => removeRelatedItem(item)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label>Related Opportunity</Label>
+            <Popover open={opportunityOpen} onOpenChange={setOpportunityOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={opportunityOpen}
+                  className="w-full justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-gray-400" />
+                    <span className="truncate">
+                      {formData.opportunity || 'Select opportunity...'}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[300px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search opportunities..." />
+                  <CommandList>
+                    <CommandEmpty>No opportunities found.</CommandEmpty>
+                    <CommandGroup>
+                      {opportunities.map((opportunity) => (
+                        <CommandItem
+                          key={opportunity.id}
+                          value={opportunity.name}
+                          onSelect={() => handleOpportunityChange(opportunity.name)}
+                          className="flex items-center gap-2"
+                        >
+                          <Target className="h-4 w-4 text-gray-400" />
+                          <span className="flex-1">{opportunity.name}</span>
+                          <Check
+                            className={cn(
+                              "h-4 w-4",
+                              formData.opportunity === opportunity.name ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
