@@ -26,9 +26,10 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap, CheckSquare } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap, CheckSquare, GitBranch } from 'lucide-react';
 import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
+import { OpportunityStageDialog } from './OpportunityStageDialog';
 import { OpportunityActivityDialog } from './OpportunityActivityDialog';
 import { OpportunityDetailsModal } from './OpportunityDetailsModal';
 import { AutomationApplyDialog } from './AutomationApplyDialog';
@@ -150,6 +151,16 @@ export const OpportunityTable = ({
     currentStatus: 'active'
   });
 
+  const [stageDialog, setStageDialog] = useState<{
+    isOpen: boolean;
+    opportunityIds: string[];
+    currentStage: string;
+  }>({
+    isOpen: false,
+    opportunityIds: [],
+    currentStage: ''
+  });
+
   const [activityDialog, setActivityDialog] = useState<{
     isOpen: boolean;
     opportunityId: string | null;
@@ -205,6 +216,14 @@ export const OpportunityTable = ({
     });
   };
 
+  const handleStageChange = (opportunityIds: string[], currentStage?: string) => {
+    setStageDialog({
+      isOpen: true,
+      opportunityIds,
+      currentStage: currentStage || ''
+    });
+  };
+
   const handleViewActivity = (opportunityId: string, opportunityName: string) => {
     setActivityDialog({
       isOpen: true,
@@ -228,6 +247,12 @@ export const OpportunityTable = ({
   const handleStatusUpdate = (status: string, reason?: string, description?: string) => {
     console.log('Status updated:', { opportunityId: statusDialog.opportunityId, status, reason, description });
     // Here you would implement the actual status update logic
+  };
+
+  const handleStageUpdate = (stage: string, notes?: string) => {
+    console.log('Stage updated:', { opportunityIds: stageDialog.opportunityIds, stage, notes });
+    // Here you would implement the actual stage update logic
+    setStageDialog({ isOpen: false, opportunityIds: [], currentStage: '' });
   };
 
   const handleApplyAutomation = (opportunityIds: string[]) => {
@@ -341,6 +366,15 @@ export const OpportunityTable = ({
             >
               <CheckSquare className="h-4 w-4 mr-1" />
               Add Task
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleStageChange(selectedOpportunities)}
+              className="text-purple-600 border-purple-600 hover:bg-purple-50"
+            >
+              <GitBranch className="h-4 w-4 mr-1" />
+              Change Stage
             </Button>
           </div>
         </div>
@@ -458,6 +492,12 @@ export const OpportunityTable = ({
                         >
                           <UserCheck className="h-4 w-4 mr-2" />
                           Change Status
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleStageChange([opportunity.id], opportunity.stage)}
+                        >
+                          <GitBranch className="h-4 w-4 mr-2" />
+                          Change Stage
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleApplyAutomation([opportunity.id])}
@@ -582,6 +622,14 @@ export const OpportunityTable = ({
         currentStatus={statusDialog.currentStatus}
         onStatusChange={handleStatusUpdate}
         onOpenDealForm={() => setShowDealForm(true)}
+      />
+
+      <OpportunityStageDialog
+        isOpen={stageDialog.isOpen}
+        onClose={() => setStageDialog({ isOpen: false, opportunityIds: [], currentStage: '' })}
+        currentStage={stageDialog.currentStage}
+        onStageChange={handleStageUpdate}
+        opportunityCount={stageDialog.opportunityIds.length}
       />
 
       <OpportunityActivityDialog
