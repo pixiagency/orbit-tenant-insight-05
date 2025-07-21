@@ -50,3 +50,13 @@ export interface UserFilters {
   lastLoginRange: string;
   dateRange: { from?: string; to?: string };
 }
+
+// New interface for task assignments
+export interface TaskUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department?: string;
+  avatar?: string;
+}
