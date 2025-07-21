@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, User, Flag, Clock, Tag, Phone, Mail, Users, FileText, Check, ChevronsUpDown, Building2, UserCheck, Target } from 'lucide-react';
+import { Calendar, User, Flag, Clock, Tag, Phone, Mail, Users, FileText, Check, ChevronsUpDown, Building2, UserCheck, Target, Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -144,6 +144,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     followers: [] as string[],
     dueDate: '',
     dueTime: '',
+    reminderDate: '',
+    reminderTime: '',
     opportunity: '',
     taskType: 'call',
     tags: [] as string[],
@@ -165,6 +167,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: task.dueDate,
         dueTime: '',
+        reminderDate: '',
+        reminderTime: '',
         opportunity: task.relatedTo || '',
         taskType: 'call',
         tags: [],
@@ -185,6 +189,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         followers: [],
         dueDate: '',
         dueTime: '',
+        reminderDate: '',
+        reminderTime: '',
         opportunity: opportunityName,
         taskType: 'call',
         tags: [],
@@ -416,6 +422,36 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                   className="pl-10" 
                   value={formData.dueTime} 
                   onChange={e => handleInputChange('dueTime', e.target.value)} 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="reminderDate">Reminder Date</Label>
+              <div className="relative">
+                <Bell className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input 
+                  id="reminderDate" 
+                  type="date" 
+                  className="pl-10" 
+                  value={formData.reminderDate} 
+                  onChange={e => handleInputChange('reminderDate', e.target.value)} 
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="reminderTime">Reminder Time</Label>
+              <div className="relative">
+                <Bell className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input 
+                  id="reminderTime" 
+                  type="time" 
+                  className="pl-10" 
+                  value={formData.reminderTime} 
+                  onChange={e => handleInputChange('reminderTime', e.target.value)} 
                 />
               </div>
             </div>
