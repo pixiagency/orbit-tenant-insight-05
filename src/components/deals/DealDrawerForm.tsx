@@ -26,7 +26,10 @@ import {
   AlertCircle,
   Calculator,
   Percent,
-  Receipt
+  Receipt,
+  Paperclip,
+  X,
+  Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -55,6 +58,12 @@ interface DealFormData {
   tax_amount?: number;
   final_total?: number;
   notes?: string;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    size: number;
+    type: string;
+  }>;
   // Subscription-specific fields
   recurring_amount?: number;
   billing_cycle?: 'monthly' | 'quarterly' | 'yearly';
@@ -107,6 +116,7 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>('');
   const [items, setItems] = useState<Array<{ item: string; quantity?: number; unit_price: number }>>([]);
+  const [attachments, setAttachments] = useState<Array<{ id: string; name: string; size: number; type: string }>>([]);
 
   const form = useForm<DealFormData>({
     defaultValues: {
@@ -130,6 +140,7 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
       tax_amount: 0,
       final_total: 0,
       notes: '',
+      attachments: [],
       recurring_amount: 0,
       billing_cycle: 'monthly',
       subscription_start: '',
@@ -211,6 +222,7 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     if (deal) {
       reset(deal);
       setItems(deal.items || []);
+      setAttachments(deal.attachments || []);
     } else {
       reset({
         deal_type: 'product_sale',
@@ -233,12 +245,14 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
         tax_amount: 0,
         final_total: 0,
         notes: '',
+        attachments: [],
         recurring_amount: 0,
         billing_cycle: 'monthly',
         subscription_start: '',
         subscription_end: ''
       });
       setItems([]);
+      setAttachments([]);
     }
   }, [deal, reset, isOpen]);
 
@@ -295,6 +309,7 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     
     setValidationErrors([]);
     data.items = items;
+    data.attachments = attachments;
     
     onSave(data);
     toast.success(deal ? 'Deal updated successfully!' : 'Deal created successfully!');
@@ -325,6 +340,33 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
   };
 
   const totals = calculateTotals();
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newAttachments = Array.from(files).map(file => ({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }));
+      setAttachments(prev => [...prev, ...newAttachments]);
+      toast.success(`${files.length} file(s) uploaded successfully`);
+    }
+  };
+
+  const removeAttachment = (attachmentId: string) => {
+    setAttachments(prev => prev.filter(att => att.id !== attachmentId));
+    toast.success('Attachment removed');
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   return (
     <DrawerForm
@@ -803,6 +845,78 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
             />
           </div>
         </div>
+
+        {/* Attachments Section - Only show for paid or partial payments */}
+        {(paymentStatus === 'paid' || paymentStatus === 'partial') && (
+          <>
+            <Separator />
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <Paperclip className="h-4 w-4 mr-2" />
+                Attachments
+              </h4>
+              
+              <div className="space-y-4">
+                {/* File Upload */}
+                <div className="flex items-center justify-center w-full">
+                  <label htmlFor="file-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, PDF, DOC up to 10MB</p>
+                    </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Uploaded Files List */}
+                {attachments.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Uploaded Files</Label>
+                    <div className="space-y-2">
+                      {attachments.map((attachment) => (
+                        <div
+                          key={attachment.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {attachment.name}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatFileSize(attachment.size)}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachment(attachment.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </form>
     </DrawerForm>
   );

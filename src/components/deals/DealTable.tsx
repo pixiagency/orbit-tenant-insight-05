@@ -18,7 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Eye, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { Eye, Edit, Trash2, MoreHorizontal, FileText } from 'lucide-react';
+import { DealViewModal } from './DealViewModal';
+import { DealInvoiceModal } from './DealInvoiceModal';
 
 interface Deal {
   id: string;
@@ -41,6 +43,7 @@ interface DealTableProps {
   deals: Deal[];
   onEdit: (deal: Deal) => void;
   onDelete: (dealId: string) => void;
+  onView?: (deal: Deal) => void;
   selectedDeals: string[];
   onSelectDeal: (dealId: string) => void;
   onSelectAllDeals: () => void;
@@ -82,6 +85,7 @@ export const DealTable: React.FC<DealTableProps> = ({
   deals,
   onEdit,
   onDelete,
+  onView,
   selectedDeals,
   onSelectDeal,
   onSelectAllDeals
@@ -125,10 +129,20 @@ export const DealTable: React.FC<DealTableProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => {}}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View
-                    </DropdownMenuItem>
+                    <DealViewModal deal={deal}>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View
+                      </DropdownMenuItem>
+                    </DealViewModal>
+                    {(deal.payment_status === 'paid' || deal.payment_status === 'partial') && (
+                      <DealInvoiceModal deal={deal}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          View Invoice
+                        </DropdownMenuItem>
+                      </DealInvoiceModal>
+                    )}
                     <DropdownMenuItem onClick={() => onEdit(deal)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
