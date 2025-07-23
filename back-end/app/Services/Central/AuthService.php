@@ -7,9 +7,9 @@ use App\Models\ActivationCode;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\BaseService;
+use Auth;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService extends BaseService
@@ -27,9 +27,10 @@ class AuthService extends BaseService
     public function loginWithEmailOrPhone(string $identifier, string $password): User|Model
     {
         $identifierField = is_numeric($identifier) ? 'phone' : 'email';
-        $credential = [$identifierField => $identifier, 'password' => $password];
-        if (!auth()->attempt($credential))
+        $user = $this->model->where($identifierField, $identifier)->with('roles', 'permissions')->first();
+        if (!$user || !Hash::check($password, $user->password)) {
             throw new NotFoundException(__('app.login_failed'));
+        }
         return $this->model->where($identifierField, $identifier)->with('roles', 'permissions')->first();
     }
 

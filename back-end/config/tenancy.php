@@ -19,7 +19,7 @@ return [
     'central_domains' => [
         // '127.0.0.1',
         // 'localhost',
-        env('APP_URL', 'crm.test')
+        env('APP_URL', 'new-crm.test')
     ],
 
     /**
@@ -52,7 +52,7 @@ return [
          * Tenant database names are created like this:
          * prefix + tenant_id + suffix.
          */
-        'prefix' => 'billiqa_',
+        'prefix' => 'crm_',
         'suffix' => '',
 
         /**

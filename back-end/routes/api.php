@@ -8,12 +8,16 @@ use App\Http\Controllers\Central\Api\PaymentController;
 use App\Http\Controllers\Central\Api\SettingController;
 use App\Http\Controllers\Central\Api\SubscriptionController;
 
-//////////// landlord routes
+
+// dd('hi');
+// //////////// landlord routes
 foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->name('central.')->group(function () {
-        Route::group(['prefix' => 'authentication', 'middleware' => 'guest'], function () {
+        Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
             Route::post('signup', [centralAuthController::class, 'signup'])->name('signup');
+
             Route::post('login', [centralAuthController::class, 'login'])->name('login');
+
             Route::get('hi', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
         });
 
@@ -28,7 +32,7 @@ foreach (config('tenancy.central_domains') as $domain) {
 
         //auth routes
         Route::group(['prefix' => 'dashboard', 'middleware' => 'auth:sanctum'], function () {
-            Route::get('logout', [centralAuthController::class, 'logout'])->name('logout');
+
             Route::resource('packages', \App\Http\Controllers\Central\Api\PackageController::class);
             Route::get('/settings', [SettingController::class, 'show']);
             Route::put('/settings', [SettingController::class, 'update']);
@@ -50,20 +54,25 @@ foreach (config('tenancy.central_domains') as $domain) {
             //payment routes
             Route::post('payment/process', [PaymentController::class, 'paymentProcess']);
             Route::get('payment/callback', [PaymentController::class, 'callback']);
+
+            Route::post('logout', [centralAuthController::class, 'logout'])->name('logout.post');
         });
     });
 }
 
 
-//////////// tenant routes
+// //////////// tenant routes
 Route::middleware([
     'api',
     \Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class,
     \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
 ])->group(function () {
     Route::get('/test', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/signup', [AuthController::class, 'signup']);
+
+    Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
+        Route::post('/login', [AuthController::class, 'login'])->name('tenant.login');
+        Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
+    });
 
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
     Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
@@ -85,13 +94,13 @@ Route::middleware([
 });
 
 
-Route::get('/user-json', function (Request $request) {
-    return response()->json($request->user()); // Returns authenticated user data
-})->middleware('auth:sanctum')->name('user.json');
+// Route::get('/user-json', function (Request $request) {
+//     return response()->json($request->user()); // Returns authenticated user data
+// })->middleware('auth:sanctum')->name('user.json');
 
-Route::fallback(function () {
-    if (request()->is('api/*')) {
-        return response()->json(['error' => 'API route not found'], 404);
-    }
-    return view('layouts.dashboard.error-pages.error404');
-})->name('error');
+// Route::fallback(function () {
+//     if (request()->is('api/*')) {
+//         return response()->json(['error' => 'API route not found'], 404);
+//     }
+//     return view('layouts.dashboard.error-pages.error404');
+// })->name('error');

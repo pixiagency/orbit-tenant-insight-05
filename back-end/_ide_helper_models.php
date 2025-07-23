@@ -13,15 +13,19 @@
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
- * @property string $activation_code
+ * @property string $code
  * @property int $tier_id
+ * @property string $source
+ * @property string $status
+ * @property int $trial_days
+ * @property string $expires_at
  * @property \Illuminate\Support\Carbon|null $used_at
  * @property string|null $deleted_at
+ * @property int $create_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $createBy
  * @property-read bool $is_expired
  * @property-read bool $is_used
  * @property-read bool $is_valid
@@ -36,11 +40,16 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode used()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode valid()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereActivationCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereCreateBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereExpiresAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereSource($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereTierId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereTrialDays($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ActivationCode whereUsedAt($value)
  */
@@ -49,8 +58,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \App\Models\Service|null $service
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newModelQuery()
@@ -62,8 +69,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property string $name
  * @property int $country_id
@@ -84,9 +89,8 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
+ * @property string|null $stripe_id
  * @property string $company_name
  * @property string|null $contact_name
  * @property string $contact_email
@@ -105,10 +109,14 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Location|null $area
  * @property-read \App\Models\Source|null $source
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subscription> $subscriptions
+ * @property-read int|null $subscriptions_count
  * @method static \Database\Factories\ClientFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client hasExpiredGenericTrial()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client onGenericTrial()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereCityId($value)
@@ -124,6 +132,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client wherePostalCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereStripeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereSubdomain($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Client whereWebsite($value)
@@ -133,8 +142,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \App\Models\Location|null $city
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
  * @property-read int|null $leads_count
@@ -149,8 +156,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -170,8 +175,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
@@ -186,8 +189,56 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
+ * @property int $id
+ * @property string $code
+ * @property int $tier_id
+ * @property string $source
+ * @property string $status
+ * @property int $trial_days
+ * @property string $expires_at
+ * @property \Illuminate\Support\Carbon|null $used_at
+ * @property string $discount_percentage
+ * @property string $usage_type
+ * @property int|null $max_uses
+ * @property string|null $deleted_at
+ * @property int $create_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $createBy
+ * @property-read bool $is_expired
+ * @property-read bool $is_used
+ * @property-read bool $is_valid
+ * @property-read \App\Models\Tenant|null $tenant
+ * @property-read \App\Models\Tier $tier
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode expired()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode forModuleType(string $moduleType)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode used()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode valid()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereCreateBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereDiscountPercentage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereMaxUses($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereSource($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereTierId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereTrialDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereUsageType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DiscountCode whereUsedAt($value)
+ */
+	class DiscountCode extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
@@ -202,21 +253,33 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
+ * @property int $id
+ * @property int $client_id
+ * @property int $subscription_id
+ * @property string $amount
+ * @property string $status
+ * @property string $due_date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Client|null $client
  * @property-read \App\Models\Subscription|null $subscription
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereClientId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereDueDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereSubscriptionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Invoice whereUpdatedAt($value)
  */
 	class Invoice extends \Eloquent {}
 }
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \App\Models\Contact|null $contact
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomField> $customFields
  * @property-read int|null $custom_fields_count
@@ -238,8 +301,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property \App\Enums\ActivationStatus $status
  * @property-read \Kalnoy\Nestedset\Collection<int, Location> $children
  * @property-read int|null $children_count
@@ -304,8 +365,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
  * @property-read int|null $stages_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline filter(\App\Abstracts\QueryFilter $filters)
@@ -318,8 +377,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
  * @property-read int|null $leads_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Reason filter(\App\Abstracts\QueryFilter $filters)
@@ -332,8 +389,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Category> $categories
  * @property-read int|null $categories_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
@@ -350,8 +405,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property array<array-key, mixed>|null $sources
  * @property array<array-key, mixed>|null $departments
@@ -373,8 +426,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Contact> $contacts
  * @property-read int|null $contacts_count
  * @property-read mixed $image_url
@@ -391,8 +442,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
  * @property-read int|null $leads_count
  * @property-read \App\Models\Pipeline|null $pipline
@@ -406,8 +455,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property int $client_id
  * @property int $tier_id
@@ -421,6 +468,8 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Client $client
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @property-read \App\Models\Tier $tier
  * @method static \Database\Factories\SubscriptionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription newModelQuery()
@@ -439,13 +488,11 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereTierId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereUpdatedAt($value)
  */
-	class Subscription extends \Eloquent {}
+	class Subscription extends \Eloquent implements \Spatie\MediaLibrary\HasMedia {}
 }
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
  * @property-read int|null $leads_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newModelQuery()
@@ -457,8 +504,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property-read \App\Models\User|null $leader
  * @property-read \App\Models\Location|null $location
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $sales
@@ -474,12 +519,9 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property string $id
  * @property string $name
- * @property int|null $user_id
- * @property int|null $activation_code_id
+ * @property int|null $client_id
  * @property array<array-key, mixed>|null $data
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -495,21 +537,70 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereActivationCodeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereClientId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereData($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUserId($value)
  */
 	class Tenant extends \Eloquent implements \Stancl\Tenancy\Contracts\TenantWithDatabase, \Spatie\MediaLibrary\HasMedia {}
 }
 
+namespace App\Models\Tenant{
+/**
+ * @property int $id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $password
+ * @property string|null $address
+ * @property string|null $phone
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $stripe_id
+ * @property string|null $pm_type
+ * @property string|null $pm_last_four
+ * @property string|null $trial_ends_at
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User permission($permissions, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User role($roles, $guard = null, $without = false)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereFirstName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereLastName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePmLastFour($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePmType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStripeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTrialEndsAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
+ */
+	class User extends \Eloquent {}
+}
+
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property string $package_name
  * @property string|null $description
@@ -554,8 +645,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
- *
  * @property int $id
  * @property string $first_name
  * @property string $last_name
@@ -567,6 +656,10 @@ namespace App\Models{
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $stripe_id
+ * @property string|null $pm_type
+ * @property string|null $pm_last_four
+ * @property string|null $trial_ends_at
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
@@ -592,7 +685,11 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePmLastFour($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePmType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStripeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTrialEndsAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)

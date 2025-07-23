@@ -138,10 +138,10 @@ class SubscriptionController extends Controller
 
             $client = Client::find($validatedData['client_id']);
             $tier = Tier::find($validatedData['tier_id']);
-
+    
             $tenant = Tenant::create([
                 'id' => $client->subdomain,
-                'tenancy_db_name' => "billiqa_" . $client->subdomain,
+                'tenancy_db_name' => "crm_" . $client->subdomain,
                 'name' => $client->company_name,
                 'client_id' => $client->id
             ]);
@@ -163,7 +163,7 @@ class SubscriptionController extends Controller
                 type: "admin"
             );
 
-               DB::commit();
+            DB::commit();
 
             return ApiResponse(new SubscriptionResource($subscription), 'Subscription created successfully');
         } catch (\Exception $e) {
