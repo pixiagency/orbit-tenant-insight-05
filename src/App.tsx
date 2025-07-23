@@ -24,7 +24,6 @@ import { ModernAdminDashboard } from "./pages/admin/ModernAdminDashboard";
 import { TeamLeaderDashboard } from "./pages/admin/TeamLeaderDashboard";
 import { SalesAgentDashboard } from "./pages/admin/SalesAgentDashboard";
 import { LeadsPage } from "./pages/admin/LeadsPage";
-import { ContactsPage } from "./pages/admin/ContactsPage";
 import { OpportunitiesPage } from "./pages/admin/OpportunitiesPage";
 import { SettingsPage } from "./pages/admin/settings/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -130,7 +129,6 @@ const App = () => {
                           <Route path="sales-agent" element={<SalesAgentDashboard />} />
                           <Route path="leads" element={<LeadsPage />} />
                           <Route path="leads/import" element={<LeadsImportPage />} />
-                          <Route path="contacts" element={<ContactsPage />} />
                           <Route path="opportunities" element={<OpportunitiesPage />} />
                           <Route path="deals" element={<DealsPage />} />
                           <Route path="tasks" element={<TasksPage />} />

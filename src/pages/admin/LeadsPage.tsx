@@ -1003,12 +1003,17 @@ export const LeadsPage = () => {
     const fullName = `${lead.first_name || lead.firstName} ${lead.last_name || lead.lastName}`;
     const email = lead.email || '';
     const company = lead.company || '';
-    const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) || email.toLowerCase().includes(searchTerm.toLowerCase()) || company.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         company.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || (lead.contact_status || lead.status) === statusFilter;
     const matchesSource = sourceFilter === 'all' || (lead.lead_source || lead.source) === sourceFilter;
     const matchesAssignee = assigneeFilter === 'all' || (lead.contact_owner || lead.assignedTo) === assigneeFilter;
     const score = lead.score || 0;
-    const matchesScore = scoreFilter === 'all' || scoreFilter === 'hot' && score >= 80 || scoreFilter === 'warm' && score >= 60 && score < 80 || scoreFilter === 'cold' && score < 60;
+    const matchesScore = scoreFilter === 'all' || 
+                        (scoreFilter === 'hot' && score >= 80) ||
+                        (scoreFilter === 'warm' && score >= 60 && score < 80) ||
+                        (scoreFilter === 'cold' && score < 60);
     return matchesSearch && matchesStatus && matchesSource && matchesAssignee && matchesScore;
   });
   const leadStats = {
@@ -1227,8 +1232,14 @@ export const LeadsPage = () => {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Contacts</h1>
           </div>
           <div className="flex items-center space-x-3">
-            
-            
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/leads/import')}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={handleAddLead}>
               <Plus className="h-4 w-4 mr-2" />
               New Contact
@@ -1238,22 +1249,46 @@ export const LeadsPage = () => {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <ModernKPICard title="Total Contacts" value={leadStats.total.toString()} icon={Users} change={{
-          value: "+8 this week",
-          trend: "up"
-        }} gradient="from-blue-500 to-blue-600" />
-          <ModernKPICard title="Active Leads" value={leadStats.qualified.toString()} icon={Star} change={{
-          value: "High quality leads",
-          trend: "up"
-        }} gradient="from-green-500 to-green-600" />
-          <ModernKPICard title="Conversions" value={leadStats.converted.toString()} icon={TrendingUp} change={{
-          value: "Great results!",
-          trend: "up"
-        }} gradient="from-purple-500 to-purple-600" />
-          <ModernKPICard title="Pipeline Value" value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} icon={TrendingUp} change={{
-          value: "Strong pipeline",
-          trend: "up"
-        }} gradient="from-orange-500 to-orange-600" />
+          <ModernKPICard 
+            title="Total Contacts" 
+            value={leadStats.total.toString()} 
+            icon={Users} 
+            change={{
+              value: "+8 this week",
+              trend: "up"
+            }} 
+            gradient="from-blue-500 to-blue-600" 
+          />
+          <ModernKPICard 
+            title="Active Leads" 
+            value={leadStats.qualified.toString()} 
+            icon={Star} 
+            change={{
+              value: "High quality leads",
+              trend: "up"
+            }} 
+            gradient="from-green-500 to-green-600" 
+          />
+          <ModernKPICard 
+            title="Conversions" 
+            value={leadStats.converted.toString()} 
+            icon={TrendingUp} 
+            change={{
+              value: "Great results!",
+              trend: "up"
+            }} 
+            gradient="from-purple-500 to-purple-600" 
+          />
+          <ModernKPICard 
+            title="Pipeline Value" 
+            value={`$${(leadStats.totalValue / 1000).toFixed(0)}K`} 
+            icon={TrendingUp} 
+            change={{
+              value: "Strong pipeline",
+              trend: "up"
+            }} 
+            gradient="from-orange-500 to-orange-600" 
+          />
         </div>
 
         {/* Filters */}
@@ -1451,10 +1486,18 @@ export const LeadsPage = () => {
 
                 {/* View Toggle - Two separate buttons */}
                 <div className="flex items-center space-x-1">
-                  <Button variant={viewMode === 'table' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('table')}>
+                  <Button
+                    variant={viewMode === 'table' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('table')}
+                  >
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="sm" onClick={() => setViewMode('grid')}>
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                  >
                     <Grid3X3 className="h-4 w-4" />
                   </Button>
                 </div>
