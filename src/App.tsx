@@ -43,7 +43,7 @@ import { FormPublicPage } from "./components/forms/FormPublicPage";
 import { AIAssistantPage } from "./pages/admin/AIAssistantPage";
 import { ReportsPage } from "./pages/admin/ReportsPage";
 import { NotificationsPage } from "./pages/admin/NotificationsPage";
-import { PRSRPage } from "./pages/admin/PRSRPage";
+import PRSRPage from "./pages/admin/PRSRPage";
 import Index from "./pages/Index";
 
 // Website Pages

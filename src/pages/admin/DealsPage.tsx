@@ -414,15 +414,6 @@ const DealsPage = () => {
             onEdit={handleEditDeal}
             onDelete={handleDeleteDeal}
             onView={handleViewDeal}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            pageSize={itemsPerPage}
-            totalItems={filteredDeals.length}
-            onPageChange={setCurrentPage}
-            onPageSizeChange={(newPageSize) => {
-              setItemsPerPage(newPageSize);
-              setCurrentPage(1);
-            }}
           />
 
           {filteredDeals.length === 0 && (
@@ -440,7 +431,7 @@ const DealsPage = () => {
       {/* Deal Form */}
       <EnhancedDealDrawerForm
         isOpen={showDealForm}
-        deal={selectedDeal}
+        deal={selectedDeal as any}
         onClose={() => {
           setShowDealForm(false);
           setSelectedDeal(null);
