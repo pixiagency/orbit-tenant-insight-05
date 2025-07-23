@@ -1,62 +1,24 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
-  Filter, 
-  Search, 
-  Calendar, 
-  Clock,
-  User,
+  Calendar,
   CheckCircle,
-  AlertCircle,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Flag,
-  Download,
-  Upload,
-  Eye,
-  FileText,
-  TrendingUp,
-  Star,
-  Target,
-  Mail,
-  Phone,
-  X
+  Clock,
+  AlertCircle
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { AdvancedFilters } from '../../components/shared/AdvancedFilters';
 import { TaskTable } from '../../components/tasks/TaskTable';
-import { TaskAdvancedFilters } from '../../components/tasks/TaskAdvancedFilters';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { TaskForm } from '../../components/tasks/TaskForm';
-
+import { EnhancedTaskForm } from '../../components/tasks/EnhancedTaskForm';
 import { toast } from 'sonner';
 
 interface Task {
@@ -72,6 +34,71 @@ interface Task {
   createdAt: string;
   completedAt?: string;
 }
+
+// Filter configuration for tasks
+const taskFilterConfig = {
+  searchPlaceholder: "Search tasks by title or description...",
+  fields: [
+    {
+      key: 'search',
+      label: 'Search',
+      type: 'search' as const,
+      placeholder: 'Search tasks by title or description...'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select' as const,
+      options: [
+        { value: 'all', label: 'All Status' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'in-progress', label: 'In Progress' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'cancelled', label: 'Cancelled' }
+      ],
+      defaultValue: 'all'
+    },
+    {
+      key: 'priority',
+      label: 'Priority',
+      type: 'select' as const,
+      options: [
+        { value: 'all', label: 'All Priorities' },
+        { value: 'low', label: 'Low' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'high', label: 'High' },
+        { value: 'urgent', label: 'Urgent' }
+      ],
+      defaultValue: 'all'
+    },
+    {
+      key: 'assignedTo',
+      label: 'Assigned To',
+      type: 'select' as const,
+      options: [
+        { value: 'all', label: 'All Assignees' },
+        { value: 'Sarah Johnson', label: 'Sarah Johnson' },
+        { value: 'Mike Chen', label: 'Mike Chen' },
+        { value: 'Emily Rodriguez', label: 'Emily Rodriguez' }
+      ],
+      defaultValue: 'all',
+      isAdvanced: true
+    },
+    {
+      key: 'dateRange',
+      label: 'Due Date Range',
+      type: 'date-range' as const,
+      isAdvanced: true
+    }
+  ],
+  defaultFilters: {
+    search: '',
+    status: 'all',
+    priority: 'all',
+    assignedTo: 'all',
+    dateRange: { from: undefined, to: undefined }
+  }
+};
 
 const tasksData: Task[] = [
   {
@@ -113,471 +140,257 @@ const tasksData: Task[] = [
   }
 ];
 
+const filterTasks = (tasks: Task[], filters: Record<string, any>) => {
+  return tasks.filter(task => {
+    // Search filter
+    if (filters.search) {
+      const searchValue = filters.search.toLowerCase();
+      const searchFields = [
+        task.title,
+        task.description,
+        task.relatedTo
+      ].filter(Boolean);
+      
+      if (!searchFields.some(field => field.toLowerCase().includes(searchValue))) {
+        return false;
+      }
+    }
+
+    // Status filter
+    if (filters.status !== 'all' && task.status !== filters.status) {
+      return false;
+    }
+
+    // Priority filter
+    if (filters.priority !== 'all' && task.priority !== filters.priority) {
+      return false;
+    }
+
+    // Assigned to filter
+    if (filters.assignedTo !== 'all' && task.assignedTo !== filters.assignedTo) {
+      return false;
+    }
+
+    // Date range filter (using due date)
+    if (filters.dateRange?.from || filters.dateRange?.to) {
+      const taskDate = new Date(task.dueDate);
+      if (filters.dateRange.from && taskDate < new Date(filters.dateRange.from)) {
+        return false;
+      }
+      if (filters.dateRange.to && taskDate > new Date(filters.dateRange.to)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+};
+
 const TasksPage = () => {
   const [tasks, setTasks] = useState<Task[]>(tasksData);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [filters, setFilters] = useState(taskFilterConfig.defaultFilters);
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [appliedFilters, setAppliedFilters] = useState<Array<{id: string, label: string, type: string}>>([]);
-  const [advancedFilters, setAdvancedFilters] = useState({
-    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
-    dueDateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined },
-    priorityFilter: 'all',
-    assignedTo: 'all',
-    status: 'all',
-    lastActivity: 'all',
-    operator: 'AND' as 'AND' | 'OR',
-    textCondition: 'contains' as 'contains' | 'equals' | 'not_contains' | 'not_equals'
-  });
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
-    return matchesStatus && matchesPriority;
-  });
+  const filteredTasks = filterTasks(tasks, filters);
 
   // Pagination
   const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTasks = filteredTasks.slice(startIndex, startIndex + itemsPerPage);
 
-  const handleSelectTask = (taskId: string) => {
-    setSelectedTasks(prev =>
-      prev.includes(taskId)
-        ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
+  const taskStats = {
+    total: tasks.length,
+    completed: tasks.filter(task => task.status === 'completed').length,
+    inProgress: tasks.filter(task => task.status === 'in-progress').length,
+    overdue: tasks.filter(task => {
+      const dueDate = new Date(task.dueDate);
+      const today = new Date();
+      return dueDate < today && task.status !== 'completed';
+    }).length
   };
 
-  const handleSelectAllTasks = () => {
-    if (selectedTasks.length === paginatedTasks.length) {
-      setSelectedTasks([]);
-    } else {
-      setSelectedTasks(paginatedTasks.map(task => task.id));
-    }
+  const handleAddTask = () => {
+    setSelectedTask(null);
+    setShowTaskForm(true);
   };
 
   const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsDrawerOpen(true);
+    setSelectedTask(task);
+    setShowTaskForm(true);
+  };
+
+  const handleSaveTask = (taskData: any) => {
+    if (selectedTask) {
+      // Edit existing task
+      setTasks(prev => prev.map(task => 
+        task.id === selectedTask.id 
+          ? { ...task, ...taskData, id: task.id }
+          : task
+      ));
+      toast.success('Task updated successfully');
+    } else {
+      // Add new task
+      const newTask: Task = {
+        ...taskData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString()
+      };
+      setTasks(prev => [...prev, newTask]);
+      toast.success('Task created successfully');
+    }
+    setShowTaskForm(false);
+    setSelectedTask(null);
   };
 
   const handleDeleteTask = (taskId: string) => {
-    setTaskToDelete(taskId);
-    setDeleteModalOpen(true);
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+    toast.success('Task deleted successfully');
   };
 
   const handleStatusChange = (taskId: string, status: string) => {
-    setTasks(prev => prev.map(task =>
-      task.id === taskId ? { ...task, status } : task
+    setTasks(prev => prev.map(task => 
+      task.id === taskId 
+        ? { 
+            ...task, 
+            status,
+            completedAt: status === 'completed' ? new Date().toISOString() : undefined
+          }
+        : task
     ));
     toast.success('Task status updated');
   };
 
-  const confirmDelete = () => {
-    if (taskToDelete) {
-      setTasks(prev => prev.filter(task => task.id !== taskToDelete));
-      toast.success('Task deleted successfully');
-      setDeleteModalOpen(false);
-      setTaskToDelete(null);
+  const handleSelectTask = (taskId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTasks(prev => [...prev, taskId]);
+    } else {
+      setSelectedTasks(prev => prev.filter(id => id !== taskId));
     }
   };
 
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (statusFilter !== 'all') count++;
-    if (priorityFilter !== 'all') count++;
-    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) count++;
-    if (advancedFilters.dueDateRange.from || advancedFilters.dueDateRange.to) count++;
-    if (advancedFilters.priorityFilter !== 'all') count++;
-    if (advancedFilters.assignedTo !== 'all') count++;
-    if (advancedFilters.status !== 'all') count++;
-    if (advancedFilters.lastActivity !== 'all') count++;
-    return count;
-  };
-
-  const clearFilters = () => {
-    setStatusFilter('all');
-    setPriorityFilter('all');
-    setAdvancedFilters({
-      dateRange: { from: undefined, to: undefined },
-      dueDateRange: { from: undefined, to: undefined },
-      priorityFilter: 'all',
-      assignedTo: 'all',
-      status: 'all',
-      lastActivity: 'all',
-      operator: 'AND',
-      textCondition: 'contains'
-    });
-    setAppliedFilters([]);
-  };
-
-  const applyAdvancedFilters = () => {
-    const newAppliedFilters = [];
-    
-    if (advancedFilters.dateRange.from || advancedFilters.dateRange.to) {
-      newAppliedFilters.push({
-        id: 'dateRange',
-        label: `Created: ${advancedFilters.dateRange.from?.toLocaleDateString() || 'Any'} - ${advancedFilters.dateRange.to?.toLocaleDateString() || 'Any'}`,
-        type: 'dateRange'
-      });
+  const handleSelectAllTasks = (checked: boolean) => {
+    if (checked) {
+      setSelectedTasks(paginatedTasks.map(task => task.id));
+    } else {
+      setSelectedTasks([]);
     }
-    
-    if (advancedFilters.dueDateRange.from || advancedFilters.dueDateRange.to) {
-      newAppliedFilters.push({
-        id: 'dueDateRange',
-        label: `Due: ${advancedFilters.dueDateRange.from?.toLocaleDateString() || 'Any'} - ${advancedFilters.dueDateRange.to?.toLocaleDateString() || 'Any'}`,
-        type: 'dueDateRange'
-      });
-    }
-    
-    if (advancedFilters.priorityFilter !== 'all') {
-      newAppliedFilters.push({
-        id: 'priorityFilter',
-        label: `Priority: ${advancedFilters.priorityFilter}`,
-        type: 'priorityFilter'
-      });
-    }
-    
-    if (advancedFilters.assignedTo !== 'all') {
-      newAppliedFilters.push({
-        id: 'assignedTo',
-        label: `Assigned: ${advancedFilters.assignedTo}`,
-        type: 'assignedTo'
-      });
-    }
-    
-    if (advancedFilters.status !== 'all') {
-      newAppliedFilters.push({
-        id: 'status',
-        label: `Status: ${advancedFilters.status}`,
-        type: 'status'
-      });
-    }
-    
-    if (advancedFilters.lastActivity !== 'all') {
-      newAppliedFilters.push({
-        id: 'lastActivity',
-        label: `Activity: ${advancedFilters.lastActivity}`,
-        type: 'lastActivity'
-      });
-    }
-    
-    setAppliedFilters(newAppliedFilters);
-    setShowAdvancedFilters(false);
-  };
-
-  const removeAppliedFilter = (filterId: string) => {
-    const updatedAdvancedFilters = { ...advancedFilters };
-    
-    switch (filterId) {
-      case 'dateRange':
-        updatedAdvancedFilters.dateRange = { from: undefined, to: undefined };
-        break;
-      case 'dueDateRange':
-        updatedAdvancedFilters.dueDateRange = { from: undefined, to: undefined };
-        break;
-      case 'priorityFilter':
-        updatedAdvancedFilters.priorityFilter = 'all';
-        break;
-      case 'assignedTo':
-        updatedAdvancedFilters.assignedTo = 'all';
-        break;
-      case 'status':
-        updatedAdvancedFilters.status = 'all';
-        break;
-      case 'lastActivity':
-        updatedAdvancedFilters.lastActivity = 'all';
-        break;
-    }
-    
-    setAdvancedFilters(updatedAdvancedFilters);
-    setAppliedFilters(prev => prev.filter(f => f.id !== filterId));
   };
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
+          <p className="text-gray-600 mt-1">Manage and track your tasks</p>
         </div>
-        <Button onClick={() => setIsDrawerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button onClick={handleAddTask}>
           <Plus className="h-4 w-4 mr-2" />
           Add Task
         </Button>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <ModernKPICard
           title="Total Tasks"
-          value={tasks.length.toString()}
-          change={{ value: "+15%", trend: "up" }}
+          value={taskStats.total.toString()}
           icon={Calendar}
+          change={{ value: "+15%", trend: "up" }}
         />
         <ModernKPICard
           title="Completed"
-          value={tasks.filter(t => t.status === 'completed').length.toString()}
-          change={{ value: "+22%", trend: "up" }}
+          value={taskStats.completed.toString()}
           icon={CheckCircle}
+          change={{ value: "+22%", trend: "up" }}
         />
         <ModernKPICard
           title="In Progress"
-          value={tasks.filter(t => t.status === 'in-progress').length.toString()}
-          change={{ value: "+8%", trend: "up" }}
+          value={taskStats.inProgress.toString()}
           icon={Clock}
+          change={{ value: "+8%", trend: "up" }}
         />
         <ModernKPICard
           title="Overdue"
-          value={tasks.filter(t => t.status === 'overdue').length.toString()}
-          change={{ value: "-12%", trend: "down" }}
+          value={taskStats.overdue.toString()}
           icon={AlertCircle}
+          change={{ value: "-12%", trend: "down" }}
         />
       </div>
 
       {/* Filters */}
+      <AdvancedFilters
+        config={taskFilterConfig}
+        filters={filters}
+        onFiltersChange={setFilters}
+        title="Task Filters"
+        filteredCount={filteredTasks.length}
+      />
+
+      {/* Table */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Task Filters</CardTitle>
-              <CardDescription>Filter and search your tasks</CardDescription>
+              <CardTitle>Tasks</CardTitle>
+              <CardDescription>
+                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTasks.length)} of {filteredTasks.length} records
+              </CardDescription>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}>
-                <Filter className="h-4 w-4 mr-2" />
-                Advanced Filters
-              </Button>
-              {getActiveFiltersCount() > 0 && (
-                <Button variant="outline" size="sm" onClick={clearFilters}>
-                  Clear Filters ({getActiveFiltersCount()})
-                </Button>
-              )}
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div className="lg:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input placeholder="Search tasks..." className="pl-10" />
-              </div>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="All Priorities" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="All Assignees" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Assignees</SelectItem>
-                <SelectItem value="sarah">Sarah Johnson</SelectItem>
-                <SelectItem value="mike">Mike Chen</SelectItem>
-                <SelectItem value="emily">Emily Rodriguez</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Applied Filters */}
-          {appliedFilters.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {appliedFilters.map((filter) => (
-                <div key={filter.id} className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                  <span>{filter.label}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 w-4 p-0 hover:bg-primary/20"
-                    onClick={() => removeAppliedFilter(filter.id)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {selectedTasks.length > 0 && (
-            <div className="flex items-center gap-2 mt-4 p-3 bg-muted rounded-lg">
-              <span className="text-sm text-muted-foreground">
-                {selectedTasks.length} selected
-              </span>
-              <Button variant="outline" size="sm">
-                <Mail className="h-4 w-4 mr-2" />
-                Send Email
-              </Button>
-              <Button variant="outline" size="sm">
-                <Phone className="h-4 w-4 mr-2" />
-                Make Call
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
         <CardContent className="p-0">
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Show</span>
-                  <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-sm text-muted-foreground">entries</span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredTasks.length)} of {filteredTasks.length} records
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                >
-                  Previous
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </div>
           <TaskTable
             tasks={paginatedTasks}
+            selectedTasks={selectedTasks}
+            onSelectTask={(id) => handleSelectTask(id, true)}
+            onSelectAllTasks={() => handleSelectAllTasks(true)}
             onEdit={handleEditTask}
             onDelete={handleDeleteTask}
             onStatusChange={handleStatusChange}
-            selectedTasks={selectedTasks}
-            onSelectTask={handleSelectTask}
-            onSelectAllTasks={handleSelectAllTasks}
           />
+
+          {filteredTasks.length === 0 && (
+            <div className="text-center py-12">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No tasks found matching your filters</p>
+              <Button onClick={() => setFilters(taskFilterConfig.defaultFilters)} variant="outline" className="mt-2">
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <TaskAdvancedFilters
-        isOpen={showAdvancedFilters}
-        onClose={() => setShowAdvancedFilters(false)}
-        filters={advancedFilters}
-        onFiltersChange={setAdvancedFilters}
-        onApplyFilters={applyAdvancedFilters}
-        onClearFilters={() => {
-          setAdvancedFilters({
-            dateRange: { from: undefined, to: undefined },
-            dueDateRange: { from: undefined, to: undefined },
-            priorityFilter: 'all',
-            assignedTo: 'all',
-            status: 'all',
-            lastActivity: 'all',
-            operator: 'AND',
-            textCondition: 'contains'
-          });
-          setAppliedFilters([]);
-        }}
-      />
-
       {/* Task Form */}
-      <TaskForm
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setEditingTask(null);
-        }}
-        onSave={(taskData) => {
-          if (editingTask) {
-            setTasks(prev => prev.map(task =>
-              task.id === editingTask.id ? { ...task, ...taskData } : task
-            ));
-            toast.success('Task updated successfully');
-          } else {
-            const newTask = {
-              id: Date.now().toString(),
-              ...taskData,
-              createdAt: new Date().toISOString()
-            };
-            setTasks(prev => [...prev, newTask]);
-            toast.success('Task created successfully');
-          }
-          setIsDrawerOpen(false);
-          setEditingTask(null);
-        }}
-        task={editingTask}
-      />
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this task? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showTaskForm && (
+        <EnhancedTaskForm
+          isOpen={showTaskForm}
+          task={selectedTask}
+          onClose={() => {
+            setShowTaskForm(false);
+            setSelectedTask(null);
+          }}
+          onSave={handleSaveTask}
+        />
+      )}
     </div>
   );
 };
