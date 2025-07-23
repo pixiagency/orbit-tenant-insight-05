@@ -68,7 +68,7 @@ const superAdminMenuItems: MenuItem[] = [
 
 const adminMenuItems: MenuItem[] = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
-  { title: 'Contacts', url: '/admin/leads', icon: Target, badge: '12' },
+  { title: 'Contacts', url: '/admin/contacts', icon: Target, badge: '12' },
   { title: 'Opportunities', url: '/admin/opportunities', icon: Briefcase, badge: '5' },
   { title: 'Deals', url: '/admin/deals', icon: FileText, badge: '8' },
   { title: 'Tasks', url: '/admin/tasks', icon: CheckSquare, badge: '3' },
