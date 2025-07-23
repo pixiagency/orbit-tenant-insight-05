@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { 
   Plus, 
   Briefcase,
@@ -11,9 +13,11 @@ import {
   Grid3X3,
   List,
   Search,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
 import { ModernKPICard } from '../../components/shared/ModernKPICard';
+import { AdvancedFilters } from '../../components/shared/AdvancedFilters';
 import {
   Select,
   SelectContent,
@@ -174,11 +178,15 @@ const filterOpportunities = (opportunities: Opportunity[], searchTerm: string, s
 
 export const OpportunitiesPage = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>(opportunitiesData);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [stageFilter, setStageFilter] = useState('all');
-  const [assignedToFilter, setAssignedToFilter] = useState('all');
-  const [sourceFilter, setSourceFilter] = useState('all');
-  const [pipelineFilter, setPipelineFilter] = useState('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    search: '',
+    stage: 'all',
+    assignedTo: 'all',
+    source: 'all',
+    pipeline: 'all',
+    dateRange: { from: undefined as Date | undefined, to: undefined as Date | undefined }
+  });
   const [showOpportunityForm, setShowOpportunityForm] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
@@ -186,7 +194,7 @@ export const OpportunitiesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const filteredOpportunities = filterOpportunities(opportunities, searchTerm, stageFilter, assignedToFilter, sourceFilter, pipelineFilter);
+  const filteredOpportunities = filterOpportunities(opportunities, filters.search, filters.stage, filters.assignedTo, filters.source, filters.pipeline);
 
   // Pagination
   const totalPages = Math.ceil(filteredOpportunities.length / itemsPerPage);
@@ -265,20 +273,107 @@ export const OpportunitiesPage = () => {
 
   const getActiveFiltersCount = () => {
     let count = 0;
-    if (searchTerm) count++;
-    if (stageFilter !== 'all') count++;
-    if (assignedToFilter !== 'all') count++;
-    if (sourceFilter !== 'all') count++;
-    if (pipelineFilter !== 'all') count++;
+    if (filters.search) count++;
+    if (filters.stage !== 'all') count++;
+    if (filters.assignedTo !== 'all') count++;
+    if (filters.source !== 'all') count++;
+    if (filters.pipeline !== 'all') count++;
+    if (filters.dateRange.from || filters.dateRange.to) count++;
     return count;
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setStageFilter('all');
-    setAssignedToFilter('all');
-    setSourceFilter('all');
-    setPipelineFilter('all');
+    setFilters({
+      search: '',
+      stage: 'all',
+      assignedTo: 'all',
+      source: 'all',
+      pipeline: 'all',
+      dateRange: { from: undefined, to: undefined }
+    });
+  };
+
+  // Filter configuration for AdvancedFilters component
+  const filterConfig = {
+    searchPlaceholder: "Search opportunities...",
+    fields: [
+      {
+        key: 'search',
+        label: 'Search',
+        type: 'search' as const,
+        placeholder: 'Search opportunities...'
+      },
+      {
+        key: 'stage',
+        label: 'Stage',
+        type: 'select' as const,
+        defaultValue: 'all',
+        options: [
+          { value: 'all', label: 'All Stages' },
+          { value: 'prospecting', label: 'Prospecting' },
+          { value: 'qualification', label: 'Qualification' },
+          { value: 'proposal', label: 'Proposal' },
+          { value: 'negotiation', label: 'Negotiation' },
+          { value: 'closed-won', label: 'Closed Won' },
+          { value: 'closed-lost', label: 'Closed Lost' }
+        ]
+      },
+      {
+        key: 'assignedTo',
+        label: 'Assigned To',
+        type: 'select' as const,
+        defaultValue: 'all',
+        options: [
+          { value: 'all', label: 'All Assignees' },
+          { value: 'Sarah Johnson', label: 'Sarah Johnson' },
+          { value: 'Mike Chen', label: 'Mike Chen' },
+          { value: 'Emily Rodriguez', label: 'Emily Rodriguez' },
+          { value: 'David Brown', label: 'David Brown' }
+        ]
+      },
+      {
+        key: 'source',
+        label: 'Source',
+        type: 'select' as const,
+        defaultValue: 'all',
+        options: [
+          { value: 'all', label: 'All Sources' },
+          { value: 'Website', label: 'Website' },
+          { value: 'LinkedIn', label: 'LinkedIn' },
+          { value: 'Referral', label: 'Referral' },
+          { value: 'Trade Show', label: 'Trade Show' },
+          { value: 'Cold Call', label: 'Cold Call' }
+        ]
+      },
+      {
+        key: 'pipeline',
+        label: 'Pipeline',
+        type: 'select' as const,
+        defaultValue: 'all',
+        isAdvanced: true,
+        options: [
+          { value: 'all', label: 'All Pipelines' },
+          { value: 'sales', label: 'Sales' },
+          { value: 'marketing', label: 'Marketing' },
+          { value: 'customer-success', label: 'Customer Success' },
+          { value: 'enterprise', label: 'Enterprise' }
+        ]
+      },
+      {
+        key: 'dateRange',
+        label: 'Date Range',
+        type: 'date-range' as const,
+        isAdvanced: true
+      }
+    ],
+    defaultFilters: {
+      search: '',
+      stage: 'all',
+      assignedTo: 'all',
+      source: 'all',
+      pipeline: 'all',
+      dateRange: { from: undefined, to: undefined }
+    }
   };
 
   return (
@@ -325,90 +420,14 @@ export const OpportunitiesPage = () => {
         />
       </div>
 
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>Opportunity Filters</CardTitle>
-                <CardDescription>Filter and search your opportunities</CardDescription>
-              </div>
-              <div className="flex items-center space-x-2">
-                {getActiveFiltersCount() > 0 && (
-                  <Button variant="outline" size="sm" onClick={clearFilters}>
-                    Clear Filters ({getActiveFiltersCount()})
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="lg:col-span-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    placeholder="Search opportunities..." 
-                    className="pl-10" 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)} 
-                  />
-                </div>
-              </div>
-              <Select value={stageFilter} onValueChange={setStageFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Stages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Stages</SelectItem>
-                  <SelectItem value="prospecting">Prospecting</SelectItem>
-                  <SelectItem value="qualification">Qualification</SelectItem>
-                  <SelectItem value="proposal">Proposal</SelectItem>
-                  <SelectItem value="negotiation">Negotiation</SelectItem>
-                  <SelectItem value="closed-won">Closed Won</SelectItem>
-                  <SelectItem value="closed-lost">Closed Lost</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={assignedToFilter} onValueChange={setAssignedToFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Assignees" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Assignees</SelectItem>
-                  <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
-                  <SelectItem value="Mike Chen">Mike Chen</SelectItem>
-                  <SelectItem value="Emily Rodriguez">Emily Rodriguez</SelectItem>
-                  <SelectItem value="David Brown">David Brown</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={sourceFilter} onValueChange={setSourceFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Sources" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Sources</SelectItem>
-                  <SelectItem value="Website">Website</SelectItem>
-                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                  <SelectItem value="Referral">Referral</SelectItem>
-                  <SelectItem value="Trade Show">Trade Show</SelectItem>
-                  <SelectItem value="Cold Call">Cold Call</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={pipelineFilter} onValueChange={setPipelineFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Pipelines" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Pipelines</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="customer-success">Customer Success</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Filters Section */}
+        <AdvancedFilters
+          config={filterConfig}
+          filters={filters}
+          onFiltersChange={setFilters}
+          title="Opportunity Filters"
+          filteredCount={filteredOpportunities.length}
+        />
 
         {/* Main Content */}
         <Card>
