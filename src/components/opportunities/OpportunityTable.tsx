@@ -26,7 +26,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap, CheckSquare, GitBranch, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, MessageSquare, Mail, Phone, Activity, UserCheck, BarChart3, Zap, CheckSquare, GitBranch } from 'lucide-react';
 import { OpportunityCommunicationDialog } from './OpportunityCommunicationDialog';
 import { OpportunityStatusDialog } from './OpportunityStatusDialog';
 import { OpportunityStageDialog } from './OpportunityStageDialog';
@@ -308,100 +308,6 @@ export const OpportunityTable = ({
     ];
   };
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(
-          <button
-            key={i}
-            onClick={() => onPageChange(i)}
-            className={`px-2 py-1 text-xs rounded-md transition-colors ${
-              currentPage === i
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-            }`}
-          >
-            {i}
-          </button>
-        );
-      }
-    } else {
-      items.push(
-        <button
-          key={1}
-          onClick={() => onPageChange(1)}
-          className={`px-2 py-1 text-xs rounded-md transition-colors ${
-            currentPage === 1
-              ? 'bg-blue-500 text-white'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-          }`}
-        >
-          1
-        </button>
-      );
-
-      if (currentPage > 3) {
-        items.push(
-          <span key="ellipsis1" className="px-2 py-1 text-xs text-gray-400">
-            ...
-          </span>
-        );
-      }
-
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        items.push(
-          <button
-            key={i}
-            onClick={() => onPageChange(i)}
-            className={`px-2 py-1 text-xs rounded-md transition-colors ${
-              currentPage === i
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-            }`}
-          >
-            {i}
-          </button>
-        );
-      }
-
-      if (currentPage < totalPages - 2) {
-        items.push(
-          <span key="ellipsis2" className="px-2 py-1 text-xs text-gray-400">
-            ...
-          </span>
-        );
-      }
-
-      if (totalPages > 1) {
-        items.push(
-          <button
-            key={totalPages}
-            onClick={() => onPageChange(totalPages)}
-            className={`px-2 py-1 text-xs rounded-md transition-colors ${
-              currentPage === totalPages
-                ? 'bg-blue-500 text-white'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-            }`}
-          >
-            {totalPages}
-          </button>
-        );
-      }
-    }
-
-    return items;
-  };
-
-  // Calculate pagination values
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-
   return (
     <div className="space-y-4">
       {/* Bulk Actions */}
@@ -474,6 +380,59 @@ export const OpportunityTable = ({
         </div>
       )}
 
+      {/* Header with entries selector and pagination */}
+      <div className="flex items-center justify-between bg-white px-4 py-3 border-b">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700 font-medium">Show</span>
+            <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
+              <SelectTrigger className="w-20 h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-gray-700 font-medium">entries</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} records
+          </div>
+        </div>
+        <div className="flex items-center space-x-6">
+          {/* Top Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="h-8 px-3 text-sm"
+              >
+                Previous
+              </Button>
+              <div className="flex items-center space-x-1">
+                <span className="text-sm text-gray-600">Page</span>
+                <span className="text-sm font-medium text-gray-900">{currentPage}</span>
+                <span className="text-sm text-gray-600">of {totalPages}</span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 px-3 text-sm"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -647,66 +606,6 @@ export const OpportunityTable = ({
             ))}
           </TableBody>
         </Table>
-
-        {/* Pagination Controls */}
-        {totalItems > 0 && (
-          <div className="border-t border-gray-200 dark:border-gray-700 p-3">
-            <div className="flex flex-col items-center xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4">
-              {/* LEFT: Info section */}
-              <div className="flex flex-col items-center xs:flex-row xs:items-center xs:space-x-4 space-y-1 xs:space-y-0">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Rows per page:</span>
-                  <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
-                    <SelectTrigger className="w-16 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <span className="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                  Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} results
-                </span>
-              </div>
-              {/* RIGHT: Compact Pagination controls */}
-              <div className="flex justify-center xs:justify-end">
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className={`p-2 rounded-md text-sm transition-colors ${
-                      currentPage === 1 
-                        ? 'text-gray-400 cursor-not-allowed' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  
-                  <div className="flex items-center space-x-1">
-                    {renderPaginationItems()}
-                  </div>
-                  
-                  <button
-                    onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className={`p-2 rounded-md text-sm transition-colors ${
-                      currentPage === totalPages 
-                        ? 'text-gray-400 cursor-not-allowed' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <OpportunityCommunicationDialog
