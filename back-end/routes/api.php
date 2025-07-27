@@ -74,11 +74,16 @@ Route::middleware([
         Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
     });
 
+    Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
+    Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
+    Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+    Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
     Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);
     Route::apiResource('pipelines', \App\Http\Controllers\Api\PipelineController::class);
+    Route::apiResource('payment-methods', \App\Http\Controllers\Api\PaymentMethodController::class);
     Route::get('/locations/countries', [\App\Http\Controllers\Api\LocationController::class, 'getCountries']);
     Route::get('/locations/countries/{countryId}/cities', [\App\Http\Controllers\Api\LocationController::class, 'getCities']);
     Route::get('/locations/cities/{cityId}/areas', [\App\Http\Controllers\Api\LocationController::class, 'getAreas']);

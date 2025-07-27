@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Contact;
+use App\Models\Tenant\Contact;
 use App\QueryFilters\ContactFilters;
 use Illuminate\Database\Eloquent\Builder;
 use App\DTO\Contact\ContactDTO;
@@ -48,9 +48,10 @@ class ContactService extends BaseService
     public function store(ContactDTO $contactDTO)
     {
         $contactData = $contactDTO->toArray();
-        // dd( $contactData);
         // Create the contact
         $contact = $this->model->create($contactData);
+
+        $contact->load('country', 'city', 'user', 'source');
         return $contact;
     }
 

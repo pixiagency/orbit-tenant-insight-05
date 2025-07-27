@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\DTO\Pipeline\PipelineDTO;
-use App\Models\Pipeline;
+use App\Models\Tenant\Pipeline;
 use App\QueryFilters\PipelineFilters;
 use Illuminate\Database\Eloquent\Builder;
 

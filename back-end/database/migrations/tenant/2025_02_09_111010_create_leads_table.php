@@ -13,11 +13,23 @@ return new class extends Migration
     {
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
+            $table->string('opportunity_name');
+            $table->string('company');
             $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
-            $table->foreignId('reason_id')->nullable()->constrained('reasons')->onDelete('cascade');// Required if status = 'lost'
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->enum('status', ['open', 'lost', 'won', 'abandoned']);
-            $table->decimal('value', 10, 2)->nullable();// Required if status = 'won'
+            $table->string('email');
+            $table->string('phone');
+            $table->foreignId('source_id')->constrained('sources')->onDelete('cascade');
+            $table->foreignId('city_id')->constrained('cities')->onDelete('cascade');
+
+            // Opportunity Details
+            $table->enum('status', ['Active', 'lost', 'won', 'abandoned']);
+            $table->foreignId('stage_id')->constrained('stages')->onDelete('cascade');
+            $table->decimal('deal_value', 10, 2);
+            $table->decimal('win_probability', 10, 2);
+            $table->date('expected_close_date');
+            $table->foreignId('assigned_to_id')->nullable()->constrained('users')->onDelete('cascade'); // Required if status = 'lost'
+            $table->text('notes')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

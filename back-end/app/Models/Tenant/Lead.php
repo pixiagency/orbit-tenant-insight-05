@@ -1,19 +1,37 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Tenant;
 
+use App\Models\CustomField;
+use App\Models\Industry;
+use App\Models\Reason;
+use App\Models\Service;
+use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
 {
-    use Filterable;
+
+use Filterable;
+
+    protected $table = 'leads';
     protected $fillable=[
-        'status',
+        'opportunity_name',
+        'company',
         'contact_id',
-        'reason_id',
-        'user_id',
-        'value',
+        'email',
+        'phone',
+        'source_id',
+        'city_id',  
+        'status',
+        'stage_id',
+        'deal_value',
+        'win_probability',
+        'expected_close_date',
+        'assigned_to_id',   
+        'notes',
+        'description',
     ];
     // Lead belongs to a Contact
     public function contact()

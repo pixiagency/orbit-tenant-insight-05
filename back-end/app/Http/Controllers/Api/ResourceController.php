@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DTO\Client\ClientDTO;
 use App\Exceptions\GeneralException;
-use App\Http\Resources\ClientCollection;
-use App\Http\Resources\ClientResource;
 use App\Http\Resources\SourceCollection;
 use Exception;
-
 use Illuminate\Http\Request;
-use App\Models\Tenant\Resource;
 use App\DTO\Resource\ResourceDTO;
 use App\Services\ResourceService;
 use Illuminate\Support\Facades\DB;
@@ -19,15 +14,11 @@ use App\Exceptions\NotFoundException;
 use App\Http\Resources\SourceResource;
 use App\Http\Requests\Resource\ResourceStoreRequest;
 use App\Http\Requests\Resource\ResourceUpdateRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ResourceController extends Controller
 {
-    public function __construct(public ResourceService $resourceService)
-    {
-
-    }
+    public function __construct(public ResourceService $resourceService) {}
 
     /**
      * Display a listing of the resource.
@@ -69,7 +60,7 @@ class ResourceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show( $id)
+    public function show($id)
     {
         // $id = (int) $id;
         try {
@@ -93,7 +84,7 @@ class ResourceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ResourceUpdateRequest $request,$id)
+    public function update(ResourceUpdateRequest $request, $id)
     {
         try {
             $resourceDTO = $request->toResourceDTO();

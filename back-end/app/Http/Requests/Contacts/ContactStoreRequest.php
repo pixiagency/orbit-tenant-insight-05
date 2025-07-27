@@ -22,12 +22,44 @@ class ContactStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:clients,email',
+            'business_phone' => 'required|string|max:20',
+            'mobile_phone' => 'required|string|max:20',
+            'job_title' => 'required|string|max:255',
+            'department' => 'required|string|max:255',
+            'status' => 'required|string|max:255',
+            'source_id' => 'required|exists:sources,id',
+
+            // communication preferences
+            'contact_method' => 'required|string|max:255',
+            'email_permission' => 'required|boolean',
+            'phone_permission' => 'required|boolean',
+            'whatsapp_permission' => 'required|boolean',
+
+            // company info
+            'company_name' => 'required|string|max:255',
+            'website' => 'required|string|max:255',
+            'industry' => 'required|string|max:255',
+            'company_size' => 'required|string|max:255',
+
+            // address info
             'address' => 'required|string|max:255',
-            'city_id' => 'nullable|integer|exists:locations,id',
-            'resource_id' => 'required|exists:resources,id',
+            'country_id' => 'required|exists:countries,id',
+            'city_id' => 'required|exists:cities,id',
+            'state' => 'required|string|max:255',
+            'zip_code' => 'required|string|max:255',
+
+            // system fields
+            'user_id' => 'required|exists:users,id',
+
+            // tags
+            'tags' => 'nullable|array',
+            'tags.*' => 'nullable|string|max:255',
+
+            // notes
+            'notes' => 'nullable|string|max:255',
         ];
     }
 }

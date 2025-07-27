@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\TaskStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tasks', function (Blueprint $table) {
+        Schema::create('subscription_details', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->enum('status', TaskStatus::values())->default('in_progress');
-            $table->date('due_date');
+            $table->foreignId('deal_id')->constrained('deals');
+            $table->integer('recurring_amount');
+            $table->enum('billing_cycle',['monthly','yearly']);
+            $table->date('subscription_start');
+            $table->date('subscription_end');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tasks');
+        Schema::dropIfExists('subscription_details');
     }
 };
