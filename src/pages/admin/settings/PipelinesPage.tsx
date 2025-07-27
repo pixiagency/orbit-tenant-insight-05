@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Save, GripVertical, Target, Workflow, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -83,6 +82,7 @@ export const PipelinesPage: React.FC = () => {
   ]);
 
   const [selectedPipeline, setSelectedPipeline] = useState<string>('1');
+  const [activeSection, setActiveSection] = useState<'stages' | 'loss-reasons'>('stages');
   const [newStageName, setNewStageName] = useState('');
   const [newStageProbability, setNewStageProbability] = useState(50);
   const [editingStage, setEditingStage] = useState<string | null>(null);
@@ -286,8 +286,8 @@ export const PipelinesPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Workflow className="h-6 w-6 text-blue-600" />
@@ -330,343 +330,407 @@ export const PipelinesPage: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <p className="text-gray-600">
+      <p className="text-gray-600 mb-6">
         Configure sales pipelines and their stages for opportunity management
       </p>
 
-      <Tabs value={selectedPipeline} onValueChange={setSelectedPipeline} className="space-y-6">
-        {/* Pipeline Tabs */}
-        <TabsList>
-          {pipelines.map(pipeline => (
-            <TabsTrigger key={pipeline.id} value={pipeline.id} className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              {pipeline.name}
-              {pipeline.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {pipelines.map(pipeline => (
-          <TabsContent key={pipeline.id} value={pipeline.id} className="space-y-6">
-            {/* Pipeline Overview */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      {pipeline.name}
-                    </CardTitle>
-                    <CardDescription>
-                      Manage stages and loss reasons for this pipeline.
-                    </CardDescription>
-                  </div>
-                  {!pipeline.isDefault && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeletePipeline(pipeline.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete Pipeline
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Total Stages:</span>
-                    <Badge variant="outline" className="ml-2">{pipeline.stages.length}</Badge>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Loss Reasons:</span>
-                    <Badge variant="outline" className="ml-2">{pipeline.lossReasons.length}</Badge>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Type:</span>
-                    <Badge variant={pipeline.isDefault ? "default" : "secondary"} className="ml-2">
-                      {pipeline.isDefault ? "Default" : "Custom"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pipeline Settings Tabs */}
-            <Tabs defaultValue="stages" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="stages">Pipeline Stages</TabsTrigger>
-                <TabsTrigger value="loss-reasons">Loss Reasons</TabsTrigger>
-              </TabsList>
-
-              {/* Stages Tab */}
-              <TabsContent value="stages" className="space-y-6">
-                {/* Add New Stage */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Add New Stage</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <Label htmlFor="stageName">Stage Name</Label>
-                        <Input
-                          id="stageName"
-                          placeholder="Enter stage name..."
-                          value={newStageName}
-                          onChange={(e) => setNewStageName(e.target.value)}
-                        />
-                      </div>
-                      <div className="w-40">
-                        <Label htmlFor="probability">Probability (%)</Label>
-                        <Input
-                          id="probability"
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={newStageProbability}
-                          onChange={(e) => setNewStageProbability(parseInt(e.target.value))}
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <Button onClick={handleAddStage}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Stage
-                        </Button>
-                      </div>
+      <div className="flex gap-6 h-[calc(100vh-200px)]">
+        {/* Sidebar */}
+        <div className="w-80 flex flex-col">
+          {/* Pipeline Selection */}
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Pipelines</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {pipelines.map(pipeline => (
+                <div
+                  key={pipeline.id}
+                  onClick={() => setSelectedPipeline(pipeline.id)}
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                    selectedPipeline === pipeline.id 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      <span className="font-medium">{pipeline.name}</span>
+                      {pipeline.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
                     </div>
-                  </CardContent>
-                </Card>
+                    {!pipeline.isDefault && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePipeline(pipeline.id);
+                        }}
+                        className="text-red-600 hover:text-red-700 p-1 h-auto"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="mt-2 text-sm text-gray-600">
+                    {pipeline.stages.length} stages • {pipeline.lossReasons.length} loss reasons
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-                {/* Stages List */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pipeline Stages</CardTitle>
-                    <CardDescription>
-                      Stages are processed in order. Drag to reorder or edit individual stages.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {pipeline.stages
-                        .sort((a, b) => a.order - b.order)
-                        .map((stage, index) => (
-                        <div key={stage.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50">
-                          <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
-                          
-                          <div className="flex items-center gap-2">
-                            <div className={`w-3 h-3 rounded-full ${stage.color}`}></div>
-                            <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
-                          </div>
+          {/* Section Navigation */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Configure</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <button
+                onClick={() => setActiveSection('stages')}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  activeSection === 'stages' 
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Workflow className="h-4 w-4" />
+                  <span className="font-medium">Pipeline Stages</span>
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  Manage stage progression and probabilities
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveSection('loss-reasons')}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  activeSection === 'loss-reasons' 
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="font-medium">Loss Reasons</span>
+                </div>
+                <div className="text-sm text-gray-600 mt-1">
+                  Define reasons for lost opportunities
+                </div>
+              </button>
+            </CardContent>
+          </Card>
+        </div>
 
-                          {editingStage === stage.id ? (
-                            <div className="flex items-center gap-2 flex-1">
-                              <Input
-                                value={editingValues.name}
-                                onChange={(e) => setEditingValues(prev => ({ ...prev, name: e.target.value }))}
-                                className="flex-1"
-                              />
-                              <Input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={editingValues.probability}
-                                onChange={(e) => setEditingValues(prev => ({ ...prev, probability: parseInt(e.target.value) }))}
-                                className="w-20"
-                              />
-                              <Button size="sm" onClick={handleSaveEdit}>
-                                <Save className="h-3 w-3" />
-                              </Button>
+        {/* Main Content */}
+        <div className="flex-1 overflow-auto">
+          {currentPipeline && (
+            <>
+              {/* Pipeline Overview */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    {currentPipeline.name}
+                  </CardTitle>
+                  <CardDescription>
+                    {activeSection === 'stages' 
+                      ? 'Manage stages and their progression probabilities'
+                      : 'Configure loss reasons for this pipeline'
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Total Stages:</span>
+                      <Badge variant="outline" className="ml-2">{currentPipeline.stages.length}</Badge>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Loss Reasons:</span>
+                      <Badge variant="outline" className="ml-2">{currentPipeline.lossReasons.length}</Badge>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Type:</span>
+                      <Badge variant={currentPipeline.isDefault ? "default" : "secondary"} className="ml-2">
+                        {currentPipeline.isDefault ? "Default" : "Custom"}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Stages Section */}
+              {activeSection === 'stages' && (
+                <div className="space-y-6">
+                  {/* Add New Stage */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Add New Stage</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <Label htmlFor="stageName">Stage Name</Label>
+                          <Input
+                            id="stageName"
+                            placeholder="Enter stage name..."
+                            value={newStageName}
+                            onChange={(e) => setNewStageName(e.target.value)}
+                          />
+                        </div>
+                        <div className="w-40">
+                          <Label htmlFor="probability">Probability (%)</Label>
+                          <Input
+                            id="probability"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={newStageProbability}
+                            onChange={(e) => setNewStageProbability(parseInt(e.target.value))}
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <Button onClick={handleAddStage}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Stage
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Stages List */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Pipeline Stages</CardTitle>
+                      <CardDescription>
+                        Stages are processed in order. Drag to reorder or edit individual stages.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {currentPipeline.stages
+                          .sort((a, b) => a.order - b.order)
+                          .map((stage, index) => (
+                          <div key={stage.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gray-50">
+                            <GripVertical className="h-4 w-4 text-gray-400 cursor-move" />
+                            
+                            <div className="flex items-center gap-2">
+                              <div className={`w-3 h-3 rounded-full ${stage.color}`}></div>
+                              <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
                             </div>
-                          ) : (
-                            <>
-                              <div className="flex-1">
-                                <span className="font-medium">{stage.name}</span>
+
+                            {editingStage === stage.id ? (
+                              <div className="flex items-center gap-2 flex-1">
+                                <Input
+                                  value={editingValues.name}
+                                  onChange={(e) => setEditingValues(prev => ({ ...prev, name: e.target.value }))}
+                                  className="flex-1"
+                                />
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  max="100"
+                                  value={editingValues.probability}
+                                  onChange={(e) => setEditingValues(prev => ({ ...prev, probability: parseInt(e.target.value) }))}
+                                  className="w-20"
+                                />
+                                <Button size="sm" onClick={handleSaveEdit}>
+                                  <Save className="h-3 w-3" />
+                                </Button>
                               </div>
-                              <div className="flex items-center gap-4">
-                                <Badge variant="outline">{stage.probability}%</Badge>
+                            ) : (
+                              <>
+                                <div className="flex-1">
+                                  <span className="font-medium">{stage.name}</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <Badge variant="outline">{stage.probability}%</Badge>
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleEditStage(stage.id)}
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDeleteStage(stage.id)}
+                                    >
+                                      <Trash2 className="h-3 w-3 text-red-500" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {currentPipeline.stages.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          No stages defined. Add your first stage above.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Loss Reasons Section */}
+              {activeSection === 'loss-reasons' && (
+                <div className="space-y-6">
+                  {/* Add New Loss Reason */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        Add New Loss Reason
+                      </CardTitle>
+                      <CardDescription>
+                        Define reasons why opportunities might be lost in this pipeline
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="lossReasonLabel">Reason Label</Label>
+                            <Input
+                              id="lossReasonLabel"
+                              placeholder="e.g., Price too high"
+                              value={newLossReasonLabel}
+                              onChange={(e) => setNewLossReasonLabel(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="lossReasonValue">System Value</Label>
+                            <Input
+                              id="lossReasonValue"
+                              placeholder="e.g., price-too-high"
+                              value={newLossReasonValue}
+                              onChange={(e) => setNewLossReasonValue(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="lossReasonDescription">Description (Optional)</Label>
+                          <Textarea
+                            id="lossReasonDescription"
+                            placeholder="Detailed description of this loss reason..."
+                            value={newLossReasonDescription}
+                            onChange={(e) => setNewLossReasonDescription(e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                        <div className="flex justify-end">
+                          <Button onClick={handleAddLossReason}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Loss Reason
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Loss Reasons List */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Loss Reasons</CardTitle>
+                      <CardDescription>
+                        These reasons will be available when marking opportunities as lost
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {currentPipeline.lossReasons.map((reason) => (
+                          <div key={reason.id} className="flex items-start gap-4 p-4 border rounded-lg bg-gray-50">
+                            <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
+                            
+                            {editingLossReason === reason.id ? (
+                              <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <Input
+                                    value={editingLossReasonValues.label}
+                                    onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, label: e.target.value }))}
+                                    placeholder="Reason label"
+                                  />
+                                  <Input
+                                    value={editingLossReasonValues.value}
+                                    onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, value: e.target.value }))}
+                                    placeholder="System value"
+                                  />
+                                </div>
+                                <Textarea
+                                  value={editingLossReasonValues.description}
+                                  onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, description: e.target.value }))}
+                                  placeholder="Description"
+                                  rows={2}
+                                />
+                                <div className="flex gap-2">
+                                  <Button size="sm" onClick={handleSaveLossReasonEdit}>
+                                    <Save className="h-3 w-3 mr-1" />
+                                    Save
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => setEditingLossReason(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium">{reason.label}</span>
+                                    <Badge variant="outline" className="text-xs">{reason.value}</Badge>
+                                  </div>
+                                  {reason.description && (
+                                    <p className="text-sm text-gray-600">{reason.description}</p>
+                                  )}
+                                </div>
                                 <div className="flex gap-1">
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => handleEditStage(stage.id)}
+                                    onClick={() => handleEditLossReason(reason.id)}
                                   >
                                     <Edit className="h-3 w-3" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => handleDeleteStage(stage.id)}
+                                    onClick={() => handleDeleteLossReason(reason.id)}
                                   >
                                     <Trash2 className="h-3 w-3 text-red-500" />
                                   </Button>
                                 </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-                    {pipeline.stages.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        No stages defined. Add your first stage above.
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Loss Reasons Tab */}
-              <TabsContent value="loss-reasons" className="space-y-6">
-                {/* Add New Loss Reason */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5" />
-                      Add New Loss Reason
-                    </CardTitle>
-                    <CardDescription>
-                      Define reasons why opportunities might be lost in this pipeline
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="lossReasonLabel">Reason Label</Label>
-                          <Input
-                            id="lossReasonLabel"
-                            placeholder="e.g., Price too high"
-                            value={newLossReasonLabel}
-                            onChange={(e) => setNewLossReasonLabel(e.target.value)}
-                          />
+                      {currentPipeline.lossReasons.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          No loss reasons defined. Add your first loss reason above.
                         </div>
-                        <div>
-                          <Label htmlFor="lossReasonValue">System Value</Label>
-                          <Input
-                            id="lossReasonValue"
-                            placeholder="e.g., price-too-high"
-                            value={newLossReasonValue}
-                            onChange={(e) => setNewLossReasonValue(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="lossReasonDescription">Description (Optional)</Label>
-                        <Textarea
-                          id="lossReasonDescription"
-                          placeholder="Detailed description of this loss reason..."
-                          value={newLossReasonDescription}
-                          onChange={(e) => setNewLossReasonDescription(e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                      <div className="flex justify-end">
-                        <Button onClick={handleAddLossReason}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Loss Reason
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Loss Reasons List */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Loss Reasons</CardTitle>
-                    <CardDescription>
-                      These reasons will be available when marking opportunities as lost
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {pipeline.lossReasons.map((reason) => (
-                        <div key={reason.id} className="flex items-start gap-4 p-4 border rounded-lg bg-gray-50">
-                          <AlertTriangle className="h-4 w-4 text-red-500 mt-1" />
-                          
-                          {editingLossReason === reason.id ? (
-                            <div className="flex-1 space-y-3">
-                              <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                  value={editingLossReasonValues.label}
-                                  onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, label: e.target.value }))}
-                                  placeholder="Reason label"
-                                />
-                                <Input
-                                  value={editingLossReasonValues.value}
-                                  onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, value: e.target.value }))}
-                                  placeholder="System value"
-                                />
-                              </div>
-                              <Textarea
-                                value={editingLossReasonValues.description}
-                                onChange={(e) => setEditingLossReasonValues(prev => ({ ...prev, description: e.target.value }))}
-                                placeholder="Description"
-                                rows={2}
-                              />
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleSaveLossReasonEdit}>
-                                  <Save className="h-3 w-3 mr-1" />
-                                  Save
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  onClick={() => setEditingLossReason(null)}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium">{reason.label}</span>
-                                  <Badge variant="outline" className="text-xs">{reason.value}</Badge>
-                                </div>
-                                {reason.description && (
-                                  <p className="text-sm text-gray-600">{reason.description}</p>
-                                )}
-                              </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleEditLossReason(reason.id)}
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleDeleteLossReason(reason.id)}
-                                >
-                                  <Trash2 className="h-3 w-3 text-red-500" />
-                                </Button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {pipeline.lossReasons.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        No loss reasons defined. Add your first loss reason above.
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </TabsContent>
-        ))}
-      </Tabs>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
