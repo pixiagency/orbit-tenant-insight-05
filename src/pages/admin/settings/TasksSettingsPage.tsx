@@ -5,22 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   CheckSquare, 
-  Clock, 
-  Users, 
   Settings,
   AlertCircle,
   Plus,
   Trash2,
-  Edit,
   Save,
   Bell,
-  Calendar
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -30,14 +26,6 @@ interface TaskPriority {
   color: string;
   level: number;
   isDefault: boolean;
-}
-
-interface TaskStatus {
-  id: string;
-  name: string;
-  color: string;
-  isDefault: boolean;
-  isFinal: boolean;
 }
 
 interface TaskSettings {
@@ -55,7 +43,6 @@ interface TaskSettings {
     enableOverdueNotifications: boolean;
   };
   priorities: TaskPriority[];
-  statuses: TaskStatus[];
 }
 
 export const TasksSettingsPage: React.FC = () => {
@@ -78,18 +65,10 @@ export const TasksSettingsPage: React.FC = () => {
       { id: '2', name: 'Medium', color: 'yellow', level: 2, isDefault: true },
       { id: '3', name: 'High', color: 'orange', level: 3, isDefault: true },
       { id: '4', name: 'Urgent', color: 'red', level: 4, isDefault: true },
-    ],
-    statuses: [
-      { id: '1', name: 'To Do', color: 'gray', isDefault: true, isFinal: false },
-      { id: '2', name: 'In Progress', color: 'blue', isDefault: true, isFinal: false },
-      { id: '3', name: 'Review', color: 'purple', isDefault: true, isFinal: false },
-      { id: '4', name: 'Completed', color: 'green', isDefault: true, isFinal: true },
-      { id: '5', name: 'Cancelled', color: 'red', isDefault: true, isFinal: true },
     ]
   });
 
   const [newPriority, setNewPriority] = useState({ name: '', color: 'blue', level: 1 });
-  const [newStatus, setNewStatus] = useState({ name: '', color: 'blue', isFinal: false });
 
   const handleSaveSettings = () => {
     // Save settings logic here
@@ -119,29 +98,6 @@ export const TasksSettingsPage: React.FC = () => {
     toast.success('Priority added successfully!');
   };
 
-  const handleAddStatus = () => {
-    if (!newStatus.name.trim()) {
-      toast.error('Status name is required');
-      return;
-    }
-
-    const status: TaskStatus = {
-      id: Date.now().toString(),
-      name: newStatus.name,
-      color: newStatus.color,
-      isDefault: false,
-      isFinal: newStatus.isFinal
-    };
-
-    setSettings(prev => ({
-      ...prev,
-      statuses: [...prev.statuses, status]
-    }));
-
-    setNewStatus({ name: '', color: 'blue', isFinal: false });
-    toast.success('Status added successfully!');
-  };
-
   const handleDeletePriority = (priorityId: string) => {
     const priority = settings.priorities.find(p => p.id === priorityId);
     if (priority?.isDefault) {
@@ -154,20 +110,6 @@ export const TasksSettingsPage: React.FC = () => {
       priorities: prev.priorities.filter(p => p.id !== priorityId)
     }));
     toast.success('Priority deleted successfully!');
-  };
-
-  const handleDeleteStatus = (statusId: string) => {
-    const status = settings.statuses.find(s => s.id === statusId);
-    if (status?.isDefault) {
-      toast.error('Cannot delete default statuses');
-      return;
-    }
-
-    setSettings(prev => ({
-      ...prev,
-      statuses: prev.statuses.filter(s => s.id !== statusId)
-    }));
-    toast.success('Status deleted successfully!');
   };
 
   const getColorBadge = (color: string) => {
@@ -203,11 +145,10 @@ export const TasksSettingsPage: React.FC = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="priorities">Priorities</TabsTrigger>
-          <TabsTrigger value="statuses">Statuses</TabsTrigger>
-          <TabsTrigger value="reminders">Reminders</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -410,111 +351,13 @@ export const TasksSettingsPage: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="statuses" className="space-y-6">
-          {/* Task Statuses */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckSquare className="h-5 w-5" />
-                Task Statuses
-              </CardTitle>
-              <CardDescription>
-                Manage task workflow statuses
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Current Statuses */}
-              <div className="space-y-3">
-                {settings.statuses.map((status) => (
-                  <div key={status.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${getColorBadge(status.color)}`} />
-                      <div>
-                        <div className="font-medium">{status.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {status.isFinal ? 'Final status' : 'Active status'}
-                          {status.isDefault && <Badge variant="secondary" className="ml-2">Default</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!status.isDefault && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleDeleteStatus(status.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              {/* Add New Status */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Add New Status</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Status Name</Label>
-                    <Input
-                      placeholder="Enter status name"
-                      value={newStatus.name}
-                      onChange={(e) => setNewStatus(prev => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Color</Label>
-                    <Select 
-                      value={newStatus.color} 
-                      onValueChange={(value) => setNewStatus(prev => ({ ...prev, color: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="blue">Blue</SelectItem>
-                        <SelectItem value="yellow">Yellow</SelectItem>
-                        <SelectItem value="purple">Purple</SelectItem>
-                        <SelectItem value="orange">Orange</SelectItem>
-                        <SelectItem value="green">Green</SelectItem>
-                        <SelectItem value="red">Red</SelectItem>
-                        <SelectItem value="gray">Gray</SelectItem>
-                        <SelectItem value="indigo">Indigo</SelectItem>
-                        <SelectItem value="pink">Pink</SelectItem>
-                        <SelectItem value="teal">Teal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isFinal"
-                    checked={newStatus.isFinal}
-                    onCheckedChange={(checked) => setNewStatus(prev => ({ ...prev, isFinal: checked }))}
-                  />
-                  <Label htmlFor="isFinal">Final status (task completion)</Label>
-                </div>
-                <Button onClick={handleAddStatus} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Status
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="reminders" className="space-y-6">
-          {/* Reminder Settings */}
+        <TabsContent value="notifications" className="space-y-6">
+          {/* Notification Settings */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
-                Reminder Settings
+                Notification Settings
               </CardTitle>
               <CardDescription>
                 Configure task reminders and notifications
