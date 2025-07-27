@@ -54,27 +54,8 @@ interface DealSettings {
   defaultPaymentMethod: string;
   enablePartialPayments: boolean;
   
-  // Deal Sources
-  dealSources: string[];
-  
   // Assignment Settings
   defaultAssignees: string[];
-  
-  // Reminder Settings
-  reminderSettings: {
-    followUpDays: number;
-    closeDateReminder: number;
-    enableNotifications: boolean;
-    reminderFrequency: 'daily' | 'weekly' | 'monthly';
-  };
-  
-  // Deal Types
-  dealTypes: Array<{
-    id: string;
-    name: string;
-    requiresItems: boolean;
-    defaultFields: string[];
-  }>;
   
   // Pipeline Stages
   stages: DealStage[];
@@ -102,26 +83,8 @@ export const DealsSettingsPage: React.FC = () => {
     defaultPaymentMethod: 'card',
     enablePartialPayments: true,
     
-    // Deal Sources
-    dealSources: ['Website', 'LinkedIn', 'Referral', 'Cold Email', 'Trade Show', 'Phone Call'],
-    
     // Assignment Settings
     defaultAssignees: ['Sarah Johnson', 'Mike Chen', 'David Brown', 'Emily Rodriguez'],
-    
-    // Reminder Settings
-    reminderSettings: {
-      followUpDays: 7,
-      closeDateReminder: 3,
-      enableNotifications: true,
-      reminderFrequency: 'weekly',
-    },
-    
-    // Deal Types
-    dealTypes: [
-      { id: '1', name: 'Product Sale', requiresItems: true, defaultFields: ['deal_name', 'customer', 'items', 'payment_status'] },
-      { id: '2', name: 'Service Sale', requiresItems: true, defaultFields: ['deal_name', 'customer', 'items', 'payment_status'] },
-      { id: '3', name: 'Subscription', requiresItems: false, defaultFields: ['deal_name', 'customer', 'recurring_amount', 'billing_cycle'] },
-    ],
     
     // Pipeline Stages
     stages: [
@@ -221,13 +184,10 @@ export const DealsSettingsPage: React.FC = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="stages">Stages</TabsTrigger>
-          <TabsTrigger value="types">Deal Types</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="approval">Approval</TabsTrigger>
-          <TabsTrigger value="reminders">Reminders</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -353,155 +313,6 @@ export const DealsSettingsPage: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="stages" className="space-y-6">
-          {/* Deal Stages */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Deal Stages
-              </CardTitle>
-              <CardDescription>
-                Manage your deal pipeline stages and probabilities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Current Stages */}
-              <div className="space-y-3">
-                {settings.stages.map((stage) => (
-                  <div key={stage.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${getColorBadge(stage.color)}`} />
-                      <div>
-                        <div className="font-medium">{stage.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {stage.probability}% probability
-                          {stage.isDefault && <Badge variant="secondary" className="ml-2">Default</Badge>}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setEditingStage(stage.id)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {!stage.isDefault && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleDeleteStage(stage.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              {/* Add New Stage */}
-              <div className="space-y-4">
-                <h4 className="font-medium">Add New Stage</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Stage Name</Label>
-                    <Input
-                      placeholder="Enter stage name"
-                      value={newStage.name}
-                      onChange={(e) => setNewStage(prev => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Color</Label>
-                    <Select 
-                      value={newStage.color} 
-                      onValueChange={(value) => setNewStage(prev => ({ ...prev, color: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="blue">Blue</SelectItem>
-                        <SelectItem value="yellow">Yellow</SelectItem>
-                        <SelectItem value="purple">Purple</SelectItem>
-                        <SelectItem value="orange">Orange</SelectItem>
-                        <SelectItem value="green">Green</SelectItem>
-                        <SelectItem value="red">Red</SelectItem>
-                        <SelectItem value="gray">Gray</SelectItem>
-                        <SelectItem value="indigo">Indigo</SelectItem>
-                        <SelectItem value="pink">Pink</SelectItem>
-                        <SelectItem value="teal">Teal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Probability (%)</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={newStage.probability}
-                      onChange={(e) => setNewStage(prev => ({ ...prev, probability: parseInt(e.target.value) || 0 }))}
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleAddStage} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Stage
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="types" className="space-y-6">
-          {/* Deal Types */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Deal Types Configuration
-              </CardTitle>
-              <CardDescription>
-                Configure different types of deals and their default settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                {settings.dealTypes.map((type) => (
-                  <div key={type.id} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">{type.name}</h4>
-                      <Badge variant={type.requiresItems ? "default" : "secondary"}>
-                        {type.requiresItems ? "Requires Items" : "Simple Deal"}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Default fields: {type.defaultFields.join(', ')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Enable Item Breakdown</Label>
-                    <p className="text-sm text-muted-foreground">Allow detailed item-level breakdown in deals</p>
-                  </div>
-                  <Switch
-                    checked={settings.enableItemization}
-                    onCheckedChange={(checked) => setSettings(prev => ({ ...prev, enableItemization: checked }))}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="payment" className="space-y-6">
           {/* Payment Settings */}
@@ -576,52 +387,6 @@ export const DealsSettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Deal Sources</h4>
-                <div className="space-y-2">
-                  <Label>Available Deal Sources</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {settings.dealSources.map((source, index) => (
-                      <Badge key={index} variant="outline" className="flex items-center gap-1">
-                        {source}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-0 ml-1"
-                          onClick={() => {
-                            setSettings(prev => ({
-                              ...prev,
-                              dealSources: prev.dealSources.filter((_, i) => i !== index)
-                            }));
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      placeholder="Add new source"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          const input = e.target as HTMLInputElement;
-                          const value = input.value.trim();
-                          if (value && !settings.dealSources.includes(value)) {
-                            setSettings(prev => ({
-                              ...prev,
-                              dealSources: [...prev.dealSources, value]
-                            }));
-                            input.value = '';
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -673,81 +438,6 @@ export const DealsSettingsPage: React.FC = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="reminders" className="space-y-6">
-          {/* Reminder Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Reminder Settings
-              </CardTitle>
-              <CardDescription>
-                Configure automatic reminders and notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Enable Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Send email and in-app notifications</p>
-                </div>
-                <Switch
-                  checked={settings.reminderSettings.enableNotifications}
-                  onCheckedChange={(checked) => 
-                    setSettings(prev => ({ 
-                      ...prev, 
-                      reminderSettings: { ...prev.reminderSettings, enableNotifications: checked }
-                    }))
-                  }
-                />
-              </div>
-
-              {settings.reminderSettings.enableNotifications && (
-                <div className="space-y-4 ml-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="followUpDays">Follow-up Reminder (days)</Label>
-                      <Input
-                        id="followUpDays"
-                        type="number"
-                        min="1"
-                        value={settings.reminderSettings.followUpDays}
-                        onChange={(e) => 
-                          setSettings(prev => ({ 
-                            ...prev, 
-                            reminderSettings: { 
-                              ...prev.reminderSettings, 
-                              followUpDays: parseInt(e.target.value) || 1 
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="closeDateReminder">Close Date Reminder (days before)</Label>
-                      <Input
-                        id="closeDateReminder"
-                        type="number"
-                        min="1"
-                        value={settings.reminderSettings.closeDateReminder}
-                        onChange={(e) => 
-                          setSettings(prev => ({ 
-                            ...prev, 
-                            reminderSettings: { 
-                              ...prev.reminderSettings, 
-                              closeDateReminder: parseInt(e.target.value) || 1 
-                            }
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
