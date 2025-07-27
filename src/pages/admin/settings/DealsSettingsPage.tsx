@@ -357,6 +357,69 @@ export const DealsSettingsPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Custom Payment Methods</Label>
+                  {settings.paymentMethods.filter(method => !['cash', 'card', 'bank_transfer', 'check', 'crypto', 'paypal'].includes(method)).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {settings.paymentMethods
+                        .filter(method => !['cash', 'card', 'bank_transfer', 'check', 'crypto', 'paypal'].includes(method))
+                        .map((method, index) => (
+                        <Badge key={method} variant="outline" className="flex items-center gap-1">
+                          {method}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto p-0 ml-1"
+                            onClick={() => {
+                              setSettings(prev => ({
+                                ...prev,
+                                paymentMethods: prev.paymentMethods.filter(m => m !== method)
+                              }));
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add custom payment method"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          const input = e.target as HTMLInputElement;
+                          const value = input.value.trim().toLowerCase();
+                          if (value && !settings.paymentMethods.includes(value)) {
+                            setSettings(prev => ({
+                              ...prev,
+                              paymentMethods: [...prev.paymentMethods, value]
+                            }));
+                            input.value = '';
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.querySelector('input[placeholder="Add custom payment method"]') as HTMLInputElement;
+                        const value = input?.value.trim().toLowerCase();
+                        if (value && !settings.paymentMethods.includes(value)) {
+                          setSettings(prev => ({
+                            ...prev,
+                            paymentMethods: [...prev.paymentMethods, value]
+                          }));
+                          input.value = '';
+                        }
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Default Payment Method</Label>
                   <Select 
                     value={settings.defaultPaymentMethod} 
