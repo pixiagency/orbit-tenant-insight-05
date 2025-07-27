@@ -20,7 +20,8 @@ import {
   Trash2,
   Edit,
   Save,
-  RefreshCw
+  RefreshCw,
+  X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -33,41 +34,96 @@ interface DealStage {
 }
 
 interface DealSettings {
+  // General Settings
   autoAssignment: boolean;
   requireApproval: boolean;
   approvalThreshold: number;
   defaultCurrency: string;
   taxRate: number;
   defaultPaymentTerms: number;
+  
+  // Deal Features
   enableDiscounts: boolean;
   maxDiscountPercentage: number;
   enableAttachments: boolean;
   attachmentSizeLimit: number;
+  enableItemization: boolean;
+  
+  // Payment Settings
+  paymentMethods: string[];
+  defaultPaymentMethod: string;
+  enablePartialPayments: boolean;
+  
+  // Deal Sources
+  dealSources: string[];
+  
+  // Assignment Settings
+  defaultAssignees: string[];
+  
+  // Reminder Settings
   reminderSettings: {
     followUpDays: number;
     closeDateReminder: number;
     enableNotifications: boolean;
+    reminderFrequency: 'daily' | 'weekly' | 'monthly';
   };
+  
+  // Deal Types
+  dealTypes: Array<{
+    id: string;
+    name: string;
+    requiresItems: boolean;
+    defaultFields: string[];
+  }>;
+  
+  // Pipeline Stages
   stages: DealStage[];
 }
 
 export const DealsSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<DealSettings>({
+    // General Settings
     autoAssignment: true,
     requireApproval: false,
     approvalThreshold: 10000,
     defaultCurrency: 'USD',
     taxRate: 0,
     defaultPaymentTerms: 30,
+    
+    // Deal Features
     enableDiscounts: true,
     maxDiscountPercentage: 20,
     enableAttachments: true,
     attachmentSizeLimit: 10,
+    enableItemization: true,
+    
+    // Payment Settings
+    paymentMethods: ['cash', 'card', 'bank_transfer', 'check'],
+    defaultPaymentMethod: 'card',
+    enablePartialPayments: true,
+    
+    // Deal Sources
+    dealSources: ['Website', 'LinkedIn', 'Referral', 'Cold Email', 'Trade Show', 'Phone Call'],
+    
+    // Assignment Settings
+    defaultAssignees: ['Sarah Johnson', 'Mike Chen', 'David Brown', 'Emily Rodriguez'],
+    
+    // Reminder Settings
     reminderSettings: {
       followUpDays: 7,
       closeDateReminder: 3,
       enableNotifications: true,
+      reminderFrequency: 'weekly',
     },
+    
+    // Deal Types
+    dealTypes: [
+      { id: '1', name: 'Product Sale', requiresItems: true, defaultFields: ['deal_name', 'customer', 'items', 'payment_status'] },
+      { id: '2', name: 'Service Sale', requiresItems: true, defaultFields: ['deal_name', 'customer', 'items', 'payment_status'] },
+      { id: '3', name: 'Subscription', requiresItems: false, defaultFields: ['deal_name', 'customer', 'recurring_amount', 'billing_cycle'] },
+    ],
+    
+    // Pipeline Stages
     stages: [
       { id: '1', name: 'Prospecting', color: 'blue', probability: 10, isDefault: true },
       { id: '2', name: 'Qualification', color: 'yellow', probability: 25, isDefault: true },
@@ -165,9 +221,11 @@ export const DealsSettingsPage: React.FC = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="stages">Deal Stages</TabsTrigger>
+          <TabsTrigger value="stages">Stages</TabsTrigger>
+          <TabsTrigger value="types">Deal Types</TabsTrigger>
+          <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="approval">Approval</TabsTrigger>
           <TabsTrigger value="reminders">Reminders</TabsTrigger>
         </TabsList>
@@ -393,6 +451,176 @@ export const DealsSettingsPage: React.FC = () => {
                   <Plus className="h-4 w-4" />
                   Add Stage
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="types" className="space-y-6">
+          {/* Deal Types */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Deal Types Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure different types of deals and their default settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {settings.dealTypes.map((type) => (
+                  <div key={type.id} className="p-4 border rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium">{type.name}</h4>
+                      <Badge variant={type.requiresItems ? "default" : "secondary"}>
+                        {type.requiresItems ? "Requires Items" : "Simple Deal"}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Default fields: {type.defaultFields.join(', ')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Enable Item Breakdown</Label>
+                    <p className="text-sm text-muted-foreground">Allow detailed item-level breakdown in deals</p>
+                  </div>
+                  <Switch
+                    checked={settings.enableItemization}
+                    onCheckedChange={(checked) => setSettings(prev => ({ ...prev, enableItemization: checked }))}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payment" className="space-y-6">
+          {/* Payment Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Payment Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure payment methods and payment-related settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Available Payment Methods</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['cash', 'card', 'bank_transfer', 'check', 'crypto', 'paypal'].map((method) => (
+                      <div key={method} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={method}
+                          checked={settings.paymentMethods.includes(method)}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setSettings(prev => ({
+                              ...prev,
+                              paymentMethods: checked 
+                                ? [...prev.paymentMethods, method]
+                                : prev.paymentMethods.filter(m => m !== method)
+                            }));
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <Label htmlFor={method} className="text-sm capitalize cursor-pointer">
+                          {method.replace('_', ' ')}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Default Payment Method</Label>
+                  <Select 
+                    value={settings.defaultPaymentMethod} 
+                    onValueChange={(value) => setSettings(prev => ({ ...prev, defaultPaymentMethod: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {settings.paymentMethods.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Enable Partial Payments</Label>
+                    <p className="text-sm text-muted-foreground">Allow customers to make partial payments</p>
+                  </div>
+                  <Switch
+                    checked={settings.enablePartialPayments}
+                    onCheckedChange={(checked) => setSettings(prev => ({ ...prev, enablePartialPayments: checked }))}
+                  />
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Deal Sources</h4>
+                <div className="space-y-2">
+                  <Label>Available Deal Sources</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {settings.dealSources.map((source, index) => (
+                      <Badge key={index} variant="outline" className="flex items-center gap-1">
+                        {source}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 ml-1"
+                          onClick={() => {
+                            setSettings(prev => ({
+                              ...prev,
+                              dealSources: prev.dealSources.filter((_, i) => i !== index)
+                            }));
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      placeholder="Add new source"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          const input = e.target as HTMLInputElement;
+                          const value = input.value.trim();
+                          if (value && !settings.dealSources.includes(value)) {
+                            setSettings(prev => ({
+                              ...prev,
+                              dealSources: [...prev.dealSources, value]
+                            }));
+                            input.value = '';
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
