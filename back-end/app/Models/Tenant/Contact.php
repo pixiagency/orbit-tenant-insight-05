@@ -40,6 +40,11 @@ class Contact extends Model
         'notes',
     ];
 
+    protected $casts = [
+        'tags' => 'array', // Automatically handle JSON encoding/decoding
+    ];
+
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class, 'city_id');
@@ -65,5 +70,20 @@ class Contact extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    // Search contacts by tag
+    public function scopeWithTag($query, $tag)
+    {
+        return $query->whereJsonContains('tags', $tag);
+    }
+
+    // Search contacts with any of the given tags
+    public function scopeWithAnyTag($query, $tags)
+    {
+        foreach ($tags as $tag) {
+            $query->orWhereJsonContains('tags', $tag);
+        }
+        return $query;
     }
 }

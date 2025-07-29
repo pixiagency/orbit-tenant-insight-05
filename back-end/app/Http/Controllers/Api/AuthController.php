@@ -25,7 +25,8 @@ class AuthController extends Controller
         try {
             DB::beginTransaction();
             $user = $this->authService->signup(
-                name: $request->name,
+                first_name: $request->first_name,
+                last_name: $request->last_name,
                 email: $request->email,
                 password: $request->password,
                 type: $request->type

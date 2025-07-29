@@ -74,6 +74,12 @@ Route::middleware([
         Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
     });
 
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::prefix('contacts/import')->group(function () {
+            Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
+            Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'import']);
+        });
+    });
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
     Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);

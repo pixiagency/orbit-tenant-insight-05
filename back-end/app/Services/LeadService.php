@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Lead;
+
 use App\QueryFilters\LeadFilters;
 use Illuminate\Database\Eloquent\Builder;
 use App\DTO\Lead\LeadDTO;
+use App\Models\Tenant\Lead;
 
 class LeadService extends BaseService
 {

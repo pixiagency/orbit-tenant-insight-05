@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('job_title');
             $table->string('department');
             $table->string('status');
-            $table->string('source_id');
-            $table->string('contact_method');
+            $table->foreignId('source_id')->nullable()->constrained('sources');
+            $table->foreignId('contact_method_id')->nullable()->constrained('contact_methods');
             $table->boolean('email_permission');
             $table->boolean('phone_permission');
             $table->boolean('whatsapp_permission');
@@ -30,11 +30,11 @@ return new class extends Migration
             $table->string('industry');
             $table->string('company_size');
             $table->string('address');
-            $table->foreignId('country_id')->constrained('countries')->onDelete('cascade');
-            $table->foreignId('city_id')->constrained('cities')->onDelete('cascade');
+            $table->foreignId('country_id')->nullable()->constrained('countries')->onDelete('cascade');
+            $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('cascade');
             $table->string('state');
             $table->string('zip_code');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->json('tags')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
