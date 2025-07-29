@@ -3,8 +3,10 @@
 namespace App\Http\Requests\Users;
 
 use App\DTO\User\UserDTO;
+use App\Enums\RolesEnum;
 use App\Enums\UserType;
 use App\Http\Requests\BaseRequest;
+use Illuminate\Validation\Rule;
 
 class AddUserRequest extends BaseRequest
 {
@@ -16,35 +18,20 @@ class AddUserRequest extends BaseRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'type' => $this->determineType(),
-        ]);
-    }
-
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
             'phone' => 'required|numeric|unique:users,phone',
-            'role' => 'required|integer|exists:roles,id',
+            'role' => ['required', Rule::in(RolesEnum::cases())],
         ];
     }
 
     public function toUserDTO(): \App\DTO\BaseDTO
     {
         return UserDTO::fromRequest($this);
-    }
-
-    protected function determineType(): string
-    {
-        return match ($this->role) {
-            1 => UserType::ADMIN->value,
-            2 => UserType::LEADER->value,
-            default => UserType::SALES->value,
-        };
     }
 }

@@ -6,8 +6,6 @@ use App\DTO\Team\TeamDTO;
 use App\Http\Requests\Teams\TeamStoreRequest;
 use App\Http\Resources\TeamCollection;
 use App\Http\Resources\TeamResource;
-use App\Http\Resources\UserCollection;
-use App\Services\UserService;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\UserUpdateRequest;
@@ -22,7 +20,6 @@ class TeamsController extends Controller
 {
 
     public function __construct(private readonly TeamService $teamService) {}
-
 
     public function index(Request $request): JsonResponse
     {

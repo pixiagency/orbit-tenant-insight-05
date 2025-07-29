@@ -9,6 +9,7 @@ use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Spatie\Permission\Models\Role;
 
 class UserService extends BaseService
 {
@@ -51,9 +52,12 @@ class UserService extends BaseService
 
     public function store(UserDTO $userDTO)
     {
+
         $data = $userDTO->toArray();
         $user = $this->getModel()->create($data);
-        $user->assignRole($userDTO->role);
+        if (Role::where('name', $userDTO->role)->exists()) {
+            $user->assignRole($userDTO->role);
+        }
         return $user->load('roles');
     }
 

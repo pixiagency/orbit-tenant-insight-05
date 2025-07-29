@@ -18,7 +18,6 @@ class TaskController extends Controller
     {
         try {
             DB::beginTransaction();
-            // dd($request->all());
             $data = $request->validate([
                 'task_title' => 'required|string|max:255',
                 'description' => 'nullable|string|max:255',

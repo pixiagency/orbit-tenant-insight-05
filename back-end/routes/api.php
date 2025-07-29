@@ -79,13 +79,18 @@ Route::middleware([
             Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
             Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'import']);
         });
+        // Route::middleware('role:admin')->group(function () { 
+            Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
+            Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+        // });
     });
+
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
-    Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
-    Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
+
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);
     Route::apiResource('pipelines', \App\Http\Controllers\Api\PipelineController::class);

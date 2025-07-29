@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,7 +29,6 @@ class UserFactory extends Factory
             'last_name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'type' => $this->faker->randomElement(UserType::values() ?? []),
             'password' => static::$password ??= Hash::make('123456'),
             'remember_token' => Str::random(10),
         ];
@@ -51,8 +49,9 @@ class UserFactory extends Factory
      */
     public function configure(): static
     {
-        return $this->afterCreating(function ($user) {
-            $user->assignRole($user->type);
+        $randomRole = Role::inRandomOrder()->first();
+        return $this->afterCreating(function ($user) use($randomRole) {
+            $user->assignRole($randomRole);
         });
     }
 }

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('department');
             $table->string('status');
             $table->foreignId('source_id')->nullable()->constrained('sources');
-            $table->foreignId('contact_method_id')->nullable()->constrained('contact_methods');
+            $table->string('contact_method')->nullable();
             $table->boolean('email_permission');
             $table->boolean('phone_permission');
             $table->boolean('whatsapp_permission');
