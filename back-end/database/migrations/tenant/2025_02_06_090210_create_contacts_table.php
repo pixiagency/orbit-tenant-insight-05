@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ContactMethods;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->string('department');
             $table->string('status');
             $table->foreignId('source_id')->nullable()->constrained('sources');
-            $table->string('contact_method')->nullable();
+            $table->enum('contact_method', ContactMethods::values())->nullable();
             $table->boolean('email_permission');
             $table->boolean('phone_permission');
             $table->boolean('whatsapp_permission');

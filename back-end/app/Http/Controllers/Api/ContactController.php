@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\DTO\Client\ClientDTO;
 use App\DTO\Contact\ContactDTO;
+use App\Enums\ContactMethods;
 use App\Exports\ContactsExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -369,5 +370,11 @@ class ContactController extends Controller
     {
         $columns = $this->getDatabaseFields();
         return ApiResponse($columns, 'Columns retrieved successfully');
+    }
+
+    public function getContactMethods()
+    {
+        $contactMethods = ContactMethods::options();
+        return ApiResponse($contactMethods, 'Contact methods retrieved successfully');
     }
 }

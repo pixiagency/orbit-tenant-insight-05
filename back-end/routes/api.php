@@ -83,6 +83,8 @@ Route::middleware([
     });
 
 
+    Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
+    Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Route::middleware('role:admin')->group(function () { 
@@ -91,7 +93,6 @@ Route::middleware([
         // });
     });
 
-    Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
 
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
