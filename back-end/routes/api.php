@@ -15,9 +15,7 @@ foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->name('central.')->group(function () {
         Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
             Route::post('signup', [centralAuthController::class, 'signup'])->name('signup');
-
             Route::post('login', [centralAuthController::class, 'login'])->name('login');
-
             Route::get('hi', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
         });
 
@@ -74,14 +72,22 @@ Route::middleware([
         Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
     });
 
+    Route::prefix('contacts/import')->group(function () {
+        Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
+        Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'import']);
+    });
+
+    Route::prefix('contacts/export')->group(function () {
+        Route::get('/columns', [\App\Http\Controllers\Api\ContactController::class, 'getColumns']);
+        Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'export']);
+    });
+
+
+
     Route::middleware('auth:sanctum')->group(function () {
-        Route::prefix('contacts/import')->group(function () {
-            Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
-            Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'import']);
-        });
         // Route::middleware('role:admin')->group(function () { 
-            Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
-            Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+        Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
+        Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
         // });
     });
 

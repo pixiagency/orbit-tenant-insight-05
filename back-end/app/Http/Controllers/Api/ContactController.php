@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\DTO\Client\ClientDTO;
 use App\DTO\Contact\ContactDTO;
+use App\Exports\ContactsExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contacts\ContactStoreRequest;
@@ -329,7 +330,7 @@ class ContactController extends Controller
             \Storage::disk('local')->delete($filePath);
 
             $failures = $import->failures();
-            
+
             if ($failures->isNotEmpty()) {
                 return response()->json([
                     'success' => false,
@@ -350,5 +351,23 @@ class ContactController extends Controller
         } catch (\Exception $e) {
             return ApiResponse(message: 'Import failed: ' . $e->getMessage(), code: 500);
         }
+    }
+
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'columns' => 'required|array|min:1', // e.g., ['first_name', 'email']
+            'columns.*' => 'string'
+        ]);
+        $columns = $request->input('columns');
+
+        return Excel::download(new ContactsExport($columns), 'contacts.xlsx');
+    }
+
+    public function getColumns()
+    {
+        $columns = $this->getDatabaseFields();
+        return ApiResponse($columns, 'Columns retrieved successfully');
     }
 }
