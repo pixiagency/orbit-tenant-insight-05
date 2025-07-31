@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -11,6 +12,12 @@ class CountriesWithCitiesSeeder extends Seeder
 {
     public function run(): void
     {
+        // Only run if no countries exist
+        if (Country::count() > 0) {
+            $this->command->info('Countries already exist. Skipping CountriesWithCitiesSeeder.');
+            return;
+        }
+   
         $jsonPath = database_path('data/countries_with_cities.json');
 
         if (!File::exists($jsonPath)) {

@@ -14,11 +14,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'first_name' => 'superadmin',
-            'last_name' => 'demo',
-            'email' => 'superadmin@demo.com',
-            'password' => Hash::make('123456'),
-        ]);
+        if (User::count() == 0) {
+            User::create([
+                'first_name' => 'abood',
+                'last_name' => 'elnakoury',
+                'email' => 'abood@gmail.com',
+                'password' => Hash::make('123456'),
+            ]);
+            $this->command->info('UserSeeder: Created default user.');
+        }
+
+        User::factory(10)->create();
     }
 }
