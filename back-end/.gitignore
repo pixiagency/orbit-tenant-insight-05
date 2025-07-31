@@ -3,7 +3,6 @@
 /public/build
 /public/hot
 /public/media
-/storage
 /public/storage
 /public/assets/img
 /storage/*.key
