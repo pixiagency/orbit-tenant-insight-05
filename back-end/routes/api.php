@@ -90,6 +90,7 @@ Route::middleware([
         // Route::middleware('role:admin')->group(function () { 
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+        Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
     });
 

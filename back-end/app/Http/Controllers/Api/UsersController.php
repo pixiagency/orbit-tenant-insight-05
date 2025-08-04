@@ -26,10 +26,9 @@ class UsersController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $perPage = $request->query('per_page');
             $filters = array_filter(request()->query());
             $withRelations = ['roles'];
-            $users = $this->userService->index(filters: $filters, withRelations: $withRelations,  perPage: $perPage);
+            $users = $this->userService->index(filters: $filters, withRelations: $withRelations,  perPage: $filters['per_page'] ?? 10);
             return ApiResponse(new UserCollection($users), 'Users retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);

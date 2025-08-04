@@ -26,9 +26,11 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
             'email' => $this->email,
-            'type' => $this->type,
+            'phone' => $this->phone,
+            'address' => $this->address,
             'roles' => $this->whenLoaded('roles', fn() => $this->roles->pluck('name')->toArray()), // ✅ Only role names
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

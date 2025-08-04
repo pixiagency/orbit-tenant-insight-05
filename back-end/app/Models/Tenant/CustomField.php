@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Tenant;
 
+use App\Models\Tenant\Contact;
 use App\Models\Tenant\Deal;
+use App\Models\Tenant\Lead;
+use App\Models\Tenant\Task;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,9 +30,9 @@ class CustomField extends Model
     ];
 
     // A custom field can belong to many clients
-    public function clients()
+    public function contacts()
     {
-        return $this->belongsToMany(Client::class, 'client_custom_fields')
+        return $this->belongsToMany(Contact::class, 'contact_custom_fields')
             ->withPivot('value');
     }
 
