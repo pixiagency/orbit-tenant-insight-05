@@ -87,7 +87,7 @@ Route::middleware([
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
-        // Route::middleware('role:admin')->group(function () { 
+        // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
@@ -112,7 +112,7 @@ Route::middleware([
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', function () {
-            return response()->json(auth()->user);
+            return response()->json(auth()->user());
         });
     });
 });
