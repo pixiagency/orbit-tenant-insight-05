@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
@@ -9,13 +8,13 @@ use App\Http\Controllers\Central\Api\SettingController;
 use App\Http\Controllers\Central\Api\SubscriptionController;
 
 
-// dd('hi');
 // //////////// landlord routes
 foreach (config('tenancy.central_domains') as $domain) {
     Route::domain($domain)->name('central.')->group(function () {
         Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
             Route::post('signup', [centralAuthController::class, 'signup'])->name('signup');
             Route::post('login', [centralAuthController::class, 'login'])->name('login');
+            Route::post('logout', [centralAuthController::class, 'logout'])->name('logout');
             Route::get('hi', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
         });
 
@@ -112,19 +111,7 @@ Route::middleware([
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/user', function () {
-            return response()->json(auth()->user());
+            return response()->json(Auth::user());
         });
     });
 });
-
-
-// Route::get('/user-json', function (Request $request) {
-//     return response()->json($request->user()); // Returns authenticated user data
-// })->middleware('auth:sanctum')->name('user.json');
-
-// Route::fallback(function () {
-//     if (request()->is('api/*')) {
-//         return response()->json(['error' => 'API route not found'], 404);
-//     }
-//     return view('layouts.dashboard.error-pages.error404');
-// })->name('error');

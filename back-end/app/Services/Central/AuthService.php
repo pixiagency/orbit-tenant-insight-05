@@ -42,7 +42,7 @@ class AuthService extends BaseService
             'password' => Hash::make($password),
         ]);
 
-        $activationCodeModel = ActivationCode::where('activation_code', $activationCode)->first();
+        $activationCodeModel = ActivationCode::where('code', $activationCode)->first();
         if (!$activationCodeModel || $activationCodeModel->used_at) {
             throw new Exception(__('app.invalid_activation_code'));
         }

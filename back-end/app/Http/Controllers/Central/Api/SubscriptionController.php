@@ -8,6 +8,7 @@ use App\Enums\landlord\InvoiceStatus;
 use App\Enums\landlord\PaymentStatus;
 use App\Enums\landlord\SubscriptionsStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Central\Subscribe\SubscribeRequest;
 use App\Http\Resources\LandlordSubscription\SubscriptionCollection;
 use App\Http\Resources\LandlordSubscription\SubscriptionResource;
 use App\Models\Client;
@@ -138,7 +139,7 @@ class SubscriptionController extends Controller
 
             $client = Client::find($validatedData['client_id']);
             $tier = Tier::find($validatedData['tier_id']);
-    
+
             $tenant = Tenant::create([
                 'id' => $client->subdomain,
                 'tenancy_db_name' => "crm_" . $client->subdomain,
@@ -172,56 +173,36 @@ class SubscriptionController extends Controller
         }
     }
 
-    public function subscribe(Request $request)
+    public function subscribe(SubscribeRequest $request)
     {
         try {
-            $setting = Setting::first();
-            $allowedIndustries = json_decode($setting?->industries ?? '[]', true);
-
             DB::beginTransaction();
-            $validatedData = $request->validate([
-                'tier_id' => 'required|exists:tiers,id',
-                'payment_method' => 'required|string',
 
-                'company_name' => 'required|string|unique:clients',
-                'subdomain' => 'required|string|unique:clients',
-                'contact_name' => 'nullable|string',
-                'contact_email' => 'required|email|unique:clients',
-                'contact_phone' => 'required|string|unique:clients',
-                'job_title' => 'nullable|string',
-                'website' => 'nullable|string',
-                'company_size' => ['nullable', Rule::in(CompanySizes::values())],
-                'industry' => ['nullable', Rule::in($allowedIndustries)],
-                'city_id' => 'nullable|exists:cities,id',
-                'postal_code' => 'nullable|string',
-                'address' => 'nullable|string',
-            ]);
-
-            $tier = Tier::find($validatedData['tier_id']);
+            $tier = Tier::find($request['tier_id']);
 
             $billable = Client::create([
-                'company_name' => $validatedData['company_name'],
-                'subdomain' => $validatedData['subdomain'],
-                'contact_name' => $validatedData['contact_name'],
-                'contact_email' => $validatedData['contact_email'],
-                'contact_phone' => $validatedData['contact_phone'],
-                'job_title' => $validatedData['job_title'],
-                'website' => $validatedData['website'],
-                'company_size' => $validatedData['company_size'],
-                'industry' => $validatedData['industry'],
-                'city_id' => $validatedData['city_id'],
-                'postal_code' => $validatedData['postal_code'],
-                'address' => $validatedData['address'],
+                'company_name' => $request['company_name'],
+                'subdomain' => $request['subdomain'],
+                'contact_name' => $request['contact_name'],
+                'contact_email' => $request['contact_email'],
+                'contact_phone' => $request['contact_phone'],
+                'job_title' => $request['job_title'],
+                'website' => $request['website'],
+                'company_size' => $request['company_size'],
+                'industry' => $request['industry'],
+                'city_id' => $request['city_id'],
+                'postal_code' => $request['postal_code'],
+                'address' => $request['address'],
             ]);
 
             $subscription = Subscription::create([
                 'client_id' => $billable->id,
-                'tier_id' => $validatedData['tier_id'],
+                'tier_id' => $request['tier_id'],
                 'subscription_start_date' => now(),
                 'subscription_end_date' => now()->addDays($tier->duration),
                 'subscription_status' => SubscriptionsStatus::ACTIVE,
-                'activition_method' => $validatedData['activition_method'] ?? ActivitionMethods::MANUAL,
-                'source' => $validatedData['source'] ?? null,
+                'activation_method' => $request['activation_method'] ?? ActivitionMethods::MANUAL,
+                'source' => $request['source'] ?? null,
             ]);
 
             $invoice = Invoice::create([
@@ -231,7 +212,6 @@ class SubscriptionController extends Controller
                 'status' => InvoiceStatus::PENDING,
                 'due_date' => $subscription->subscription_end_date,
             ]);
-
 
             // Create or get Stripe customer
             if (!$billable->hasStripeId()) {

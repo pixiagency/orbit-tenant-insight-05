@@ -25,7 +25,7 @@ class SignupRequest extends BaseRequest
             'tenant' => 'required|string|unique:tenants,name',
             'email'   => 'required|email|unique:users',
             'password'   => 'required|min:6',
-            'activation_code' => 'required|string|exists:activation_codes,activation_code,used_at,NULL',
+            'activation_code' => 'required|string|exists:activation_codes,code,used_at,NULL',
             'image' => 'nullable|image|max:2048', // 2MB max
         ];
     }
