@@ -21,10 +21,12 @@ import {
   Star,
   AlertCircle,
   Target,
-  Building
+  Building,
+  MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProductService } from '@/types/products-services';
+import { WhatsAppSendModal } from '../shared/WhatsAppSendModal';
 
 interface ProductServiceDrawerFormProps {
   isOpen: boolean;
@@ -48,6 +50,7 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
   productService
 }) => {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<'product' | 'service'>('product');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedTargetMarkets, setSelectedTargetMarkets] = useState<string[]>([]);
@@ -204,6 +207,18 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
       onSave={handleSubmit(onFormSubmit)}
       saveText={productService ? 'Update Product/Service' : 'Create Product/Service'}
       width="wide"
+      additionalActions={
+        productService && (
+          <Button
+            variant="outline"
+            onClick={() => setIsWhatsAppModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <MessageSquare className="w-4 h-4 text-green-600" />
+            Send via WhatsApp
+          </Button>
+        )
+      }
     >
       <form className="space-y-6">
         {/* Validation Errors */}
@@ -494,6 +509,23 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
           />
         )}
       </form>
+
+      {/* WhatsApp Send Modal */}
+      {productService && (
+        <WhatsAppSendModal
+          isOpen={isWhatsAppModalOpen}
+          onClose={() => setIsWhatsAppModalOpen(false)}
+          productService={{
+            id: productService.id || 'new',
+            name: productService.name || 'New Product/Service',
+            description: productService.description || '',
+            price: productService.price || 0,
+            currency: productService.currency || 'USD',
+            category: productService.category || 'General'
+          }}
+          clients={[]} // You can pass actual clients here from props
+        />
+      )}
     </DrawerForm>
   );
 };
