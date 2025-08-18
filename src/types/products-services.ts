@@ -29,4 +29,8 @@ export interface ProductService {
   competitor_products?: string[];
   launch_date?: string;
   end_of_life_date?: string;
+  industry?: string;
+  custom_fields?: {
+    [key: string]: any;
+  };
 }

@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { DrawerForm } from '../layout/DrawerForm';
+import { IndustrySpecificFields } from './IndustrySpecificFields';
+import { getAllIndustries, getIndustryCategories } from './IndustryCategories';
 import { 
   Package, 
   ShoppingCart, 
@@ -18,7 +20,8 @@ import {
   Settings,
   Star,
   AlertCircle,
-  Target
+  Target,
+  Building
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ProductService } from '@/types/products-services';
@@ -30,12 +33,7 @@ interface ProductServiceDrawerFormProps {
   productService?: ProductService | null;
 }
 
-const CATEGORIES = [
-  'Software Solutions', 'Hardware Products', 'SaaS Platforms', 'Mobile Apps',
-  'Enterprise Tools', 'Consumer Electronics', 'Industrial Equipment', 'Medical Devices',
-  'Consulting Services', 'Training Programs', 'Support Services', 'Maintenance',
-  'Implementation', 'Custom Development', 'Managed Services', 'Professional Services'
-];
+// Categories are now dynamic based on selected industry
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY'];
 const SUPPORT_LEVELS = ['Basic', 'Standard', 'Premium', 'Enterprise'];
@@ -53,6 +51,8 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
   const [selectedType, setSelectedType] = useState<'product' | 'service'>('product');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedTargetMarkets, setSelectedTargetMarkets] = useState<string[]>([]);
+  const [selectedIndustry, setSelectedIndustry] = useState<string>('');
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
   const form = useForm<ProductService>({
     defaultValues: {
@@ -75,7 +75,9 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
       created_date: new Date().toISOString().split('T')[0],
       modified_date: new Date().toISOString().split('T')[0],
       target_market: [],
-      competitor_products: []
+      competitor_products: [],
+      industry: '',
+      custom_fields: {}
     }
   });
 
@@ -87,6 +89,8 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
       setSelectedType(productService.type);
       setSelectedFeatures(productService.features || []);
       setSelectedTargetMarkets(productService.target_market || []);
+      setSelectedIndustry((productService as any).industry || '');
+      setAvailableCategories(getIndustryCategories((productService as any).industry || ''));
     } else {
       reset({
         name: '',
@@ -108,11 +112,15 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
         created_date: new Date().toISOString().split('T')[0],
         modified_date: new Date().toISOString().split('T')[0],
         target_market: [],
-        competitor_products: []
+        competitor_products: [],
+        industry: '',
+        custom_fields: {}
       });
       setSelectedType('product');
       setSelectedFeatures([]);
       setSelectedTargetMarkets([]);
+      setSelectedIndustry('');
+      setAvailableCategories([]);
     }
   }, [productService, reset, isOpen]);
 
@@ -155,6 +163,13 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
     
     setSelectedTargetMarkets(updatedMarkets);
     setValue('target_market', updatedMarkets);
+  };
+
+  const handleIndustryChange = (industry: string) => {
+    setSelectedIndustry(industry);
+    setValue('industry', industry);
+    setValue('category', ''); // Reset category when industry changes
+    setAvailableCategories(getIndustryCategories(industry));
   };
 
   const onFormSubmit = (data: ProductService) => {
@@ -255,15 +270,35 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="industry">
+                  Industry <span className="text-destructive">*</span>
+                </Label>
+                <Select onValueChange={handleIndustryChange} value={selectedIndustry}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAllIndustries().map((industry) => (
+                      <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="category">
                   Category <span className="text-destructive">*</span>
                 </Label>
-                <Select onValueChange={(value) => setValue('category', value)} defaultValue={watch('category')}>
+                <Select 
+                  onValueChange={(value) => setValue('category', value)} 
+                  value={watch('category')}
+                  disabled={!selectedIndustry}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={selectedIndustry ? "Select category" : "Select industry first"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((category) => (
+                    {availableCategories.map((category) => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
                   </SelectContent>
@@ -448,6 +483,16 @@ export const ProductServiceDrawerForm: React.FC<ProductServiceDrawerFormProps> =
             </div>
           </div>
         </div>
+
+        {/* Industry-Specific Fields */}
+        {selectedIndustry && (
+          <IndustrySpecificFields
+            industry={selectedIndustry}
+            register={register}
+            setValue={setValue}
+            watch={watch}
+          />
+        )}
       </form>
     </DrawerForm>
   );
