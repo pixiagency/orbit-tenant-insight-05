@@ -21,7 +21,7 @@ class Subscription extends Model implements HasMedia
         'subscription_start_date',
         'subscription_end_date',
         'subscription_status',
-        'activition_method',
+        'activation_method',
         'source',
         'auto_renew',
         'payment_status',
@@ -36,12 +36,12 @@ class Subscription extends Model implements HasMedia
 
     public function client()
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'client_id', 'id');
     }
 
     public function tier()
     {
-        return $this->belongsTo(Tier::class);
+        return $this->belongsTo(Tier::class, 'tier_id', 'id');
     }
 
     public function registerMediaConversions(?Media $media = null): void

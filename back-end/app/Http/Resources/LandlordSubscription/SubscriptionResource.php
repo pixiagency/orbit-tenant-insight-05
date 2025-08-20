@@ -18,6 +18,7 @@ class SubscriptionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'client' => $this->whenLoaded('client', fn() => new ClientResource($this->client)),
             'package' => $this->whenLoaded('tier', fn() => new TierResource($this->tier)),
             'subscription_start_date' => $this->subscription_start_date,

@@ -23,6 +23,9 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Laravel\Cashier\Exceptions\IncompletePayment;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Exception;
+use Illuminate\Http\JsonResponse;
 
 class SubscriptionController extends Controller
 {
@@ -173,6 +176,19 @@ class SubscriptionController extends Controller
         }
     }
 
+    public function show(int $subscription)
+    {
+        try {
+            $subscription = Subscription::findOrFail($subscription);
+            $subscription->load(['client', 'tier']);
+            return ApiResponse(new SubscriptionResource($subscription), 'Subscription retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Subscription not found', code: 404);
+        } catch (\Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
     public function subscribe(SubscribeRequest $request)
     {
         try {
@@ -262,5 +278,41 @@ class SubscriptionController extends Controller
     {
         $subscriptionStatus = SubscriptionsStatus::values();
         return ApiResponse($subscriptionStatus, 'Subscription status retrieved successfully');
+    }
+
+    public function update(int $subscription, Request $request): JsonResponse
+    {
+        $subscription = Subscription::findOrFail($subscription);
+        // Update the subscription
+        $validatedData = $request->validate([
+            'client_id' => 'sometimes|exists:clients,id',
+            'tier_id' => 'sometimes|exists:tiers,id',
+            'activition_method' => ['sometimes', Rule::in(ActivitionMethods::values())],
+            'source' => ['sometimes', Rule::in(json_decode(Setting::first()?->sources ?? '[]', true))],
+            'subscription_status' => ['sometimes', Rule::in(SubscriptionsStatus::values())],
+            'subscription_start_date' => ['sometimes', 'date'],
+            'subscription_end_date' => ['sometimes', 'date'],
+            'auto_renew' => ['sometimes', Rule::in(['yes', 'no'])],
+            'payment_status' => ['sometimes', Rule::in(PaymentStatus::values())],
+            'note' => 'nullable|string',
+        ]);
+
+        $subscription->update($validatedData);
+
+
+        return ApiResponse($subscription, 'Subscription updated successfully');
+    }
+
+    public function destroy(int $subscription)
+    {
+        try {
+            $subscription = Subscription::findOrFail($subscription);
+            $subscription->delete();
+            return ApiResponse(message: 'Subscription deleted successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Subscription not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 }

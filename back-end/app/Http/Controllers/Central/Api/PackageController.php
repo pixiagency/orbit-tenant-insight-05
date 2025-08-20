@@ -10,8 +10,11 @@ use App\Http\Requests\UpdateTierRequest;
 use App\Http\Resources\TierCollection;
 use App\Http\Resources\TierResource;
 use App\Models\Tenant;
+use Auth;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Spatie\LaravelPackageTools\Package;
 
 class PackageController extends Controller
 {
@@ -20,9 +23,24 @@ class PackageController extends Controller
         $this->middleware('auth:sanctum')->except(['index', 'show']);
         // $this->middleware('permission:tiers.add')->only(['store']);
     }
-    /**
-     * Display a listing of the resource.
-     */
+
+    public function get_statistics()
+    {
+        try {
+            $totalPackages = Tier::count();
+            $activePackages = Tier::where('status', 'active')->count();
+            $inactivePackages = Tier::where('status', 'inactive')->count();
+
+            return ApiResponse([
+                'total_packages' => $totalPackages,
+                'active_packages' => $activePackages,
+                'inactive_packages' => $inactivePackages,
+            ], 'Package statistics retrieved successfully');
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
     public function index(Request $request)
     {
         try {
@@ -90,9 +108,6 @@ class PackageController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreTierRequest $request)
     {
         try {
@@ -116,7 +131,7 @@ class PackageController extends Controller
             }
             $tenant = Tenant::find($request->tenant_id);
             $tenant->tiers()->attach($tier->id, [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::user()->id,
                 'activated_at' => now(),
             ]);
 
@@ -126,27 +141,45 @@ class PackageController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tier $tier)
+    public function show(int $tier_id)
     {
-        //
+        $tier = Tier::findOrFail($tier_id);
+
+        // Check if the user has permission to view the tier
+        // $this->authorize('view', $tier);
+
+        return ApiResponse(new TierResource($tier), 'Tier retrieved successfully');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateTierRequest $request, Tier $tier)
     {
-        //
+        try {
+            // $this->authorize('user.update');
+            $data = $request->validated();
+            $tier->update($data);
+            return ApiResponse(new TierResource($tier), 'Tier updated successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Tier not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Tier $tier)
     {
-        //
+        try {
+            // Check if tier has active subscriptions
+            if ($tier->subscriptions()->exists()) {
+                return ApiResponse(
+                    message: 'Cannot delete tier with active subscriptions',
+                    code: 422
+                );
+            }
+
+            $tier->delete();
+            return ApiResponse(message: 'Tier deleted successfully');
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 }
