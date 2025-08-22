@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Crown, Gift, Zap } from 'lucide-react';
 import { SignupForm } from '@/components/auth/SignupForm';
+import { OTPVerificationForm } from '@/components/auth/OTPVerificationForm';
 
 interface RegistrationFlowProps {
   selectedPlan?: {
@@ -15,9 +16,10 @@ interface RegistrationFlowProps {
 }
 
 export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({ selectedPlan }) => {
-  const [flowType, setFlowType] = useState<'tier-selection' | 'direct-registration' | 'registration-form'>(
+  const [flowType, setFlowType] = useState<'tier-selection' | 'direct-registration' | 'registration-form' | 'otp-verification'>(
     selectedPlan ? 'registration-form' : 'tier-selection'
   );
+  const [userEmail, setUserEmail] = useState('');
 
   const pricingTiers = [
     {
@@ -54,6 +56,20 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({ selectedPlan
     setFlowType('registration-form');
   };
 
+  const handleRegistrationSuccess = (email: string) => {
+    setUserEmail(email);
+    setFlowType('otp-verification');
+  };
+
+  const handleOTPVerified = () => {
+    // Redirect to dashboard or payment page
+    window.location.href = '/admin';
+  };
+
+  const handleBackFromOTP = () => {
+    setFlowType('registration-form');
+  };
+
   if (flowType === 'registration-form') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center p-4">
@@ -68,7 +84,29 @@ export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({ selectedPlan
               </div>
             )}
           </div>
-          <SignupForm onSuccess={() => {}} />
+          <Card>
+            <CardContent className="p-8">
+              <SignupForm onSuccess={handleRegistrationSuccess} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (flowType === 'otp-verification') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardContent className="p-8">
+              <OTPVerificationForm
+                email={userEmail}
+                onVerified={handleOTPVerified}
+                onBack={handleBackFromOTP}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
