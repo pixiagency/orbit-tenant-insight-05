@@ -116,7 +116,7 @@ export const PricingPage: React.FC = () => {
                   ))}
                 </ul>
                 
-                <Link to="/auth" className="block">
+                <Link to={`/register?plan=${plan.name.toLowerCase()}`} className="block">
                   <Button 
                     className={`w-full ${
                       plan.popular 
@@ -199,7 +199,7 @@ export const PricingPage: React.FC = () => {
             Join thousands of companies already using our platform to grow their business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/auth">
+            <Link to="/register">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
                 Start Free Trial
               </Button>

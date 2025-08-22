@@ -52,6 +52,7 @@ import { HomePage } from "./pages/website/HomePage";
 import { FeaturesPage } from "./pages/website/FeaturesPage";
 import { PricingPage } from "./pages/website/PricingPage";
 import { AboutPage } from "./pages/website/AboutPage";
+import { RegistrationPage } from "./pages/RegistrationPage";
 
 
 // Create QueryClient instance
@@ -95,6 +96,7 @@ const App = () => {
                 
                 {/* Public Routes */}
                 <Route path="/signup" element={<SignupForm onSuccess={() => {}} />} />
+                <Route path="/register" element={<RegistrationPage />} />
                 <Route path="/forms/:formId" element={<FormPublicPage />} />
                 
                 {/* Super Admin Routes */}
