@@ -15,7 +15,9 @@ interface RegistrationFlowProps {
 }
 
 export const RegistrationFlow: React.FC<RegistrationFlowProps> = ({ selectedPlan }) => {
-  const [flowType, setFlowType] = useState<'tier-selection' | 'direct-registration' | 'registration-form'>('tier-selection');
+  const [flowType, setFlowType] = useState<'tier-selection' | 'direct-registration' | 'registration-form'>(
+    selectedPlan ? 'registration-form' : 'tier-selection'
+  );
 
   const pricingTiers = [
     {
