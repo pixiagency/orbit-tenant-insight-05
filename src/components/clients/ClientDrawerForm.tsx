@@ -10,7 +10,6 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Client, ClientFormData } from '../../types/superadmin';
-import { WhatsAppNumberManager } from './WhatsAppNumberManager';
 
 interface ClientDrawerFormProps {
   isOpen: boolean;
@@ -56,7 +55,6 @@ export const ClientDrawerForm: React.FC<ClientDrawerFormProps> = ({
 }) => {
   const [sendPasswordSetupEmail, setSendPasswordSetupEmail] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [phoneNumbers, setPhoneNumbers] = useState<any[]>([]);
 
   const form = useForm<ClientFormData>({
     defaultValues: {
@@ -270,16 +268,6 @@ export const ClientDrawerForm: React.FC<ClientDrawerFormProps> = ({
             </div>
           </div>
         </div>
-
-        <Separator />
-
-        {/* Phone Numbers & WhatsApp */}
-        <WhatsAppNumberManager
-          clientId={client?.id}
-          primaryPhone={watch('contactPhone') || ''}
-          phoneNumbers={phoneNumbers}
-          onPhoneNumbersChange={setPhoneNumbers}
-        />
 
         <Separator />
 
