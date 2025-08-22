@@ -38,6 +38,11 @@ class Tier extends Model
         return $this->belongsToMany(Tenant::class);
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
     protected function modules(): Attribute
     {
         return Attribute::make(
@@ -110,4 +115,6 @@ class Tier extends Model
     {
         return $query->whereJsonContains('modules', $module->value);
     }
+
+
 }

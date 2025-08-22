@@ -20,7 +20,7 @@ return [
         // '127.0.0.1',
         // 'localhost',
         'barmagiat.com',
-//        env('APP_URL', 'new-crm.test')
+        env('APP_URL', 'new-crm.test')
     ],
 
     /**
@@ -170,7 +170,7 @@ return [
         // Stancl\Tenancy\Features\UniversalRoutes::class,
         // Stancl\Tenancy\Features\TenantConfig::class, // https://tenancyforlaravel.com/docs/v3/features/tenant-config
         // Stancl\Tenancy\Features\CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
-         Stancl\Tenancy\Features\ViteBundler::class,
+        Stancl\Tenancy\Features\ViteBundler::class,
     ],
 
     /**

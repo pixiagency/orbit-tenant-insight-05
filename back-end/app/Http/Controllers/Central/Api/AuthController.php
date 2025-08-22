@@ -57,7 +57,7 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-            $user = Auth::user();
+            $user = Auth::guard('sanctum')->user();
             $user?->tokens()->delete(); // Revoke all tokens
             return apiResponse(null, trans('app.logout_successfully'), 200);
         } catch (Exception $e) {

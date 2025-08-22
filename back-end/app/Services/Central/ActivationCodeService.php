@@ -56,14 +56,14 @@ class ActivationCodeService extends BaseService
                 'create_by' => auth()->user()->id,
                 'source' => 'manual',
                 'status' => $data['status'] ?? 'active',
-                'trial_days' => 30, 
+                'trial_days' => 30,
                 'expires_at' => now()->addDays(30),
             ]);
             return "Code created successfully";
         } elseif ($number_of_codes && $code_parts && $part_length) {
             $codes = $this->generateCodes($number_of_codes, $code_parts, $part_length);
             $codes = array_unique($codes);
-            $codes = array_filter($codes, function($code) {
+            $codes = array_filter($codes, function ($code) {
                 return !$this->getModel()->where('code', $code)->exists();
             });
             if (empty($codes)) {
@@ -76,7 +76,7 @@ class ActivationCodeService extends BaseService
                 'create_by' => auth()->user()->id,
                 'source' => 'manual',
                 'status' => $data['status'] ?? 'active',
-                'trial_days' => 30, 
+                'trial_days' => 30,
                 'expires_at' => now()->addDays(30),
             ];
             $insertData = [];
@@ -89,10 +89,27 @@ class ActivationCodeService extends BaseService
 
             $this->getModel()->insert($insertData);
             return count($codes) . " Codes created successfully";
-
         }
 
         return true;
+    }
+
+    public function update(array $data)
+    {
+        $activationCode = $this->findById($data['id']);
+        // if (!$activationCode) {
+        //     return "Activation code not found";
+        // }
+
+        $activationCode->update([
+            'code' => $data['code'],
+            'tier_id' => $data['tier_id'],
+            'status' => $data['status'] ?? 'active',
+            'trial_days' => $data['trial_days'] ?? 30,
+            'expires_at' => now()->addDays($data['trial_days'] ?? 30),
+        ]);
+
+        return "Activation code updated successfully";
     }
 
     public function generateCodes($number_of_codes, $code_parts, $part_length)
@@ -116,13 +133,39 @@ class ActivationCodeService extends BaseService
 
     public function statistics()
     {
-        $total_codes = $this->getModel()->count() ;
+        $total_codes = $this->getModel()->count();
+        $total_active_codes = $this->getModel()->where('status', 'active')->count();
         $total_used_codes = $this->getModel()->whereNotNull('used_at')->count();
         $total_unused_codes = $this->getModel()->whereNull('used_at')->count();
+        $expired_codes = $this->getModel()->where('expires_at', '<', now())->count();
         return [
             'total_codes' => $total_codes,
             'total_used_codes' => $total_used_codes,
             'total_unused_codes' => $total_unused_codes,
+            'expired_codes' => $expired_codes,
         ];
     }
-}   
+
+    public function show($id, array $withRelations = [])
+    {
+        $activationCode = $this->findById($id, ['*'], $withRelations);
+        return $activationCode;
+    }
+
+    public function destroy($id)
+    {
+        $activationCode = $this->findById($id);
+        if (!$activationCode) {
+            return "Activation code not found";
+        }
+
+        // Check if the activation code is used
+        if ($activationCode->used_at) {
+            return "Cannot delete a used activation code";
+        }
+
+        // Delete the activation code
+        $activationCode->delete();
+        return "Activation code deleted successfully";
+    }
+}
