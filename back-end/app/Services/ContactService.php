@@ -272,4 +272,19 @@ class ContactService extends BaseService
             return ['headers' => [], 'rows' => []];
         }
     }
+
+    public function get_statistics()
+    {
+        $total_contacts = $this->model->count();
+        $active_contacts = $this->model->where('status', 'active')->count();
+        $inactive_contacts = $this->model->where('status', 'inactive')->count();
+        $pending_contacts = $this->model->where('status', 'pending')->count();
+
+        return [
+            'total_contacts' => $total_contacts,
+            'active_contacts' => $active_contacts,
+            'inactive_contacts' => $inactive_contacts,
+            'pending_contacts' => $pending_contacts
+        ];
+    }
 }

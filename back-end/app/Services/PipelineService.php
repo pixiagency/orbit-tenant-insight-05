@@ -44,7 +44,7 @@ class PipelineService extends BaseService
 
     public function index(array $filters = [], array $withRelations = [], ?int $perPage = null)
     {
-//        dd('hi');
+        //        dd('hi');
         $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
         if ($perPage) {
             return $query->paginate($perPage);
@@ -71,7 +71,6 @@ class PipelineService extends BaseService
         $pipeline->update([
             'name' => $pipelineDTO->name,
         ]);
-        // Remove old stages and create new ones
         $pipeline->stages()->delete();
         foreach ($pipelineDTO->stages as $index => $stageData) {
             $pipeline->stages()->create([
@@ -79,12 +78,19 @@ class PipelineService extends BaseService
                 'seq_number' => $index + 1,
             ]);
         }
-        return $pipeline;
+        return $pipeline->load('stages');
+    }
+
+    public function show(int $id)
+    {
+        return $this->getQuery()->with('stages')->findOrFail($id);
     }
 
 
     public function delete(int $id)
     {
-        return $this->getQuery()->where('id', $id)->delete();
+        $pipeline = $this->getQuery()->findOrFail($id);
+        $pipeline->stages()->delete();
+        return $pipeline->delete();
     }
 }

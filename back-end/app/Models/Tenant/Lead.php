@@ -2,6 +2,7 @@
 
 namespace App\Models\Tenant;
 
+use App\Models\City;
 use App\Models\CustomField;
 use App\Models\Industry;
 use App\Models\Reason;
@@ -38,6 +39,10 @@ use Filterable;
     {
         return $this->belongsTo(Contact::class);
     }
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
 
     // Lead belongs to a User (Sales Representative)
     public function user()
@@ -70,7 +75,10 @@ use Filterable;
         return $this->belongsToMany(CustomField::class, 'lead_custom_fields')->withPivot('value')->withTimestamps();
     }
 
-
+    public function stage()
+    {
+        return $this->belongsTo(Stage::class);
+    }
 
      // Lead has many Stages (Many-to-Many)
      public function stages()

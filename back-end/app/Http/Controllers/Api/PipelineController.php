@@ -8,25 +8,18 @@ use App\DTO\Pipeline\PipelineDTO;
 use App\Services\PipelineService;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\Pipeline\PipelineStoreRequest;
 use App\Http\Requests\Pipeline\PipelineUpdateRequest;
 use App\Http\Resources\PipelineResource;
+use App\Models\Tenant\Pipeline;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 
 class PipelineController extends Controller
 {
-    public function __construct(public PipelineService $pipelineService)
-    {
-        //        $this->middleware('permission:view pipelines', ['only' => ['index','show']]);
-        //        $this->middleware('permission:edit pipelines', ['only' => ['edit', 'update']]);
-        //        $this->middleware('permission:create pipelines', ['only' => ['create', 'store']]);
-        //        $this->middleware('permission:delete pipelines', ['only' => ['destroy']]);
-    }
-    /**
-     * Display a listing of the pipeline.
-     */
+    public function __construct(public PipelineService $pipelineService) {}
+
     public function index(Request $request): JsonResponse
     {
         try {
@@ -41,9 +34,7 @@ class PipelineController extends Controller
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
-    /**
-     * Store a newly created pipline in storage.
-     */
+
     public function store(PipelineStoreRequest $request): JsonResponse
     {
         try {
@@ -57,82 +48,46 @@ class PipelineController extends Controller
         }
     }
 
-    /**
-     * Display the specified pipline.
-     */
-    public function show(Pipline $pipline)
+    public function show(int $id)
     {
-        return view('layouts.dashboard.pipline.show', compact('pipline'));
+        try {
+            $pipline = $this->pipelineService->show($id);
+            return ApiResponse(new PipelineResource($pipline), 'Pipeline retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Pipeline not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 
-    /**
-     * Show the form for editing the specified pipline.
-     */
-    public function edit(Pipline $pipline)
-    {
-        return view('layouts.dashboard.pipline.edit', compact('pipline'));
-    }
-
-    /**
-     * Update the specified pipline in storage.
-     */
     public function update(PipelineUpdateRequest $request, $id)
     {
         try {
             DB::beginTransaction();
 
-            // Retrieve the pipline by ID
-            $pipline = Pipline::findOrFail($id); // Fetch the Pipline model
-
-            // Create piplineDTO from the request
+            $pipline = Pipeline::findOrFail($id);
             $piplineDTO = PipelineDTO::fromRequest($request);
-
-            // Update the pipline using the pipline model
-            $pipline = $this->piplineService->update($pipline, $piplineDTO); // Pass the model instead of the ID
-
-            // Success message
-            $toast = [
-                'type' => 'success',
-                'title' => 'Success',
-                'message' => trans('app.pipline_updated_successfully')
-            ];
+            $pipline = $this->pipelineService->update($pipline, $piplineDTO);
 
             DB::commit();
-            return to_route('piplines.index')->with('toast', $toast);
+            return ApiResponse(new PipelineResource($pipline), 'Pipeline updated successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Pipeline not found', code: 404);
         } catch (\Exception $e) {
             DB::rollBack();
-            // Error message
-            $toast = [
-                'type' => 'error',
-                'title' => 'Error',
-                'message' => $e->getMessage()
-            ];
-            return back()->with('toast', $toast);
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
-
-
-    /**
-     * Remove the specified pipline from storage.
-     */
     public function destroy(int $id)
     {
         try {
-            $this->piplineService->delete($id);
-            $toast = [
-                'type' => 'success',
-                'title' => 'success',
-                'message' => trans('app.pipline_deleted_successfully')
-            ];
-            return to_route('piplines.index')->with('toast', $toast);
+            $this->pipelineService->delete($id);
+            return ApiResponse(message: 'Pipeline deleted successfully', code: 200);
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Pipeline not found', code: 404);
         } catch (\Exception $e) {
-            $toast = [
-                'type' => 'error',
-                'title' => 'error',
-                'message' => trans('app.there_is_an_error')
-            ];
-            return back()->with('toast', $toast);
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 }
