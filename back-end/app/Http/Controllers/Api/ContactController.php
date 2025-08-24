@@ -3,29 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exceptions\GeneralException;
-use App\Http\Requests\Clients\StoreClientRequest;
 use Exception;
 use Illuminate\Http\Request;
-use App\DTO\Client\ClientDTO;
 use App\DTO\Contact\ContactDTO;
 use App\Enums\ContactMethods;
 use App\Exports\ContactsExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contacts\ContactStoreRequest;
+use App\Http\Requests\Contacts\ContactUpdateRequest;
 use App\Http\Resources\ContactResource;
 use App\Imports\ContactsImport;
+use App\Models\Tenant\Contact;
 use App\Services\ContactService;
-use Maatwebsite\Excel\Exceptions\NoTypeDetectedException;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ContactController extends Controller
 {
     public function __construct(public ContactService $contactService) {}
-    /**
-     * Display a listing of the resource.
-     */
+
+    public function get_statistics()
+    {
+        try {
+            $statistics = $this->contactService->get_statistics();
+            return ApiResponse($statistics, 'Statistics retrieved successfully');
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
     public function index(Request $request)
     {
         try {
@@ -35,15 +43,29 @@ class ContactController extends Controller
             });
             $withRelations = ['area.ancestors', 'source'];
             $contacts = $this->contactService->getContacts($filters, $withRelations, $perPage);
-            return ApiResponse(new ContactCollection($contacts), 'Contacts retrieved successfully');
+
+            // Handle pagination properly
+            if ($contacts instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                return response()->json([
+                    'data' => ContactResource::collection($contacts),
+                    'pagination' => [
+                        'current_page' => $contacts->currentPage(),
+                        'per_page' => $contacts->perPage(),
+                        'total' => $contacts->total(),
+                        'last_page' => $contacts->lastPage(),
+                        'from' => $contacts->firstItem(),
+                        'to' => $contacts->lastItem(),
+                    ],
+                    'status' => true,
+                    'message' => 'Contacts retrieved successfully'
+                ]);
+            }
+            return ApiResponse(ContactResource::collection($contacts), 'Contacts retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ContactStoreRequest $request)
     {
         try {
@@ -95,9 +117,6 @@ class ContactController extends Controller
             ], 500);
         }
     }
-
-
-
 
     public function import(Request $request)
     {
@@ -160,7 +179,6 @@ class ContactController extends Controller
         }
     }
 
-
     public function export(Request $request)
     {
         $request->validate([
@@ -182,5 +200,43 @@ class ContactController extends Controller
     {
         $contactMethods = ContactMethods::options();
         return ApiResponse($contactMethods, 'Contact methods retrieved successfully');
+    }
+
+    public function update(ContactUpdateRequest $request, Contact $contact)
+    {
+        try {
+            $contactDTO = ContactDTO::fromRequest($request);
+            $contact = $this->contactService->update($contact->id, $contactDTO);
+            return ApiResponse(new ContactResource($contact), 'Contact updated successfully');
+        } catch (GeneralException $e) {
+            return ApiResponse(message: $e->getMessage(), code: $e->getCode());
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
+    public function show(int $contact)
+    {
+        try {
+            $contact = Contact::findOrFail($contact);
+            return ApiResponse(new ContactResource($contact), 'Contact retrieved successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Contact not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
+    public function destroy(int $contact)
+    {
+        try {
+            $contact = Contact::findOrFail($contact);
+            $this->contactService->delete($contact);
+            return ApiResponse(message: 'Contact deleted successfully');
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Contact not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 }

@@ -101,7 +101,7 @@ Route::middleware([
         Route::post('/', [\App\Http\Controllers\Api\ContactController::class, 'export']);
     });
 
-
+    Route::get('/contacts/statistics', [\App\Http\Controllers\Api\ContactController::class, 'get_statistics']);
     Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
 
