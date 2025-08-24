@@ -18,9 +18,8 @@ return [
      */
     'central_domains' => [
         // '127.0.0.1',
-        // 'localhost',
+         'localhost',
         'barmagiat.com',
-        env('APP_URL', 'new-crm.test')
     ],
 
     /**

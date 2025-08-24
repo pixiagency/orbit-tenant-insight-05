@@ -37,8 +37,8 @@ COPY composer.json composer.lock ./
 # Copy application code
 COPY . .
 
-# Install dependencies
-RUN composer install --no-interaction --optimize-autoloader
+## Install dependencies
+#RUN composer install --no-interaction --optimize-autoloader
 
 # Copy application code with correct ownership
 COPY --chown=www-data:www-data . .

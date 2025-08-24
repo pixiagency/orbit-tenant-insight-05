@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             PackageSeeder::class,
             SubscriptionSeeder::class,
+            TenantSeeder::class,
             // PermissionSeeder::class,
             // PermissionRoleSeeder::class,
             // RoleSeeder::class,
