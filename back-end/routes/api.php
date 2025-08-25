@@ -104,6 +104,8 @@ Route::middleware([
     Route::get('/contacts/statistics', [\App\Http\Controllers\Api\ContactController::class, 'get_statistics']);
     Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
+    Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
+    Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Route::middleware('role:admin')->group(function () {
@@ -115,6 +117,7 @@ Route::middleware([
 
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
 
+    Route::get('/opportunities/statistics', [\App\Http\Controllers\Api\OpportunityController::class, 'statistics']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
 
