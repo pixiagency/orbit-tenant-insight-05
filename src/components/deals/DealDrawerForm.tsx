@@ -74,7 +74,7 @@ interface DealFormData {
 interface DealDrawerFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (deal: DealFormData) => void;
+  onSave: (deal: DealFormData, showOpportunityAlert?: boolean) => void;
   deal?: DealFormData | null;
 }
 
@@ -312,7 +312,6 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     data.attachments = attachments;
     
     onSave(data);
-    toast.success(deal ? 'Deal updated successfully!' : 'Deal created successfully!');
     onClose();
   };
 
