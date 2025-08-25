@@ -80,9 +80,11 @@ interface DealDrawerFormProps {
 
 // Mock data - replace with actual data from your backend
 const CUSTOMERS = [
-  { id: '1', name: 'ABC Corp', type: 'company' },
-  { id: '2', name: 'XYZ Ltd', type: 'company' },
-  { id: '3', name: 'John Smith', type: 'contact' },
+  { id: '1', name: 'TechCorp Inc.', type: 'company' },
+  { id: '2', name: 'StartupXYZ', type: 'company' },
+  { id: '3', name: 'Manufacturing Ltd', type: 'company' },
+  { id: '4', name: 'ABC Corp', type: 'company' },
+  { id: '5', name: 'XYZ Ltd', type: 'company' },
 ];
 
 const PRODUCTS = [
@@ -312,7 +314,7 @@ export const DealDrawerForm: React.FC<DealDrawerFormProps> = ({
     data.attachments = attachments;
     
     onSave(data);
-    onClose();
+    // Don't close immediately - let the parent component handle closing after alert
   };
 
   const addItem = () => {

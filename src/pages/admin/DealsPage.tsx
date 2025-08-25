@@ -289,13 +289,25 @@ const DealsPage = () => {
           : deal
       ));
       toast.success('Deal updated successfully');
+      setShowDealForm(false);
+      setSelectedDeal(null);
     } else {
       // Add new deal
+      const customerMap: any = {
+        '1': 'TechCorp Inc.',
+        '2': 'StartupXYZ', 
+        '3': 'Manufacturing Ltd',
+        '4': 'ABC Corp',
+        '5': 'XYZ Ltd'
+      };
+      
+      const customerName = customerMap[dealData.customer] || dealData.customer;
+      
       const newDeal: Deal = {
         id: Date.now().toString(),
         title: dealData.deal_name || 'New Deal',
-        company: dealData.customer || '',
-        contact: dealData.customer || '',
+        company: customerName,
+        contact: customerName,
         value: dealData.deal_value || 0,
         stage: dealData.payment_status === 'paid' ? 'closed-won' : 'qualification',
         probability: dealData.payment_status === 'paid' ? 100 : 50,
@@ -309,23 +321,24 @@ const DealsPage = () => {
       setDeals(prev => [...prev, newDeal]);
 
       // Check if there's a related opportunity in active status
-      const opportunity = findRelatedOpportunity(dealData.customer);
+      const opportunity = findRelatedOpportunity(customerName);
       if (opportunity?.status === 'active') {
         setRelatedOpportunity(opportunity);
         setShowOpportunityAlert(true);
+        setShowDealForm(false);
+        setSelectedDeal(null);
       } else {
         toast.success('Deal created successfully');
+        setShowDealForm(false);
+        setSelectedDeal(null);
       }
     }
-    setShowDealForm(false);
-    setSelectedDeal(null);
   };
 
   const findRelatedOpportunity = (customerName: string) => {
-    // Mock logic to find opportunity by customer name
+    // Find opportunity by exact company name match
     return mockOpportunities.find(opp => 
-      opp.company.toLowerCase().includes(customerName.toLowerCase()) && 
-      opp.status === 'active'
+      opp.company === customerName && opp.status === 'active'
     );
   };
 
