@@ -19,7 +19,6 @@ import {
 import { AdvancedFilters } from '../../components/shared/AdvancedFilters';
 import { DealTable } from '../../components/deals/DealTable';
 import { EnhancedDealDrawerForm } from '../../components/deals/EnhancedDealDrawerForm';
-import { OpportunityStatusAlertDialog } from '../../components/deals/OpportunityStatusAlertDialog';
 import { toast } from 'sonner';
 
 interface Deal {
@@ -166,13 +165,6 @@ const dealsData: Deal[] = [
   }
 ];
 
-// Mock opportunities data that could be related to deals
-const mockOpportunities = [
-  { id: '1', name: 'TechCorp Enterprise Software', company: 'TechCorp Inc.', status: 'active' },
-  { id: '2', name: 'StartupXYZ Cloud Migration', company: 'StartupXYZ', status: 'active' },
-  { id: '3', name: 'Manufacturing Digital Transformation', company: 'Manufacturing Ltd', status: 'won' },
-];
-
 const filterDeals = (deals: Deal[], filters: Record<string, any>) => {
   return deals.filter(deal => {
     // Search filter
@@ -243,8 +235,6 @@ const DealsPage = () => {
   const [selectedDeals, setSelectedDeals] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [showOpportunityAlert, setShowOpportunityAlert] = useState(false);
-  const [relatedOpportunity, setRelatedOpportunity] = useState<any>(null);
 
   const filteredDeals = filterDeals(deals, filters);
 
@@ -271,10 +261,6 @@ const DealsPage = () => {
   };
 
   const handleSaveDeal = (dealData: any) => {
-    console.log('=== Deal Save Started ===');
-    console.log('Deal Data:', dealData);
-    console.log('Selected Deal:', selectedDeal);
-    
     if (selectedDeal) {
       // Edit existing deal
       setDeals(prev => prev.map(deal => 
@@ -293,28 +279,13 @@ const DealsPage = () => {
           : deal
       ));
       toast.success('Deal updated successfully');
-      setShowDealForm(false);
-      setSelectedDeal(null);
     } else {
-      console.log('=== Creating New Deal ===');
       // Add new deal
-      const customerMap: any = {
-        '1': 'TechCorp Inc.',
-        '2': 'StartupXYZ', 
-        '3': 'Manufacturing Ltd',
-        '4': 'ABC Corp',
-        '5': 'XYZ Ltd'
-      };
-      
-      const customerName = customerMap[dealData.customer] || dealData.customer;
-      console.log('Customer ID:', dealData.customer);
-      console.log('Customer Name:', customerName);
-      
       const newDeal: Deal = {
         id: Date.now().toString(),
         title: dealData.deal_name || 'New Deal',
-        company: customerName,
-        contact: customerName,
+        company: dealData.customer || '',
+        contact: dealData.customer || '',
         value: dealData.deal_value || 0,
         stage: dealData.payment_status === 'paid' ? 'closed-won' : 'qualification',
         probability: dealData.payment_status === 'paid' ? 100 : 50,
@@ -326,46 +297,10 @@ const DealsPage = () => {
         payment_status: dealData.payment_status || 'pending'
       };
       setDeals(prev => [...prev, newDeal]);
-
-      // Check if there's a related opportunity in active status
-      console.log('=== Checking for Related Opportunity ===');
-      console.log('Mock Opportunities:', mockOpportunities);
-      const opportunity = findRelatedOpportunity(customerName);
-      console.log('Found Opportunity:', opportunity);
-      
-      if (opportunity?.status === 'active') {
-        console.log('=== Showing Alert ===');
-        setRelatedOpportunity(opportunity);
-        setShowOpportunityAlert(true);
-        setShowDealForm(false);
-        setSelectedDeal(null);
-      } else {
-        console.log('=== No Alert - No Active Opportunity ===');
-        toast.success('Deal created successfully');
-        setShowDealForm(false);
-        setSelectedDeal(null);
-      }
+      toast.success('Deal created successfully');
     }
-  };
-
-  const findRelatedOpportunity = (customerName: string) => {
-    console.log('Looking for opportunity for customer:', customerName);
-    // Find opportunity by exact company name match
-    const found = mockOpportunities.find(opp => 
-      opp.company === customerName && opp.status === 'active'
-    );
-    console.log('Search result:', found);
-    return found;
-  };
-
-  const handleChangeOpportunityStatus = () => {
-    console.log('=== Changing Opportunity Status ===');
-    if (relatedOpportunity) {
-      // Mock update opportunity status to won
-      toast.success('Deal created successfully! Opportunity status changed to Won.');
-    }
-    setShowOpportunityAlert(false);
-    setRelatedOpportunity(null);
+    setShowDealForm(false);
+    setSelectedDeal(null);
   };
 
   const handleDeleteDeal = (dealId: string) => {
@@ -502,18 +437,6 @@ const DealsPage = () => {
           setSelectedDeal(null);
         }}
         onSave={handleSaveDeal}
-      />
-
-      {/* Opportunity Status Alert */}
-      <OpportunityStatusAlertDialog
-        isOpen={showOpportunityAlert}
-        onClose={() => {
-          setShowOpportunityAlert(false);
-          setRelatedOpportunity(null);
-          toast.success('Deal created successfully!');
-        }}
-        onChangeStatus={handleChangeOpportunityStatus}
-        opportunityName={relatedOpportunity?.name}
       />
     </div>
   );
