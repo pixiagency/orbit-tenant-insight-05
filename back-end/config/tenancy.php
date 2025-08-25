@@ -18,7 +18,8 @@ return [
      */
     'central_domains' => [
         // '127.0.0.1',
-         'localhost',
+         'crm.test',
+         'tenant1.crm.test',
         'barmagiat.com',
     ],
 
