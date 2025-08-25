@@ -62,6 +62,11 @@ class Contact extends Model
         return $this->hasMany(Lead::class, 'contact_id');
     }
 
+    public function activeLead()
+    {
+        return $this->hasOne(Lead::class, 'contact_id')->where('status', 'Active')->latest();
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
