@@ -271,6 +271,10 @@ const DealsPage = () => {
   };
 
   const handleSaveDeal = (dealData: any) => {
+    console.log('=== Deal Save Started ===');
+    console.log('Deal Data:', dealData);
+    console.log('Selected Deal:', selectedDeal);
+    
     if (selectedDeal) {
       // Edit existing deal
       setDeals(prev => prev.map(deal => 
@@ -292,6 +296,7 @@ const DealsPage = () => {
       setShowDealForm(false);
       setSelectedDeal(null);
     } else {
+      console.log('=== Creating New Deal ===');
       // Add new deal
       const customerMap: any = {
         '1': 'TechCorp Inc.',
@@ -302,6 +307,8 @@ const DealsPage = () => {
       };
       
       const customerName = customerMap[dealData.customer] || dealData.customer;
+      console.log('Customer ID:', dealData.customer);
+      console.log('Customer Name:', customerName);
       
       const newDeal: Deal = {
         id: Date.now().toString(),
@@ -321,13 +328,19 @@ const DealsPage = () => {
       setDeals(prev => [...prev, newDeal]);
 
       // Check if there's a related opportunity in active status
+      console.log('=== Checking for Related Opportunity ===');
+      console.log('Mock Opportunities:', mockOpportunities);
       const opportunity = findRelatedOpportunity(customerName);
+      console.log('Found Opportunity:', opportunity);
+      
       if (opportunity?.status === 'active') {
+        console.log('=== Showing Alert ===');
         setRelatedOpportunity(opportunity);
         setShowOpportunityAlert(true);
         setShowDealForm(false);
         setSelectedDeal(null);
       } else {
+        console.log('=== No Alert - No Active Opportunity ===');
         toast.success('Deal created successfully');
         setShowDealForm(false);
         setSelectedDeal(null);
@@ -336,13 +349,17 @@ const DealsPage = () => {
   };
 
   const findRelatedOpportunity = (customerName: string) => {
+    console.log('Looking for opportunity for customer:', customerName);
     // Find opportunity by exact company name match
-    return mockOpportunities.find(opp => 
+    const found = mockOpportunities.find(opp => 
       opp.company === customerName && opp.status === 'active'
     );
+    console.log('Search result:', found);
+    return found;
   };
 
   const handleChangeOpportunityStatus = () => {
+    console.log('=== Changing Opportunity Status ===');
     if (relatedOpportunity) {
       // Mock update opportunity status to won
       toast.success('Deal created successfully! Opportunity status changed to Won.');
