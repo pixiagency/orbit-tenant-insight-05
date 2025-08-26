@@ -21,7 +21,7 @@ services:
         container_name: crm-nginx
         ports:
             - "${FORWARD_WEB_PORT:-80}:80"
-#            - "8444:443"
+            - "8444:443"
         volumes:
             - ./:/var/www/html
             - ./storage:/var/www/html/storage
