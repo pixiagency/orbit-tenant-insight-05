@@ -1,7 +1,9 @@
 services:
   nginx:
     depends_on:
-      - app_php
+      app_php:
+        condition: service_started
+        required: true
     volumes:
       - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf
 #      - ./letsencrypt:/etc/letsencrypt:ro
