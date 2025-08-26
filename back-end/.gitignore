@@ -6,6 +6,7 @@
 /public/storage
 /public/assets/img
 /storage/*.key
+/storage/*
 /storage/pail
 /vendor
 Console
@@ -24,4 +25,3 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-!/storage/
