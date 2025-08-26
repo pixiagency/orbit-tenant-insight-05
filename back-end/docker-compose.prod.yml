@@ -1,7 +1,7 @@
 services:
   nginx:
     depends_on:
-      app_php:
+      app:
         condition: service_started
         required: true
     volumes:
