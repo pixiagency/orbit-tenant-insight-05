@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Tenant\AppSettingsSeeder;
 use Database\Seeders\tenant\ContactSeeder;
+use Database\Seeders\tenant\ItemCategorySeeder;
+use Database\Seeders\tenant\ItemStatusSeeder;
 use Database\Seeders\tenant\PaymentMethodSeeder;
 use Database\Seeders\tenant\PipelineSeeder;
 use Database\Seeders\tenant\UserSeeder;
@@ -18,13 +21,16 @@ class DatabaseTenantSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SourceSeeder::class,
-            RolesAndPermissionsSeeder::class,
-            UserSeeder::class,
-            CountriesWithCitiesSeeder::class,
-            PaymentMethodSeeder::class,
-            PipelineSeeder::class,
-            ContactSeeder::class,
+            // RolesAndPermissionsSeeder::class,
+            // CountriesWithCitiesSeeder::class,
+            // UserSeeder::class,
+            // SourceSeeder::class,
+            // PaymentMethodSeeder::class,
+            // PipelineSeeder::class,
+            // ContactSeeder::class,
+            // ItemStatusSeeder::class,
+            // ItemCategorySeeder::class,
+            // AppSettingsSeeder::class,
         ]);
     }
 }

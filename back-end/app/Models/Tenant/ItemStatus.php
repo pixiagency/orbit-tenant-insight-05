@@ -6,14 +6,18 @@ use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItemCategory extends Model
+class ItemStatus extends Model
 {
     use Filterable, HasFactory;
     protected $fillable =
     [
         'name',
-        'description',
+        'status',
         'color',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function items()

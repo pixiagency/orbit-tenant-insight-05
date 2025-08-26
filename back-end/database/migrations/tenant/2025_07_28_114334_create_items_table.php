@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\DealType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +21,8 @@ return new class extends Migration
             $table->string('unit');
             $table->string('image')->nullable();
             $table->foreignId('category_id')->constrained('item_categories');
-            $table->string('status');
+            $table->foreignId('status_id')->constrained('item_statuses');
+            $table->enum('type', DealType::values());
             $table->timestamps();
         });
     }

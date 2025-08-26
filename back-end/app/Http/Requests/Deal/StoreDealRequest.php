@@ -27,6 +27,11 @@ class StoreDealRequest extends FormRequest
             'payment_status' => ['required', Rule::in(['paid', 'unpaid', 'partial'])],
             'payment_method_id' => 'required|exists:payment_methods,id',
             'notes' => 'nullable|string|max:255',
+            'stage_id' => 'required|exists:stages,id',
+            'items' => 'required|array',
+            'items.*.item_id' => 'required|exists:items,id',
+            'items.*.quantity' => 'sometimes|integer',
+            'items.*.price' => 'required|numeric',
         ];
     }
 }

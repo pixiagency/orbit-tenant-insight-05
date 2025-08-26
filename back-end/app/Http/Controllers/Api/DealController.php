@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DealType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Deal\StoreDealRequest;
+use App\Http\Resources\DealResource;
 use App\Models\Tenant\Deal;
+use App\Models\Tenant\Item;
+use App\Services\DealService;
 use DB;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class DealController extends Controller
 {
+
+    public function __construct(public DealService $dealService) {}
 
     public function index(Request $request)
     {
@@ -36,25 +41,31 @@ class DealController extends Controller
             $query->where('assigned_to_id', $request->assigned_to_id);
         }
 
-
-
-
+        $query->with('items', 'stage.pipeline');
 
         $deals = $query->paginate($request->per_page ?? 10);
-        return ApiResponse(message: 'Deals retrieved successfully', code: 200, data: $deals);
+        return ApiResponse(message: 'Deals retrieved successfully', code: 200, data: DealResource::collection($deals));
     }
 
     public function store(StoreDealRequest $request)
     {
         try {
-            DB::beginTransaction();
-            $data = $request->validated();
-            Deal::create($data);
-            DB::commit();
-            return ApiResponse(message: 'Deal created successfully', code: 201);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return ApiResponse(message: $e->getMessage(), code: 500);
+            $deal = $this->dealService->create($request->validated());
+            return ApiResponse(
+                message: 'Deal created successfully',
+                data: new DealResource($deal),
+                code: 201
+            );
+        } catch (ValidationException $e) {
+            return ApiResponse(
+                message: $e->errors(),
+                code: 422
+            );
+        } catch (\Exception $e) {
+            return ApiResponse(
+                message: $e->getMessage(),
+                code: 500
+            );
         }
     }
 }

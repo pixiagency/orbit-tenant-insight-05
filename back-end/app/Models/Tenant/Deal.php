@@ -21,6 +21,7 @@ class Deal extends Model
         'notes',
         'assigned_to_id',
         'stage_id',
+        'total_amount',
     ];
 
     public function contact()
@@ -31,5 +32,10 @@ class Deal extends Model
     public function stage()
     {
         return $this->belongsTo(Stage::class);
+    }
+
+    public function items()
+    {
+        return $this->belongsToMany(Item::class, 'deal_items', 'deal_id', 'item_id')->withPivot('quantity', 'price', 'total');
     }
 }

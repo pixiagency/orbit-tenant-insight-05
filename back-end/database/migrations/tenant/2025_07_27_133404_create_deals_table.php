@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\DealType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('deals', function (Blueprint $table) {
             $table->id();
-            $table->enum('deal_type',['product_sale', 'service_sale', 'subscription']);
+            $table->enum('deal_type', DealType::values());
 
             // basic info
             $table->string('deal_name');
@@ -22,9 +23,9 @@ return new class extends Migration
 
 
             // tax info & discount
-            $table->enum('discount_type',['percentage','fixed']);
-            $table->decimal('discount_value',10,2);
-            $table->decimal('tax_rate',10,2);
+            $table->enum('discount_type', ['percentage', 'fixed']);
+            $table->decimal('discount_value', 10, 2);
+            $table->decimal('tax_rate', 10, 2);
 
             // Assignment
             $table->foreignId('assigned_to_id')->constrained('users');
@@ -32,11 +33,14 @@ return new class extends Migration
             $table->foreignId('payment_method_id')->constrained('payment_methods');
             $table->foreignId('stage_id')->constrained('stages');
 
+            // total amount
+            $table->decimal('total_amount', 10, 2);
+
             // Notes
             $table->text('notes');
             $table->timestamps();
         });
-    }   
+    }
 
     /**
      * Reverse the migrations.

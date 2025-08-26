@@ -17,6 +17,12 @@ class Item extends Model
         'category_id',
         'unit',
         'image',
-        'status',
+        'type',
+        'status_id',
     ];
+
+    public function deals()
+    {
+        return $this->belongsToMany(Deal::class, 'deal_items', 'item_id', 'deal_id');
+    }
 }

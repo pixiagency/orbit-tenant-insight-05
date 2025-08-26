@@ -106,6 +106,7 @@ Route::middleware([
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
     Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
     Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
+    Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
         // Route::middleware('role:admin')->group(function () {
