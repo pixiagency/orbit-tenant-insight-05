@@ -1,5 +1,5 @@
 services:
-    app:
+    app_php:
         build:
             context: .
             dockerfile: docker/php/Dockerfile
@@ -27,7 +27,7 @@ services:
             - ./storage:/var/www/html/storage
             - ./logs:/var/www/html/storage/logs
         depends_on:
-            - app
+            - app_php
         networks:
             - laravel
         restart: unless-stopped
