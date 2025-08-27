@@ -20,6 +20,7 @@ return [
         // '127.0.0.1',
         'localhost',
         'crm.test',
+        'new-crm.test',
         'barmagiat.com',
     ],
 

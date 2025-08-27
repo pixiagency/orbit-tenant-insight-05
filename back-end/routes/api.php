@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FormController;
+use App\Http\Controllers\Api\FormSubmissionController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
 use App\Http\Controllers\Central\Api\SettingController;
@@ -114,6 +116,20 @@ Route::middleware([
         Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
+    });
+
+    Route::prefix('forms')->group(function () {
+        // Form CRUD
+        Route::get('/', [FormController::class, 'index']);
+        Route::post('/', [FormController::class, 'store']);
+        Route::get('/{form}', [FormController::class, 'show']);
+        Route::put('/{form}', [FormController::class, 'update']);
+        Route::delete('/{form}', [FormController::class, 'destroy']);
+        Route::patch('/{form}/toggle', [FormController::class, 'toggle']);
+
+        // Submissions
+        Route::post('/{slug}/submit', [FormSubmissionController::class, 'submit']);
+        Route::get('/{form}/submissions', [FormSubmissionController::class, 'submissions']);
     });
 
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
