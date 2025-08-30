@@ -39,6 +39,8 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
     { code: 'ar', name: 'العربية', flag: '🇸🇦' },
   ];
 
