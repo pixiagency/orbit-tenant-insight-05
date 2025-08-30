@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { OpportunityImportModal } from '@/components/opportunities/OpportunityImportModal';
+import { ImportWizard } from '@/components/import-export/ImportWizard';
 
 const ImportExportPage = () => {
   const [importProgress, setImportProgress] = useState<{[key: string]: number}>({});
   const [activeImports, setActiveImports] = useState<string[]>([]);
   const [importResults, setImportResults] = useState<{[key: string]: any}>({});
   const [showOpportunityImport, setShowOpportunityImport] = useState(false);
+  const [showImportWizard, setShowImportWizard] = useState(false);
 
   const handleFileUpload = (type: string, file: File) => {
     setActiveImports(prev => [...prev, type]);
@@ -172,10 +174,44 @@ const ImportExportPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Upload className="h-5 w-5 mr-2" />
-                Import Data
+                Advanced Import Wizard
               </CardTitle>
               <CardDescription>
-                Upload CSV or Excel files to import data into your CRM
+                Use our advanced import wizard for a guided multi-step import process with field mapping and validation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <div className="max-w-md mx-auto space-y-4">
+                  <div className="p-6 bg-primary/10 rounded-full w-24 h-24 mx-auto flex items-center justify-center">
+                    <Upload className="h-12 w-12 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">Start Import Process</h3>
+                  <p className="text-muted-foreground">
+                    Follow our guided wizard to import your data with field mapping, validation, and preview
+                  </p>
+                  <Button 
+                    size="lg" 
+                    onClick={() => setShowImportWizard(true)}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Launch Import Wizard
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Import Cards - Legacy Method */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="h-5 w-5 mr-2" />
+                Quick Import (Legacy)
+              </CardTitle>
+              <CardDescription>
+                Quick one-click import for advanced users who have pre-formatted files
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -485,6 +521,21 @@ const ImportExportPage = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Import Wizard Modal */}
+      <ImportWizard 
+        isOpen={showImportWizard} 
+        onClose={() => setShowImportWizard(false)} 
+      />
+
+      {/* Legacy Opportunity Import Modal */}
+      {showOpportunityImport && (
+        <OpportunityImportModal
+          isOpen={showOpportunityImport}
+          onClose={() => setShowOpportunityImport(false)}
+          onImport={handleOpportunityImport}
+        />
+      )}
     </div>
   );
 };
