@@ -2,15 +2,6 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\Tenant\AppSettingsSeeder;
-use Database\Seeders\tenant\ContactSeeder;
-use Database\Seeders\tenant\ItemCategorySeeder;
-use Database\Seeders\tenant\ItemStatusSeeder;
-use Database\Seeders\tenant\PaymentMethodSeeder;
-use Database\Seeders\tenant\PipelineSeeder;
-use Database\Seeders\tenant\UserSeeder;
-use Database\Seeders\tenant\RolesAndPermissionsSeeder;
-use Database\Seeders\tenant\SourceSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseTenantSeeder extends Seeder

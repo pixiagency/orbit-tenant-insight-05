@@ -2,7 +2,9 @@ FROM php:8.3-fpm
 
 WORKDIR /var/www/html
 
-# Install system dependencies first (these change rarely)
+# -------------------------------------------------------------------
+# 1) Install system dependencies
+# -------------------------------------------------------------------
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -15,7 +17,9 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (depends on libs above)
+# -------------------------------------------------------------------
+# 2) Install PHP extensions
+# -------------------------------------------------------------------
 RUN docker-php-ext-install \
     pdo_mysql \
     mbstring \
@@ -25,26 +29,51 @@ RUN docker-php-ext-install \
     gd \
     zip
 
-# Install Redis via PECL (separate so cache works better)
+# -------------------------------------------------------------------
+# 3) Install Redis via PECL
+# -------------------------------------------------------------------
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
-# Install Composer
+# -------------------------------------------------------------------
+# 4) Install Composer
+# -------------------------------------------------------------------
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy only composer files first
+# -------------------------------------------------------------------
+# 5) Copy only composer files first (for caching)
+# -------------------------------------------------------------------
 COPY composer.json composer.lock ./
-# Copy application code
-COPY . .
 
-# Install dependencies
-RUN composer install --no-interaction --optimize-autoloader
+# -------------------------------------------------------------------
+# 6) Copy helpers, artisan, and bootstrap early (needed for autoload + package:discover)
+# -------------------------------------------------------------------
+COPY app/Helpers ./app/Helpers
+COPY artisan ./
+COPY bootstrap ./bootstrap
 
-# Copy application code with correct ownership
+# -------------------------------------------------------------------
+# 7) Create Laravel cache dirs before running composer install
+# -------------------------------------------------------------------
+RUN mkdir -p storage/framework/{cache,sessions,views} \
+    && mkdir -p bootstrap/cache
+
+# -------------------------------------------------------------------
+# 8) Install PHP dependencies (cached unless composer.json changes)
+# -------------------------------------------------------------------
+#RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# -------------------------------------------------------------------
+# 9) Now copy the rest of the application
+# -------------------------------------------------------------------
 COPY --chown=www-data:www-data . .
 
-# Set permissions for storage/cache
+# -------------------------------------------------------------------
+# 10) Set permissions for Laravel
+# -------------------------------------------------------------------
 RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port
+# -------------------------------------------------------------------
+# 11) Expose PHP-FPM port
+# -------------------------------------------------------------------
 EXPOSE 9000
