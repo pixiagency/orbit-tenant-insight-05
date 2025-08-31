@@ -24,8 +24,6 @@ class PipelineStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'stages' => 'required|array',
-            'stages.*.name' => 'required|string',
         ];
     }
 
@@ -35,8 +33,6 @@ class PipelineStoreRequest extends FormRequest
     {
         return new PipelineDTO(
             name: $this->input('name'),
-            stages: $this->input('stages', [])
         );
     }
-
 }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('seq_number');
+            $table->integer('probability');
             $table->foreignId('pipeline_id')->constrained('pipelines')->onDelete('cascade');
             $table->timestamps();
         });

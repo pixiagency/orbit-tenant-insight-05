@@ -32,11 +32,6 @@ class OpportunityController extends Controller
     {
         $query = Lead::query();
 
-        // Search by package name
-        if ($request->filled('search')) {
-            $query->where('opportunity_name', 'like', '%' . $request->search . '%');
-        }
-
         // Filter by stage_id
         if ($request->filled('stage_id')) {
             $query->where('stage_id', $request->stage_id);
@@ -49,7 +44,9 @@ class OpportunityController extends Controller
 
         // Filter by source_id
         if ($request->filled('source_id')) {
-            $query->where('source_id', $request->source_id);
+            $query->whereHas('contact', function ($contactQuery) use ($request) {
+                $contactQuery->where('source_id', $request->source_id);
+            });
         }
 
         // Filter by pipeline_id
@@ -59,10 +56,10 @@ class OpportunityController extends Controller
             });
         }
 
-
         // Get pagination per page from request or default to 10
         $perPage = $request->get('per_page', 10);
 
+        // dd($query->get());
         // Paginate the results
         $opportunities = $query->with('contact', 'city', 'stage')->paginate($perPage);
 
@@ -83,20 +80,15 @@ class OpportunityController extends Controller
             }
 
             Lead::create([
-                'opportunity_name' => $data['opportunity_name'],
-                'company' => $data['company'],
                 'contact_id' => $data['contact_id'],
-                'email' => $data['email'],
-                'phone' => $data['phone'],
-                'source_id' => $data['source_id'],
-                'city_id' => $data['city_id'],
-                'status' => $data['status'],
                 'stage_id' => $data['stage_id'],
+                'status' => $data['status'],
                 'deal_value' => $data['deal_value'],
                 'win_probability' => $data['win_probability'],
                 'expected_close_date' => $data['expected_close_date'],
                 'assigned_to_id' => $data['assigned_to_id'],
                 'notes' => $data['notes'],
+                'description' => $data['description'],
             ]);
             DB::commit();
             return ApiResponse(message: 'Opportunity created successfully', code: 201);

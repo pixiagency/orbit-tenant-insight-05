@@ -2,6 +2,7 @@
 
 namespace App\Models\Tenant;
 
+use App\Models\Tenant\LossReason;
 use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
@@ -15,5 +16,10 @@ class Pipeline extends Model
     public function stages(): HasMany
     {
         return $this->hasMany(Stage::class);
+    }
+
+    public function lossReasons(): HasMany
+    {
+        return $this->hasMany(LossReason::class);
     }
 }

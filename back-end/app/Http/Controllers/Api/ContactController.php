@@ -230,7 +230,6 @@ class ContactController extends Controller
     public function destroy(int $contact)
     {
         try {
-            $contact = Contact::findOrFail($contact);
             $this->contactService->delete($contact);
             return ApiResponse(message: 'Contact deleted successfully');
         } catch (ModelNotFoundException $e) {

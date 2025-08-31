@@ -24,15 +24,12 @@ class PipelineUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'stages' => 'required|array',
-            'stages.*.name' => 'required|string',
         ];
     }
     public function toPipelineDTO(): PipelineDTO
     {
         return new PipelineDTO(
             name: $this->input('name'),
-            stages: $this->input('stages', [])
         );
     }
 }

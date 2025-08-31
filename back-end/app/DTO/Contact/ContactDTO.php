@@ -10,6 +10,7 @@ class ContactDTO extends BaseDTO
     public function __construct(
         public string $first_name,
         public string $last_name,
+        public string $email,
         public string $business_phone,
         public string $mobile_phone,
         public string $job_title,
@@ -39,6 +40,7 @@ class ContactDTO extends BaseDTO
         return new self(
             first_name: $request->input('first_name'),
             last_name: $request->input('last_name'),
+            email: $request->input('email'),
             business_phone: $request->input('business_phone'),
             mobile_phone: $request->input('mobile_phone'),
             job_title: $request->input('job_title'),
@@ -69,6 +71,7 @@ class ContactDTO extends BaseDTO
         return [
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
+            'email' => $this->email,
             'business_phone' => $this->business_phone,
             'mobile_phone' => $this->mobile_phone,
             'job_title' => $this->job_title,
@@ -99,6 +102,7 @@ class ContactDTO extends BaseDTO
         return new self(
             first_name: Arr::get($data, 'first_name'),
             last_name: Arr::get($data, 'last_name'),
+            email: Arr::get($data, 'email'),
             business_phone: Arr::get($data, 'business_phone'),
             mobile_phone: Arr::get($data, 'mobile_phone'),
             job_title: Arr::get($data, 'job_title'),

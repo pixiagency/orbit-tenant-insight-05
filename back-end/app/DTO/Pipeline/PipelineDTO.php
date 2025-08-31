@@ -14,14 +14,12 @@ class PipelineDTO extends BaseDTO
      */
     public function __construct(
         public string $name,
-        public array $stages,
     ) {}
 
     public static function fromRequest($request): PipelineDTO
     {
         return new self(
             name: $request->name,
-            stages: $request->stages,
         );
     }
 
@@ -34,7 +32,6 @@ class PipelineDTO extends BaseDTO
     {
         return new self(
             name: Arr::get($data, 'name'),
-            stages: Arr::get($data, 'stages', []),
         );
     }
 
@@ -45,7 +42,6 @@ class PipelineDTO extends BaseDTO
     {
         return [
             'name' => $this->name,
-            'stages' => $this->stages,
         ];
     }
 }
