@@ -69,7 +69,9 @@ class ContactService extends BaseService
 
     public function delete(int $id)
     {
-        return $this->getQuery()->where('id', $id)->delete();
+        $contact = $this->model->findOrFail($id);
+        $contact->delete();
+        return $contact;
     }
 
     public function getContacts()

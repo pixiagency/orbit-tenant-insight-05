@@ -20,9 +20,6 @@ class ResourceController extends Controller
 {
     public function __construct(public ResourceService $resourceService) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -38,9 +35,6 @@ class ResourceController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ResourceStoreRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
@@ -57,70 +51,40 @@ class ResourceController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        // $id = (int) $id;
         try {
-            dd($id);
             $resource = $this->resourceService->findById($id);
-            // $resource=Resource::find($id);
-            return ApiResponse::sendResponse(200, 'Source retrieved successfully', new SourceResource($resource));
+            return ApiResponse(new SourceResource($resource), 'Source retrieved successfully');
         } catch (NotFoundException $e) {
-            return ApiResponse::sendResponse(404, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 404);
         } catch (Exception $e) {
-            return ApiResponse::sendResponse(500, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
-    // public function show(Resource $resource)
-    // {
-    //     // dd($resource);
-    //     return ApiResponse::sendResponse(200, 'Source retrieved successfully', new SourceResource($resource));
-    // }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ResourceUpdateRequest $request, $id)
     {
         try {
             $resourceDTO = $request->toResourceDTO();
-            // dd($resourceDTO);
             $this->resourceService->update($resourceDTO, $id);
-            return ApiResponse::sendResponse(200, 'Source updated successfully');
+            return ApiResponse(message: 'Source updated successfully');
         } catch (NotFoundException $e) {
-            return ApiResponse::sendResponse(404, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 404);
         } catch (\Exception $e) {
-            return ApiResponse::sendResponse(500, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
-    // public function update(ResourceUpdateRequest $request, Resource $resource)
-    // {
-
-    //     $resourceDTO = $request->toResourceDTO();
-    //     $resource->update($resourceDTO->toArray());
-    //     return ApiResponse::sendResponse(200, 'Source updated successfully');
-    // }
-
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        // $id = (int) $id;
         try {
             $this->resourceService->delete($id);
-            return ApiResponse::sendResponse(200, 'Source deleted successfully');
+            return ApiResponse(message: 'Source deleted successfully');
         } catch (NotFoundException $e) {
-            return ApiResponse::sendResponse(404, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 404);
         } catch (\Exception $e) {
-            return ApiResponse::sendResponse(500, $e->getMessage());
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 }

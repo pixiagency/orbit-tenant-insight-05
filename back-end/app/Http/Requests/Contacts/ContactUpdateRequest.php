@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Contacts;
 
+use App\Enums\CompanySizes;
 use App\Enums\ContactMethods;
+use App\Enums\ContactStatus;
+use App\Enums\IndustryStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,16 +29,16 @@ class ContactUpdateRequest extends FormRequest
         return [
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:clients,email',
+            'email' => 'sometimes|email|unique:contacts,email',
             'business_phone' => 'sometimes|string|max:20',
             'mobile_phone' => 'sometimes|string|max:20',
             'job_title' => 'sometimes|string|max:255',
             'department' => 'sometimes|string|max:255',
-            'status' => 'sometimes|string|max:255',
+            'status' => ['sometimes', Rule::enum(ContactStatus::class)],
             'source_id' => 'sometimes|exists:sources,id',
 
             // communication preferences
-            'contact_method' => [Rule::enum(ContactMethods::class)],
+            'contact_method' => ['sometimes', Rule::enum(ContactMethods::class)],
             'email_permission' => 'sometimes|boolean',
             'phone_permission' => 'sometimes|boolean',
             'whatsapp_permission' => 'sometimes|boolean',
@@ -43,8 +46,8 @@ class ContactUpdateRequest extends FormRequest
             // company info
             'company_name' => 'sometimes|string|max:255',
             'website' => 'sometimes|string|max:255',
-            'industry' => 'sometimes|string|max:255',
-            'company_size' => 'sometimes|numeric|min:1',
+            'industry' => ['sometimes', Rule::enum(IndustryStatus::class)],
+            'company_size' => ['sometimes', Rule::enum(CompanySizes::class)],
 
             // address info
             'address' => 'sometimes|string|max:255',

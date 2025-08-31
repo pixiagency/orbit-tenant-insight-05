@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\Contacts;
 
+use App\Enums\CompanySizes;
+use App\Enums\ContactMethods;
+use App\Enums\ContactStatus;
+use App\Enums\IndustryStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ContactStoreRequest extends FormRequest
 {
@@ -24,16 +29,16 @@ class ContactStoreRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:clients,email',
+            'email' => 'required|email|unique:contacts,email',
             'business_phone' => 'required|string|max:20',
             'mobile_phone' => 'required|string|max:20',
             'job_title' => 'required|string|max:255',
             'department' => 'required|string|max:255',
-            'status' => 'required|string|max:255',
+            'status' => ['required', Rule::enum(ContactStatus::class)],
             'source_id' => 'required|exists:sources,id',
 
             // communication preferences
-            'contact_method' => 'required|string|max:255',
+            'contact_method' => ['required', Rule::enum(ContactMethods::class)],
             'email_permission' => 'required|boolean',
             'phone_permission' => 'required|boolean',
             'whatsapp_permission' => 'required|boolean',
@@ -41,8 +46,8 @@ class ContactStoreRequest extends FormRequest
             // company info
             'company_name' => 'required|string|max:255',
             'website' => 'required|string|max:255',
-            'industry' => 'required|string|max:255',
-            'company_size' => 'required|string|max:255',
+            'industry' => ['required', Rule::enum(IndustryStatus::class)],
+            'company_size' => ['required', Rule::enum(CompanySizes::class)],
 
             // address info
             'address' => 'required|string|max:255',
