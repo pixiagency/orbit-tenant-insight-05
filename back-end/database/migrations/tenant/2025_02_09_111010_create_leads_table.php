@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignId('stage_id')->constrained('stages')->onDelete('cascade');
             $table->decimal('deal_value', 10, 2);
             $table->decimal('win_probability', 10, 2);
-            $table->date('expected_close_date');
+            $table->date('expected_close_date')->nullable();
             $table->foreignId('assigned_to_id')->nullable()->constrained('users')->onDelete('cascade'); // Required if status = 'lost'
             $table->text('notes')->nullable();
             $table->text('description')->nullable();

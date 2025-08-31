@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Pipeline;
+namespace App\Http\Requests\Stage;
 
-use App\DTO\Pipeline\PipelineDTO;
+use App\DTO\Stage\StageDTO;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PipelineUpdateRequest extends FormRequest
+class StageStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,13 +23,18 @@ class PipelineUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'name' => 'required|string|max:255|unique:stages,name',
+            'probability' => 'required|integer|min:0|max:100',
         ];
     }
-    public function toPipelineDTO(): PipelineDTO
+
+
+
+    public function toStageDTO(): StageDTO
     {
-        return new PipelineDTO(
+        return new StageDTO(
             name: $this->input('name'),
+            probability: $this->input('probability'),
         );
     }
 }

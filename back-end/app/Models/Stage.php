@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 class Stage extends Model
 {
     use Filterable;
-    protected $fillable = ['name', 'seq_number', 'pipeline_id'];
+    protected $fillable = ['name', 'probability', 'seq_number', 'pipeline_id'];
 
     public function pipeline()
     {
         return $this->belongsTo(Pipeline::class);
     }
+
     public function leads()
     {
         return $this->belongsToMany(Lead::class, 'lead_stage')

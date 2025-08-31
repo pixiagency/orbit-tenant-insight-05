@@ -140,7 +140,16 @@ Route::middleware([
 
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);
+
+    // pipeline and stage routes
     Route::apiResource('pipelines', \App\Http\Controllers\Api\PipelineController::class);
+    Route::get('pipelines/{pipelineId}/stages', [\App\Http\Controllers\Api\StageController::class, 'index']);
+    Route::post('pipelines/{pipelineId}/stages', [\App\Http\Controllers\Api\StageController::class, 'store']);
+    Route::get('stages/{stageId}', [\App\Http\Controllers\Api\StageController::class, 'show']);
+    Route::put('stages/{stageId}', [\App\Http\Controllers\Api\StageController::class, 'update']);
+    Route::delete('stages/{stageId}', [\App\Http\Controllers\Api\StageController::class, 'destroy']);
+
+
     Route::apiResource('payment-methods', \App\Http\Controllers\Api\PaymentMethodController::class);
     Route::get('/locations/countries', [\App\Http\Controllers\Api\LocationController::class, 'getCountries']);
     Route::get('/locations/countries/{countryId}/cities', [\App\Http\Controllers\Api\LocationController::class, 'getCities']);
