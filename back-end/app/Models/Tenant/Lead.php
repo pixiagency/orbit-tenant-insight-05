@@ -2,38 +2,40 @@
 
 namespace App\Models\Tenant;
 
+use App\Enums\OpportunityStatus;
 use App\Models\City;
 use App\Models\CustomField;
 use App\Models\Industry;
 use App\Models\Reason;
 use App\Models\Service;
+use App\Models\Source;
 use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Lead extends Model
 {
 
-use Filterable;
+    use Filterable;
 
     protected $table = 'leads';
-    protected $fillable=[
-        'opportunity_name',
-        'company',
-        'contact_id',
-        'email',
-        'phone',
-        'source_id',
-        'city_id',  
+    protected $fillable = [
         'status',
+        'contact_id',
         'stage_id',
         'deal_value',
         'win_probability',
         'expected_close_date',
-        'assigned_to_id',   
+        'assigned_to_id',
         'notes',
         'description',
     ];
+
+    protected $casts = [
+        'status' => OpportunityStatus::class,
+    ];
+
     // Lead belongs to a Contact
     public function contact()
     {
@@ -43,6 +45,12 @@ use Filterable;
     {
         return $this->belongsTo(City::class);
     }
+
+    public function sourceContact(): HasOneThrough
+    {
+        return $this->through('contact')->has('source');
+    }
+
 
     // Lead belongs to a User (Sales Representative)
     public function user()
@@ -80,12 +88,11 @@ use Filterable;
         return $this->belongsTo(Stage::class);
     }
 
-     // Lead has many Stages (Many-to-Many)
-     public function stages()
+    // Lead has many Stages (Many-to-Many)
+    public function stages()
     {
         return $this->belongsToMany(Stage::class, 'lead_stage')
             ->withPivot('start_date', 'exit_date', 'pipline_id')
             ->withTimestamps();
     }
-
 }

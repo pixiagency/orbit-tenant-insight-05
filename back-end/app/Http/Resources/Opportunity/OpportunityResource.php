@@ -19,12 +19,11 @@ class OpportunityResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'opportunity_name' => $this->opportunity_name,
-            'company' => $this->company,
-            'contact_id' => $this->contact_id,
-            'email' => $this->email,
-            'phone' => $this->phone,
-            'source_id' => $this->source_id,
+            'company' => $this->contact->company_name,
+            'contact_id' => $this->contact->id,
+            'email' => $this->contact->email,
+            'phone' => $this->contact->business_phone,
+            'source_id' => $this->sourceContact,
             'status' => $this->status,
             'deal_value' => $this->deal_value,
             'win_probability' => $this->win_probability,
