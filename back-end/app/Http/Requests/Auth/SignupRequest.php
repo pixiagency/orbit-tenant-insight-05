@@ -23,7 +23,8 @@ class SignupRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
             'email'   => 'required|email|unique:users',
             'type' => ['required', new Enum(UserType::class)],
             'password'   => 'required|min:6',
