@@ -22,7 +22,6 @@ class Tier extends Model
         'max_users',
         'max_contacts',
         'storage_limit',
-        'modules',
         'status',
         'availability',
     ];
@@ -41,6 +40,11 @@ class Tier extends Model
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function tier_modules()
+    {
+        return $this->hasMany(TierModule::class);
     }
 
     protected function modules(): Attribute
@@ -115,6 +119,4 @@ class Tier extends Model
     {
         return $query->whereJsonContains('modules', $module->value);
     }
-
-
 }

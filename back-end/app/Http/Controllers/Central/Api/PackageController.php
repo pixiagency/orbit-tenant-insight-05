@@ -14,11 +14,12 @@ use Auth;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Spatie\LaravelPackageTools\Package;
+use App\Services\Central\TierService;
+use App\DTO\Tier\TierDTO;
 
 class PackageController extends Controller
 {
-    public function __construct()
+    public function __construct(public TierService $tierService)
     {
         $this->middleware('auth:sanctum')->except(['index', 'show']);
         // $this->middleware('permission:tiers.add')->only(['store']);
@@ -111,10 +112,10 @@ class PackageController extends Controller
     public function store(StoreTierRequest $request)
     {
         try {
-
             // $this->authorize('user.create');
-            $data = $request->validated();
-            $tier = Tier::create($data);
+            $tierDTO = TierDTO::fromRequest($request);
+            $tier = $this->tierService->store($tierDTO);
+            
             return ApiResponse(new TierResource($tier), 'Tier created successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
