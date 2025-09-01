@@ -29,8 +29,9 @@ class LocationController extends Controller
             $filters = array_filter($request->get('filters', []), function ($value) {
                 return ($value !== null && $value !== false && $value !== '');
             });
-            $withRelations = [];
-            $filters["root"] = true;
+            $withRelations = ['cities'];
+            $filters = [];
+
             $locations = $this->locationService->getCountries($filters, $withRelations, $perPage);
             return ApiResponse(new LocationCollection($locations), 'Countries retrieved successfully');
         } catch (Exception $e) {
@@ -45,8 +46,8 @@ class LocationController extends Controller
             $filters = array_filter($request->get('filters', []), function ($value) {
                 return ($value !== null && $value !== false && $value !== '');
             });
-            $withRelations = [];
-            $locations = $this->locationService->getCities($country_id,$filters, $withRelations, $perPage);
+            $withRelations = ['cities'];
+            $locations = $this->locationService->getCities($country_id, $filters, $withRelations, $perPage);
             return ApiResponse(new LocationCollection($locations), 'Cities retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: $e->getCode());

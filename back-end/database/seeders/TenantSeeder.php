@@ -12,9 +12,19 @@ class TenantSeeder extends Seeder
      */
     public function run(): void
     {
-        $tenant1 = Tenant::create([
-            'name' => 'tenant1', // unique ID
-            'domains' => ['tenant1'], // subdomain,
+        // Tenant::create([
+        //     'name' => 'pixicrm', // unique ID
+        //     'domains' => ['pixicrm'], // subdomain,
+        // ]);
+
+        $tenant = Tenant::create(
+            [
+                'name' => 'pixicrm'
+            ]
+        );
+
+        $tenant->createDomain([
+            'domain' => 'pixicrm',
         ]);
     }
 }
