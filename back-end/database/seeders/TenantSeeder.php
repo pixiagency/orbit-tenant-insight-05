@@ -19,7 +19,7 @@ class TenantSeeder extends Seeder
         // ]);
 
 
-        if (config('app.env') == 'local') {
+        if (config('app.env') == 'development') {
             
 
             $databaseName = 'tenant_database_dev';
