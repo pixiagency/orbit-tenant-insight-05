@@ -43,14 +43,14 @@ class StageService extends BaseService
         return $industries->filter(new StageFilters($filters));
     }
 
-    public function index(array $filters = [], array $withRelations = [], ?int $perPage = null, $pipelineId)
+    public function index(array $filters = [], array $withRelations = [], ?int $perPage = 10, $pipelineId)
     {
         $pipeline = $this->pipelineService->getQuery()->findOrFail($pipelineId);
         $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
         if ($perPage) {
             return $query->where('pipeline_id', $pipeline->id)->paginate($perPage);
         }
-        return $query->where('pipeline_id', $pipeline->id)->get();
+        return $query->where('pipeline_id', $pipeline->id)->paginate($perPage);
     }
 
     public function store(StageDTO $stageDTO, $pipelineId): Stage

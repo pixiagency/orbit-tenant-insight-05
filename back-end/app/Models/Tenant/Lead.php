@@ -13,11 +13,14 @@ use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Arr;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class Lead extends Model
+class Lead extends Model implements Auditable
 {
 
-    use Filterable;
+    use Filterable, AuditableTrait;
 
     protected $table = 'leads';
     protected $fillable = [
@@ -34,6 +37,9 @@ class Lead extends Model
 
     protected $casts = [
         'status' => OpportunityStatus::class,
+        'deal_value'           => 'decimal:2',
+        'win_probability'      => 'decimal:0',
+        'expected_close_date'  => 'date',
     ];
 
     // Lead belongs to a Contact
@@ -46,10 +52,20 @@ class Lead extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function sourceContact(): HasOneThrough
+    public function transformAudit(array $data): array
     {
-        return $this->through('contact')->has('source');
+        if (Arr::has($data, 'new_values.stage_id')) {
+            $data['old_values']['stage'] = Stage::find($this->getOriginal('stage_id'))->name;
+            $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))->name;
+        }
+
+        return $data;
     }
+
+    // public function sourceContact(): HasOneThrough
+    // {
+    //     return $this->through('contact')->has('source');
+    // }
 
 
     // Lead belongs to a User (Sales Representative)

@@ -81,7 +81,6 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::prefix('helpers')->group(function () {
                 // Form CRUD
                 Route::get('/modules', [ModuleController::class, 'index']);
-               
             });
         });
     });
@@ -143,6 +142,8 @@ Route::middleware([
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
 
     Route::get('/opportunities/statistics', [\App\Http\Controllers\Api\OpportunityController::class, 'statistics']);
+    Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
+    Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
 
@@ -170,7 +171,7 @@ Route::middleware([
     Route::get('/locations/cities/{cityId}/areas', [\App\Http\Controllers\Api\LocationController::class, 'getAreas']);
     Route::apiResource('sources', \App\Http\Controllers\Api\ResourceController::class);
     Route::apiResource('reasons', \App\Http\Controllers\Api\ReasonController::class);
-    
+
     // Translatable example routes
     Route::prefix('translatable')->group(function () {
         Route::get('/industries', [TranslatableExampleController::class, 'index']);

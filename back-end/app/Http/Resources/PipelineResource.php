@@ -28,7 +28,7 @@ class PipelineResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'stages' => $this->whenLoaded('stages', fn() => new StageCollection($this->stages)),
+            'stages' => $this->whenLoaded('stages', fn() => stageResource::collection($this->stages)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
