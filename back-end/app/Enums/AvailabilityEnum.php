@@ -2,16 +2,16 @@
 
 namespace App\Enums;
 
-enum ActivationStatus: string
+enum AvailabilityEnum: string
 {
-    case ACTIVE = "active";
-    case INACTIVE = "inactive";
+    case PUBLIC = "Public";
+    case PRIVATE = "Private";
 
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => __('app.active'),
-            self::INACTIVE => __('app.inactive'),
+            self::PUBLIC => __('app.Public'),
+            self::PRIVATE => __('app.Private'),
         };
     }
 
@@ -19,7 +19,4 @@ enum ActivationStatus: string
     {
         return array_map(fn($case) => $case->value, self::cases());
     }
-}
-
-
-
+} 

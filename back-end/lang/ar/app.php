@@ -15,4 +15,13 @@ return array (
   'support_and_docs' => 'الدعم و المقالات',
   'there_is_an_error_in_change_awbs_status' => 'مشكلة',
   'translation' => 'الترجمة',
+  'Days' => 'أيام',
+  'Lifetime' => 'مدى الحياة',
+  'Months' => 'أشهر',
+  'Years' => 'سنوات',
+  'active' => 'فعال',
+  'inactive' => 'معطل',
+  'Public' => 'عام',
+  'Private' => 'خاص',
+  'data added successfully' => 'تم اضافة البيانات بنجاح',
 );
