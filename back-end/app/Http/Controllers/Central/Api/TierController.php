@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateTierRequest;
 use App\Http\Resources\TierCollection;
 use App\Http\Resources\TierResource;
 use App\Models\Tenant;
+use Auth;
 use Exception;
 use Request;
 
@@ -59,7 +60,7 @@ class TierController extends Controller
             }
             $tenant = Tenant::find($request->tenant_id);
             $tenant->tiers()->attach($tier->id, [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::user()->id,
                 'activated_at' => now(),
             ]);
 

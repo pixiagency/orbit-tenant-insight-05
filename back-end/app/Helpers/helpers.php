@@ -25,8 +25,8 @@ if (!function_exists('apiResponse')) {
                 $array['meta'] = [
                     'page'      => $base->currentPage(),
                     'per_page'  => $base->perPage(),
-                    'total'     => method_exists($base, 'total') ? $base->total() : null,
-                    'last_page' => method_exists($base, 'lastPage') ? $base->lastPage() : null,
+                    'total'     => $base instanceof LengthAwarePaginator ? $base->total() : null,
+                    'last_page' => $base instanceof LengthAwarePaginator ? $base->lastPage() : null,
                     'from'      => method_exists($base, 'firstItem') ? $base->firstItem() : null,
                     'to'        => method_exists($base, 'lastItem') ? $base->lastItem() : null,
                 ];
@@ -36,10 +36,10 @@ if (!function_exists('apiResponse')) {
             }
         }
         // Check if data is a single resource or is null
-        else if ($data) {
+        else if ($data && is_object($data) && method_exists($data, 'toArray')) {
             $array['data'] = $data->toArray(request());
         } else {
-            $array['data'] = null;
+            $array['data'] = $data;
         }
 
         return response()->json($array, $code);
@@ -57,13 +57,13 @@ if (!function_exists('successCode')) {
     }
 }
 
-if (!function_exists('notifyUser')) {
+// if (!function_exists('notifyUser')) {
 
-    function notifyUser(\App\Models\User $user, $data = [])
-    {
-        $user->notify(new \App\Notifications\GeneralNotification($data));
-    }
-}
+//     function notifyUser(\App\Models\User $user, $data = [])
+//     {
+//         $user->notify(new \App\Notifications\GeneralNotification($data));
+//     }
+// }
 
 if (!function_exists('getLocale')) {
 
@@ -87,5 +87,15 @@ if (!function_exists('getAuthUser')) {
     function getAuthUser(string $guard = 'sanctum'): \Illuminate\Contracts\Auth\Authenticatable|null|\App\Models\User
     {
         return auth($guard)->user();
+    }
+
+}
+
+if (!function_exists('per_page')) {
+
+    function per_page()
+    {
+        return request()->get('per_page', 10);
+
     }
 }

@@ -11,4 +11,9 @@ class TierModule extends Model
         'module_id',
         'limit_value',
     ];
+
+    public function module()
+    {
+        return $this->belongsTo(Module::class);
+    }
 }
