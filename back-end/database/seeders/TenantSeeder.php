@@ -20,8 +20,9 @@ class TenantSeeder extends Seeder
 
 
         if (config('app.env') == 'local') {
+            
 
-            $databaseName = 'acme_production_db';
+            $databaseName = 'tenant_database_dev';
 
             // check if database already exists
             $exists = DB::select("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?", [$databaseName]);
@@ -33,7 +34,7 @@ class TenantSeeder extends Seeder
             ]);
 
             $acmeTenant->createDomain([
-                'domain' => 'acme',
+                'domain' => 'pixicrm',
             ]);
 
             // $tenant = Tenant::create(
