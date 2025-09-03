@@ -32,5 +32,6 @@ return array (
     'completed' => 'مكتمل',
     'cancelled' => 'ملغي',
     'on_hold' => 'معلق',
+    
   ],
 );
