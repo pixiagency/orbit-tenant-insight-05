@@ -22,6 +22,7 @@ return [
         'crm.test',
         'new-crm.test',
         'barmagiat.com',
+        'pixicrm.barmagiat.com',
     ],
 
     /**
