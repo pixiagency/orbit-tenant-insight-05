@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTO\Location\LocationDTO;
 use App\Exceptions\GeneralException;
 use App\Exceptions\NotFoundException;
+use App\Models\Country;
 use App\Models\Location;
 use App\QueryFilters\LocationFilters;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,7 +65,7 @@ class LocationService extends BaseService
 
     public function getCountries(array $filters = [], array $withRelations = [], ?int $perPage = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection
     {
-        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
+        $query = Country::query()->with($withRelations);
         if ($perPage) {
             return $query->paginate($perPage);
         }
@@ -77,16 +78,8 @@ class LocationService extends BaseService
      */
     public function getCities(int $country_id, array $filters = [], array $withRelations = [], ?int $perPage = null): \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Database\Eloquent\Collection
     {
-        $country = $this->findById($country_id);
-        if (!$country->isRoot()) {
-            throw new GeneralException('wrong id');
-        }
-
-        $filters['parent'] = $country_id;
-        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
-        if ($perPage) {
-            return $query->paginate($perPage);
-        }
+        $country = Country::with($withRelations)->find($country_id);
+        $query = $country->cities();
         return $query->get();
     }
 

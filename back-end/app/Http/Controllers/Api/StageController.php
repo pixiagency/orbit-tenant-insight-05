@@ -33,7 +33,7 @@ class StageController extends Controller
             });
             $withRelations = ['pipeline'];
             $pipelines = $this->stageService->index($filters, $withRelations, $perPage, $pipelineId);
-            return ApiResponse(new StageCollection($pipelines), 'Stages retrieved successfully');
+            return ApiResponse(stageResource::collection($pipelines), 'Stages retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }

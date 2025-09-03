@@ -8,15 +8,17 @@ enum TaskStatus: string
     case IN_PROGRESS = 'in_progress';
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
+    case on_hold = 'on_hold';
 
 
     public function label(): string
     {
         return match ($this) {
-            static::PENDING => 'Pending',
-            static::IN_PROGRESS => 'In progress',
-            static::COMPLETED => 'Completed',
-            static::CANCELLED => 'Cancelled',
+            static::PENDING => __('app.task_status.pending'),
+            static::IN_PROGRESS => __('app.task_status.in_progress'),
+            static::COMPLETED => __('app.task_status.completed'),
+            static::CANCELLED => __('app.task_status.cancelled'),
+            static::on_hold => __('app.task_status.on_hold'),
         };
     }
 

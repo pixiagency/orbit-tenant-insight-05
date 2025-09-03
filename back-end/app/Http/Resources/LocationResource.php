@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\landloardLocation\CityResource;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,12 +23,8 @@ class LocationResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
-            // 'status' => $this->status,
-            // 'parent_id' => $this->parent_id,
-            // 'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            // 'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
-            'children' => LocationResource::collection($this->whenLoaded('children')),
+            'name' => $this->name,
+            'cities' => $this->whenLoaded('cities', fn() => CityResource::collection($this->cities)),
         ];
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ActivationStatus;
+use App\Enums\AvailabilityEnum;
+use App\Enums\DurationUnits;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,17 +22,15 @@ class TierResource extends JsonResource
             'id' => $this->id,
             'package_name' => $this->package_name,
             'description' => $this->description,
-            'availability' => $this->availability,
+            'availability' => AvailabilityEnum::from($this->availability)->label(),
             'price' => $this->price,
             'duration' => $this->duration,
-            'duration_unit' => $this->duration_unit,
+            'duration_unit' => DurationUnits::from($this->duration_unit)->label(),
             'max_users' => $this->max_users,
+            'max_contacts' => $this->max_contacts,
             'storage_limit' => $this->storage_limit,
-            'modules' => $this->modules->map(fn($module) => [
-                'value' => $module->value,
-                'label' => $module->label(),
-            ]),
-            'status' => $this->status,
+            'modules' => TierModuleResource::collection($this->tier_modules),
+            'status' =>  ActivationStatus::from($this->status)->label()
         ];
     }
 }

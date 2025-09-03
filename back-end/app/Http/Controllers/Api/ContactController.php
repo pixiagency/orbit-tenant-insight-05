@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\AbstractPaginator;
 use App\Exceptions\GeneralException;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contacts\ContactStoreRequest;
 use App\Http\Requests\Contacts\ContactUpdateRequest;
+use App\Http\Resources\ContactCollection;
 use App\Http\Resources\ContactResource;
 use App\Imports\ContactsImport;
 use App\Models\Tenant\Contact;
@@ -41,26 +45,9 @@ class ContactController extends Controller
             $filters = array_filter($request->get('filters', []), function ($value) {
                 return ($value !== null && $value !== false && $value !== '');
             });
-            $withRelations = ['area.ancestors', 'source'];
+            $withRelations = ['country', 'city', 'user', 'source'];
             $contacts = $this->contactService->getContacts($filters, $withRelations, $perPage);
-
-            // Handle pagination properly
-            if ($contacts instanceof \Illuminate\Pagination\LengthAwarePaginator) {
-                return response()->json([
-                    'data' => ContactResource::collection($contacts),
-                    'pagination' => [
-                        'current_page' => $contacts->currentPage(),
-                        'per_page' => $contacts->perPage(),
-                        'total' => $contacts->total(),
-                        'last_page' => $contacts->lastPage(),
-                        'from' => $contacts->firstItem(),
-                        'to' => $contacts->lastItem(),
-                    ],
-                    'status' => true,
-                    'message' => 'Contacts retrieved successfully'
-                ]);
-            }
-            return ApiResponse(ContactResource::collection($contacts), 'Contacts retrieved successfully');
+            return apiResponse(ContactResource::collection($contacts), 'Contacts retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
@@ -219,6 +206,7 @@ class ContactController extends Controller
     {
         try {
             $contact = Contact::findOrFail($contact);
+
             return ApiResponse(new ContactResource($contact), 'Contact retrieved successfully');
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Contact not found', code: 404);

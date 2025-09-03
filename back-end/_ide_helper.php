@@ -5,7 +5,7 @@
 
 /**
  * A helper file for Laravel, to provide autocomplete information to your IDE
- * Generated for Laravel 11.45.1.
+ * Generated for Laravel 11.45.2.
  *
  * This file should not be included in your code, only analyzed by your IDE!
  *
@@ -24312,6 +24312,26 @@ namespace Illuminate\Database\Schema {
         public static function dropNestedSet()
         {
             return \Illuminate\Database\Schema\Blueprint::dropNestedSet();
+        }
+
+            }
+    }
+
+namespace Illuminate\Database\Eloquent\Factories {
+    /**
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     * @method $this trashed()
+     */
+    class Factory {
+        /**
+         * @see \Spatie\Translatable\TranslatableServiceProvider::packageRegistered()
+         * @param array|string $locales
+         * @param mixed|null $value
+         * @static
+         */
+        public static function translations($locales, $value)
+        {
+            return \Illuminate\Database\Eloquent\Factories\Factory::translations($locales, $value);
         }
 
             }

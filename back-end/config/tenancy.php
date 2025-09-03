@@ -19,6 +19,8 @@ return [
     'central_domains' => [
         // '127.0.0.1',
         'localhost',
+        'barmagiat.test',
+        'back-end.test',
         'crm.test',
         'new-crm.test',
         'barmagiat.com',

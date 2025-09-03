@@ -3,8 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\DurationUnits;
-use App\Enums\ModuleType;
-use App\Rules\NoDuplicateValues;
+use App\Rules\NoDuplicateModuleIds;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,8 +34,9 @@ class StoreTierRequest extends FormRequest
             "max_sales" => 'nullable|integer|min:1',
             "max_contacts" => 'nullable|integer|min:1',
             "storage_limit" => 'nullable|integer|min:1',
-            "modules" => ['nullable', 'array', new NoDuplicateValues()],
-            "modules.*" => [Rule::enum(ModuleType::class)],
+            "modules" => ['nullable', 'array', new NoDuplicateModuleIds()],
+            "modules.*.module_id" => ['required', Rule::exists('modules','id')],
+            "modules.*.limit_value" => ['nullable', 'numeric', 'min:0'],
             "status" => 'required|in:active,inactive',
             "availability" => 'required|in:Public,Private',
         ];

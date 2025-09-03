@@ -14,11 +14,13 @@ use Auth;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Spatie\LaravelPackageTools\Package;
+use App\Services\Central\TierService;
+use App\DTO\Tier\TierDTO;
+use App\Models\Filters\TierFilter;
 
 class PackageController extends Controller
 {
-    public function __construct()
+    public function __construct(public TierService $tierService)
     {
         $this->middleware('auth:sanctum')->except(['index', 'show']);
         // $this->middleware('permission:tiers.add')->only(['store']);
@@ -46,63 +48,40 @@ class PackageController extends Controller
         try {
             $query = Tier::query();
 
-            // Filter by price range
-            if ($request->filled('price')) {
-                $query->where('price', '<=', $request->price);
-            }
+            // Apply filters using TierFilter
+            $filters = $request->only([
+                'package_name', 
+                'status',
+                'duration_unit',
+                'price_type',
 
-            // Filter by duration unit
-            if ($request->filled('duration_unit')) {
-                $query->where('duration_unit', $request->duration_unit);
-            }
+                'availability',
+                'min_users',
+                'min_price',
+                'max_users',
+                'max_price',
+                'after_date',
+                'before_date',
+                'module_id',
+                'max_users_range'
+            ]);
 
-            // Filter by status
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
+            // Remove empty values
+            $filters = array_filter($filters, function ($value) {
+                return $value !== null && $value !== '';
+            });
 
-            // Search by package name
-            if ($request->filled('search')) {
-                $query->where('package_name', 'like', '%' . $request->search . '%');
-            }
-
-            // Filter by max users
-            if ($request->filled('max_users')) {
-                $query->where('max_users', '<=', $request->max_users);
-            }
-
-            // Filter by min users
-            if ($request->filled('min_users')) {
-                $query->where('max_users', '>=', $request->min_users);
-            }
-
-            // Filter by visibility
-            if ($request->filled('visibility')) {
-                $query->where('visibility', $request->visibility);
-            }
-
-            // Filter by after date
-            if ($request->filled('after_date')) {
-                $query->where('created_at', '>=', $request->after_date);
-            }
-
-            // Filter by before date
-            if ($request->filled('before_date')) {
-                $query->where('created_at', '<=', $request->before_date);
-            }
-
-            // Filter by modules dropdown filter
-            if ($request->filled('modules')) {
-                $query->where('modules', 'like', '%' . $request->modules . '%');
-            }
+            $tierFilter = new TierFilter($filters);
+            $query = $tierFilter->apply($query);
 
             // Get pagination per page from request or default to 10
-            $perPage = $request->get('per_page', 10);
+
 
             // Paginate the results
-            $tiers = $query->paginate($perPage);
-
-            return ApiResponse(new TierCollection($tiers), 'Packages retrieved successfully');
+            $tiers = $query->paginate(per_page());
+            // dd($tiers);
+            $data = TierResource::collection($tiers)->response()->getdata(true);
+            return ApiResponse($data, __('app.data added successfully'));
         } catch (\Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
@@ -111,10 +90,10 @@ class PackageController extends Controller
     public function store(StoreTierRequest $request)
     {
         try {
-
             // $this->authorize('user.create');
-            $data = $request->validated();
-            $tier = Tier::create($data);
+            $tierDTO = TierDTO::fromRequest($request);
+            $tier = $this->tierService->store($tierDTO);
+
             return ApiResponse(new TierResource($tier), 'Tier created successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);

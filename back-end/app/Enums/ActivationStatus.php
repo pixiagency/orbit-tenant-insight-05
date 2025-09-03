@@ -10,8 +10,8 @@ enum ActivationStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::ACTIVE => "Active",
-            self::INACTIVE => "Inactive",
+            self::ACTIVE => __('app.active'),
+            self::INACTIVE => __('app.inactive'),
         };
     }
 

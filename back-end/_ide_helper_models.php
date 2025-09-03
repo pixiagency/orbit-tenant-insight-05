@@ -142,20 +142,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \App\Models\Location|null $city
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
- * @property-read \App\Models\Source|null $source
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact filter(\App\Abstracts\QueryFilter $filters)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact query()
- */
-	class Contact extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
  * @property int $id
  * @property string $name
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -177,8 +163,8 @@ namespace App\Models{
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Deal> $deals
+ * @property-read int|null $deals_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField newQuery()
@@ -241,12 +227,17 @@ namespace App\Models{
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Lead> $leads
  * @property-read int|null $leads_count
+ * @property-read mixed $translations
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry whereLocale(string $column, string $locale)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Industry whereLocales(string $column, array $locales)
  */
 	class Industry extends \Eloquent {}
 }
@@ -280,34 +271,11 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \App\Models\Contact|null $contact
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomField> $customFields
- * @property-read int|null $custom_fields_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Industry> $industries
- * @property-read int|null $industries_count
- * @property-read \App\Models\Reason|null $reason
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Service> $services
- * @property-read int|null $services_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
- * @property-read int|null $stages_count
- * @property-read \App\Models\User|null $user
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead filter(\App\Abstracts\QueryFilter $filters)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead query()
- */
-	class Lead extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
  * @property \App\Enums\ActivationStatus $status
  * @property-read \Kalnoy\Nestedset\Collection<int, Location> $children
  * @property-read int|null $children_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Contact> $contacts
- * @property-read int|null $contacts_count
  * @property-read Location|null $parent
  * @property-write mixed $parent_id
  * @method static \Kalnoy\Nestedset\QueryBuilder<static>|Location active()
@@ -365,20 +333,34 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
- * @property-read int|null $stages_count
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline filter(\App\Abstracts\QueryFilter $filters)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline query()
+ * @property int $id
+ * @property array<array-key, mixed> $name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
+ * @property-read int|null $clients_count
+ * @property-read mixed $localized_group_label
+ * @property-read mixed $localized_name
+ * @property-read mixed $localized_number_field_label
+ * @property-read mixed $translations
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereLocale(string $column, string $locale)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereLocales(string $column, array $locales)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereUpdatedAt($value)
  */
-	class Pipeline extends \Eloquent {}
+	class Module extends \Eloquent {}
 }
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Reason filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Reason newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Reason newQuery()
@@ -393,8 +375,6 @@ namespace App\Models{
  * @property-read int|null $categories_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Service filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Service newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Service newQuery()
@@ -426,8 +406,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Contact> $contacts
- * @property-read int|null $contacts_count
  * @property-read mixed $image_url
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
@@ -442,9 +420,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
- * @property-read \App\Models\Pipeline|null $pipline
+ * @property-read \App\Models\Tenant\Pipeline|null $pipeline
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stage filter(\App\Abstracts\QueryFilter $filters)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stage newQuery()
@@ -493,17 +469,6 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lead> $leads
- * @property-read int|null $leads_count
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Task query()
- */
-	class Task extends \Eloquent {}
-}
-
-namespace App\Models{
-/**
  * @property-read \App\Models\User|null $leader
  * @property-read \App\Models\Location|null $location
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $sales
@@ -545,6 +510,241 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tenant whereUpdatedAt($value)
  */
 	class Tenant extends \Eloquent implements \Stancl\Tenancy\Contracts\TenantWithDatabase, \Spatie\MediaLibrary\HasMedia {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property mixed $value
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AppSetting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AppSetting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AppSetting query()
+ */
+	class AppSetting extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Lead|null $activeLead
+ * @property-read \App\Models\City|null $city
+ * @property-read \App\Models\Country|null $country
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Lead> $leads
+ * @property-read int|null $leads_count
+ * @property-read \App\Models\Source|null $source
+ * @property-read \App\Models\Tenant\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withAnyTag($tags)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withTag($tag)
+ */
+	class Contact extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Contact> $contacts
+ * @property-read int|null $contacts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Deal> $deals
+ * @property-read int|null $deals_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Lead> $leads
+ * @property-read int|null $leads_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Task> $tasks
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomField query()
+ */
+	class CustomField extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Contact|null $contact
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Item> $items
+ * @property-read int|null $items_count
+ * @property-read \App\Models\Stage|null $stage
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Deal newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Deal newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Deal query()
+ */
+	class Deal extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Deal|null $deal
+ * @property-read \App\Models\Tenant\Item|null $item
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DealItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DealItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|DealItem query()
+ */
+	class DealItem extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\FormAction> $actions
+ * @property-read int|null $actions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\FormField> $fields
+ * @property-read int|null $fields_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\FormSubmission> $submissions
+ * @property-read int|null $submissions_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Form newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Form newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Form query()
+ */
+	class Form extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Form|null $form
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormAction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormAction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormAction query()
+ */
+	class FormAction extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Form|null $form
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormField newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormField newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormField query()
+ */
+	class FormField extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Form|null $form
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormSubmission newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormSubmission newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FormSubmission query()
+ */
+	class FormSubmission extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Deal> $deals
+ * @property-read int|null $deals_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Item filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Item newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Item newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Item query()
+ */
+	class Item extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Item> $items
+ * @property-read int|null $items_count
+ * @method static \Database\Factories\Tenant\ItemCategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemCategory filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemCategory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemCategory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemCategory query()
+ */
+	class ItemCategory extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Item> $items
+ * @property-read int|null $items_count
+ * @method static \Database\Factories\Tenant\ItemStatusFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemStatus filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemStatus newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemStatus newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ItemStatus query()
+ */
+	class ItemStatus extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property \App\Enums\OpportunityStatus $status
+ * @property-read \App\Models\City|null $city
+ * @property-read \App\Models\Tenant\Contact|null $contact
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomField> $customFields
+ * @property-read int|null $custom_fields_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Industry> $industries
+ * @property-read int|null $industries_count
+ * @property-read \App\Models\Reason|null $reason
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Service> $services
+ * @property-read int|null $services_count
+ * @property-read \App\Models\Stage|null $stage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
+ * @property-read int|null $stages_count
+ * @property-read \App\Models\Tenant\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead query()
+ */
+	class Lead extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Pipeline|null $pipeline
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LossReason filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LossReason newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LossReason newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LossReason query()
+ */
+	class LossReason extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentMethod newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentMethod newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentMethod query()
+ */
+	class PaymentMethod extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\LossReason> $lossReasons
+ * @property-read int|null $loss_reasons_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Stage> $stages
+ * @property-read int|null $stages_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline filter(\App\Abstracts\QueryFilter $filters)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Pipeline query()
+ */
+	class Pipeline extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \App\Models\Tenant\Deal|null $deal
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubscriptionDetail newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubscriptionDetail newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SubscriptionDetail query()
+ */
+	class SubscriptionDetail extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\User> $followers
+ * @property-read int|null $followers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Lead> $leads
+ * @property-read int|null $leads_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Task query()
+ */
+	class Task extends \Eloquent {}
 }
 
 namespace App\Models\Tenant{
@@ -616,8 +816,12 @@ namespace App\Models{
  * @property string $availability
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subscription> $subscriptions
+ * @property-read int|null $subscriptions_count
  * @property-read \Stancl\Tenancy\Database\TenantCollection<int, \App\Models\Tenant> $tenant
  * @property-read int|null $tenant_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TierModule> $tier_modules
+ * @property-read int|null $tier_modules_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier active()
  * @method static \Database\Factories\TierFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier newModelQuery()
@@ -641,6 +845,15 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier withModule(\App\Enums\ModuleType $module)
  */
 	class Tier extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule query()
+ */
+	class TierModule extends \Eloquent {}
 }
 
 namespace App\Models{

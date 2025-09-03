@@ -74,10 +74,12 @@ class ContactService extends BaseService
         return $contact;
     }
 
-    public function getContacts()
+    public function getContacts(array $filters = [], array $withRelations = [], $perPage = 5)
     {
-        return $this->model->all();
+        return $this->queryGet(filters: $filters, withRelations: $withRelations)->paginate($perPage);
     }
+
+
 
     public function getDatabaseFields()
     {

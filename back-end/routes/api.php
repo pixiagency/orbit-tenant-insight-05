@@ -4,10 +4,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
 use App\Http\Controllers\Central\Api\SettingController;
 use App\Http\Controllers\Central\Api\SubscriptionController;
+use App\Http\Controllers\Central\Api\ModuleController;
 
 
 // //////////// landlord routes
@@ -75,6 +78,11 @@ foreach (config('tenancy.central_domains') as $domain) {
             Route::get('payment/callback', [PaymentController::class, 'callback']);
 
             Route::post('logout', [centralAuthController::class, 'logout'])->name('logout.post');
+
+            Route::prefix('helpers')->group(function () {
+                // Form CRUD
+                Route::get('/modules', [ModuleController::class, 'index']);
+            });
         });
     });
 }
@@ -111,6 +119,10 @@ Route::middleware([
     Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/user', function () {
+            return response()->json(Auth::user());
+        });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
@@ -135,6 +147,8 @@ Route::middleware([
     Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
 
     Route::get('/opportunities/statistics', [\App\Http\Controllers\Api\OpportunityController::class, 'statistics']);
+    Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
+    Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
     Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
 
@@ -163,10 +177,19 @@ Route::middleware([
     Route::apiResource('sources', \App\Http\Controllers\Api\ResourceController::class);
     Route::apiResource('reasons', \App\Http\Controllers\Api\ReasonController::class);
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/user', function () {
-            return response()->json(Auth::user());
-        });
+    // Translatable example routes
+    Route::prefix('translatable')->group(function () {
+        Route::get('/industries', [TranslatableExampleController::class, 'index']);
+        Route::post('/industries', [TranslatableExampleController::class, 'store']);
+        Route::get('/industries/{industry}', [TranslatableExampleController::class, 'show']);
+        Route::put('/industries/{industry}', [TranslatableExampleController::class, 'update']);
+        Route::patch('/industries/{industry}/locale', [TranslatableExampleController::class, 'changeLocale']);
+    });
+
+
+
+    Route::prefix('helpers')->group(function () {
+        // Form CRUD
+        Route::get('/task-types', [TaskController::class, 'taskTypes']);
     });
 });
