@@ -75,12 +75,6 @@ class OpportunityController extends Controller
             DB::beginTransaction();
             $data = $request->validated();
 
-            $contact = Contact::find($data['contact_id']);
-
-            if ($contact->activeLead) {
-                return ApiResponse(message: 'Contact already has an active lead', code: 400);
-            }
-
             Lead::create([
                 'contact_id' => $data['contact_id'],
                 'stage_id' => $data['stage_id'],
@@ -115,7 +109,6 @@ class OpportunityController extends Controller
     public function update(UpdateOpportunityRequest $request, $id)
     {
         try {
-            // dd($request->all());
             $opportunity = Lead::with('contact', 'city', 'stage')->findOrFail($id);
             $opportunity->update($request->validated());
             return ApiResponse(message: 'Opportunity updated successfully', code: 200);
@@ -158,12 +151,14 @@ class OpportunityController extends Controller
 
     public function getActivitiesList($id)
     {
-        $opportunity = Lead::findOrFail($id);
-        // Get all associated Audits
-        // $all = $opportunity->audits()->with('user')->get();
-        // dd($all[0]->user);
-
-        $audits = $opportunity->audits()->with('user')->latest()->get();
-        return ApiResponse(message: 'Opportunity activity list retrieved successfully', code: 200, data: AuditOpportunityResource::collection($audits));
+        try {
+            $opportunity = Lead::findOrFail($id);
+            $audits = $opportunity->audits()->with('user')->latest()->get();
+            return ApiResponse(message: 'Opportunity activity list retrieved successfully', code: 200, data: AuditOpportunityResource::collection($audits));
+        } catch (ModelNotFoundException $e) {
+            return ApiResponse(message: 'Opportunity not found', code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
+        }
     }
 }
