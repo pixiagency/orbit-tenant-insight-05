@@ -1,5 +1,26 @@
 <?php
 
+namespace App\Enums;
+
+enum Availability: string
+{
+    case PUBLIC = "public";
+    case PRIVATE = "private";
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PUBLIC => __('app.public'),
+            self::PRIVATE => __('app.private'),
+        };
+    }
+
+    public static function values(): array
+    {
+        return array_map(fn($case) => $case->value, self::cases());
+    }
+}
+
 return array(
   'actions' => 'Actions',
   'back' => 'Back',
@@ -332,4 +353,13 @@ return array(
   'wight' => 'Wight',
   'yes' => 'Yes',
   'zone_price' => 'Z-price',
+  'Days' => 'Days',
+  'Lifetime' => 'Lifetime',
+  'Months' => 'Months',
+  'Years' => 'Years',
+  'active' => 'Active',
+  'inactive' => 'Inactive',
+  'Public' => 'Public',
+  'Private' => 'Private',
+  'data added successfully' => 'data added successfully',
 );
