@@ -361,5 +361,14 @@ return array(
   'inactive' => 'Inactive',
   'Public' => 'Public',
   'Private' => 'Private',
-  'data added successfully' => 'data added successfully',
+  'data added successfully' => 'Data added successfully',
+  'data displayed successfully' => 'Data displayed successfully',
+
+  'task_status' => [
+    'pending' => 'Pending',
+    'in_progress' => 'In progress',
+    'completed' => 'Completed',
+    'cancelled' => 'Cancelled',
+    'on_hold' => 'On hold',
+  ],
 );

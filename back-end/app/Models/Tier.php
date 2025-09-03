@@ -83,7 +83,7 @@ class Tier extends Model
     // Get module labels for display
     public function getModuleLabels(): array
     {
-        return $this->modules->map(fn($module) => $module->label())->toArray();
+        return collect($this->modules)->map(fn($module) => $module->label())->toArray();
     }
 
     // Validate modules against enum

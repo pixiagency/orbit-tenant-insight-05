@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
@@ -118,6 +119,10 @@ Route::middleware([
     Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/user', function () {
+            return response()->json(Auth::user());
+        });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
@@ -181,10 +186,10 @@ Route::middleware([
         Route::patch('/industries/{industry}/locale', [TranslatableExampleController::class, 'changeLocale']);
     });
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/user', function () {
-            return response()->json(Auth::user());
-        });
+
+
+    Route::prefix('helpers')->group(function () {
+        // Form CRUD
+        Route::get('/task-types', [TaskController::class, 'taskTypes']);
     });
 });

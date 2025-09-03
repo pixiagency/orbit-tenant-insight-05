@@ -6,7 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    protected $fillable = ['task_title', 'description', 'task_type', 'status', 'priority', 'due_date', 'due_time', 'assigned_to_id', 'reminder_time', 'lead_id', 'tags', 'Additional Notes'];
+    protected $fillable = [
+        'task_title',
+        'description',
+        'task_type',
+        'status',
+        'priority',
+        'due_date',
+        'due_time',
+        'assigned_to_id',
+        'reminder_time',
+        'lead_id',
+        'tags',
+        'Additional Notes'
+    ];
 
     public function leads()
     {

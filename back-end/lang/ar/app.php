@@ -24,4 +24,13 @@ return array (
   'Public' => 'عام',
   'Private' => 'خاص',
   'data added successfully' => 'تم اضافة البيانات بنجاح',
+  'data displayed successfully' => 'تم عرض البيانات بنجاح',
+
+  'task_status' => [
+    'pending' => 'قيد الانتظار',
+    'in_progress' => 'قيد التنفيذ',
+    'completed' => 'مكتمل',
+    'cancelled' => 'ملغي',
+    'on_hold' => 'معلق',
+  ],
 );
