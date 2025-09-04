@@ -337,6 +337,11 @@ namespace App\Models{
  * @property array<array-key, mixed> $name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $key
+ * @property string $group
+ * @property array<array-key, mixed> $group_label
+ * @property int $has_number_field
+ * @property array<array-key, mixed>|null $number_field_label
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Client> $clients
  * @property-read int|null $clients_count
  * @property-read mixed $localized_group_label
@@ -348,12 +353,17 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereGroup($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereGroupLabel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereHasNumberField($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereKey($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereLocale(string $column, string $locale)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereLocales(string $column, array $locales)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereNumberFieldLabel($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Module whereUpdatedAt($value)
  */
 	class Module extends \Eloquent {}
@@ -465,6 +475,17 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereUpdatedAt($value)
  */
 	class Subscription extends \Eloquent implements \Spatie\MediaLibrary\HasMedia {}
+}
+
+namespace App\Models{
+/**
+ * @property-read \App\Models\Tenant\Reminder|null $reminder
+ * @property-read \App\Models\Tenant\Task|null $task
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskReminder newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskReminder newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskReminder query()
+ */
+	class TaskReminder extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -669,6 +690,8 @@ namespace App\Models\Tenant{
 namespace App\Models\Tenant{
 /**
  * @property \App\Enums\OpportunityStatus $status
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \OwenIt\Auditing\Models\Audit> $audits
+ * @property-read int|null $audits_count
  * @property-read \App\Models\City|null $city
  * @property-read \App\Models\Tenant\Contact|null $contact
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomField> $customFields
@@ -687,7 +710,7 @@ namespace App\Models\Tenant{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Lead query()
  */
-	class Lead extends \Eloquent {}
+	class Lead extends \Eloquent implements \OwenIt\Auditing\Contracts\Auditable {}
 }
 
 namespace App\Models\Tenant{
@@ -726,6 +749,55 @@ namespace App\Models\Tenant{
 
 namespace App\Models\Tenant{
 /**
+ * @property-read \App\Models\Tenant\PriorityColor|null $color
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Task> $tasks
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Priority default()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Priority newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Priority newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Priority ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Priority query()
+ */
+	class Priority extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Priority> $priorities
+ * @property-read int|null $priorities_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PriorityColor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PriorityColor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PriorityColor ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PriorityColor query()
+ */
+	class PriorityColor extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @property-read string $display_name
+ * @property-read mixed $localized_name
+ * @property-read int $total_minutes
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TaskReminder> $taskReminders
+ * @property-read int|null $task_reminders_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Task> $tasks
+ * @property-read int|null $tasks_count
+ * @property-read mixed $translations
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder default()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder whereJsonContainsLocale(string $column, string $locale, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder whereJsonContainsLocales(string $column, array $locales, ?mixed $value, string $operand = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder whereLocale(string $column, string $locale)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Reminder whereLocales(string $column, array $locales)
+ */
+	class Reminder extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
  * @property-read \App\Models\Tenant\Deal|null $deal
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubscriptionDetail newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SubscriptionDetail newQuery()
@@ -740,11 +812,25 @@ namespace App\Models\Tenant{
  * @property-read int|null $followers_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Lead> $leads
  * @property-read int|null $leads_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tenant\Reminder> $reminders
+ * @property-read int|null $reminders_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TaskReminder> $taskReminders
+ * @property-read int|null $task_reminders_count
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task query()
  */
 	class Task extends \Eloquent {}
+}
+
+namespace App\Models\Tenant{
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskType ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskType query()
+ */
+	class TaskType extends \Eloquent {}
 }
 
 namespace App\Models\Tenant{
@@ -811,11 +897,11 @@ namespace App\Models{
  * @property int|null $max_users
  * @property int $max_contacts
  * @property int $storage_limit
- * @property array<array-key, mixed> $modules
  * @property string $status
  * @property string $availability
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property mixed $modules
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subscription> $subscriptions
  * @property-read int|null $subscriptions_count
  * @property-read \Stancl\Tenancy\Database\TenantCollection<int, \App\Models\Tenant> $tenant
@@ -835,7 +921,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier whereMaxContacts($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier whereMaxUsers($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier whereModules($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier wherePackageName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier wherePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Tier whereRefundPeriod($value)
@@ -849,9 +934,22 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property int $tier_id
+ * @property int $module_id
+ * @property int|null $limit_value
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Module $module
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereLimitValue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereModuleId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereTierId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TierModule whereUpdatedAt($value)
  */
 	class TierModule extends \Eloquent {}
 }

@@ -1,6 +1,6 @@
 <?php
 
-return array (
+return array(
   'actions' => 'فعل',
   'all_awbs' => 'كل البوليصات',
   'area' => 'المنطقة',
@@ -32,7 +32,9 @@ return array (
     'completed' => 'مكتمل',
     'cancelled' => 'ملغي',
     'on_hold' => 'معلق',
-    
+
   ],
   'cannot_delete_priority_used_by_tasks' => 'لا يمكن حذف أولوية مستخدمة في المهام.',
+  'data changed successfully' => 'تم تغيير البيانات بنجاح',
+
 );

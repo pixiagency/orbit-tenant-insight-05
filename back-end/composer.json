@@ -18,8 +18,10 @@
         "livewire/livewire": "^3.5",
         "maatwebsite/excel": "^3.1",
         "owen-it/laravel-auditing": "^14.0",
+        "spatie/laravel-data": "^4.17",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.10",
+        "spatie/laravel-settings": "^3.4",
         "spatie/laravel-translatable": "*",
         "stancl/tenancy": "^3.8",
         "yajra/laravel-datatables": "^11.0"

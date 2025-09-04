@@ -372,4 +372,5 @@ return array(
     'on_hold' => 'On hold',
   ],
   'cannot_delete_priority_used_by_tasks' => 'Cannot delete priority that is being used by tasks.',
+  'data changed successfully' => 'data changed successfully',
 );

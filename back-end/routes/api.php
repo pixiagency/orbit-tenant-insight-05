@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
 use App\Http\Controllers\Central\Api\SettingController;
+use App\Http\Controllers\Api\SettingController as TenantSettingController;
 use App\Http\Controllers\Central\Api\SubscriptionController;
 use App\Http\Controllers\Central\Api\ModuleController;
 
@@ -201,12 +202,18 @@ Route::middleware([
     Route::apiResource('priorities', PriorityController::class);
     Route::patch('priorities/{priority}/set-default', [PriorityController::class, 'setDefault']);
     Route::get('priorities-colors', [PriorityColorController::class, 'index']);
-    
+
     // Priority Color routes
     Route::get('priority-colors', [PriorityColorController::class, 'index']);
     Route::get('priority-colors/{id}', [PriorityColorController::class, 'show']);
-    
+
     // Reminder routes
     Route::apiResource('reminders', ReminderController::class);
     Route::patch('reminders/{reminder}/set-default', [ReminderController::class, 'setDefault']);
+
+    Route::prefix('settings')->group(function () {
+        Route::get('get', [TenantSettingController::class, 'getSettingsByGroup']);
+        Route::post('switcher', [TenantSettingController::class, 'switcher']);
+        Route::post('change-value', [TenantSettingController::class, 'changeValue']);
+    });
 });
