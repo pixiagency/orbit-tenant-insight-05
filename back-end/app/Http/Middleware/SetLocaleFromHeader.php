@@ -26,7 +26,7 @@ class SetLocaleFromHeader
         }
         
         // Validate locale (you can add more supported locales here)
-        $supportedLocales = ['en', 'ar']; // Add more as needed
+        $supportedLocales = ['en', 'ar','es','fr']; // Add more as needed
         if (!in_array($locale, $supportedLocales)) {
             $locale = config('app.fallback_locale', 'en'); // Use config fallback
         }

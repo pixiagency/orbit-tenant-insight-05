@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('task_types', function (Blueprint $table) {
+        Schema::create('priority_colors', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('icon')->nullable();
-            $table->boolean('is_default')->default(false);
+            $table->string('hex_code')->unique();
             $table->timestamps();
         });
 
-        Artisan::call('tenants:seed', ['--class' => \Database\Seeders\tenant\TaskTypeSeeder::class]);
+        \Artisan::call('tenants:seed', ['--class' => \Database\Seeders\tenant\PriorityColorSeeder::class]);
     }
 
     /**
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('task_types');
+        Schema::dropIfExists('priority_colors');
     }
 };

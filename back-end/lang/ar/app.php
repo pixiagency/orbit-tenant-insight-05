@@ -34,4 +34,5 @@ return array (
     'on_hold' => 'معلق',
     
   ],
+  'cannot_delete_priority_used_by_tasks' => 'لا يمكن حذف أولوية مستخدمة في المهام.',
 );

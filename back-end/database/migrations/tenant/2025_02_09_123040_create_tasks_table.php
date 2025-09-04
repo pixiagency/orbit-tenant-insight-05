@@ -18,11 +18,10 @@ return new class extends Migration
             $table->text('description');
             $table->enum('task_type', ['call', 'email', 'meeting', 'task', 'other'])->default('other');
             $table->enum('status', TaskStatus::values())->default('in_progress');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->foreignId('priority_id')->constrained('priorities');
             $table->date('due_date');
             $table->time('due_time');
             $table->foreignId('assigned_to_id')->constrained('users');
-            $table->integer('reminder_time')->nullable();
             $table->foreignId('lead_id')->constrained('leads');
             $table->json('tags')->nullable();
             $table->text('additional_notes')->nullable();

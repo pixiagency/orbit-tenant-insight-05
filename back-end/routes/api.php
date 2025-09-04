@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\PriorityController;
+use App\Http\Controllers\Api\PriorityColorController;
+use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TaskTypeController;
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
@@ -188,8 +192,22 @@ Route::middleware([
 
 
 
-    Route::prefix('helpers')->group(function () {
+    Route::prefix('task-types')->group(function () {
         // Form CRUD
-        Route::get('/task-types', [TaskController::class, 'taskTypes']);
+        Route::get('/', [TaskTypeController::class, 'index']);
+        Route::patch('/{id}/set-default', [TaskTypeController::class, 'setDefault']);
     });
+
+    // Priority routes
+    Route::apiResource('priorities', PriorityController::class);
+    Route::patch('priorities/{priority}/set-default', [PriorityController::class, 'setDefault']);
+    Route::get('priorities-colors', [PriorityColorController::class, 'index']);
+    
+    // Priority Color routes
+    Route::get('priority-colors', [PriorityColorController::class, 'index']);
+    Route::get('priority-colors/{id}', [PriorityColorController::class, 'show']);
+    
+    // Reminder routes
+    Route::apiResource('reminders', ReminderController::class);
+    Route::patch('reminders/{reminder}/set-default', [ReminderController::class, 'setDefault']);
 });

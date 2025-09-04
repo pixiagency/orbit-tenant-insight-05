@@ -15,18 +15,18 @@ class TaskTypeSeeder extends Seeder
         $now = now();
 
         $types = [
-            ['title' => 'Call', 'icon' => 'phone', 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Meeting', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Email', 'icon' => 'mail', 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Follow-up', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Presentation', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Demo', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
-            ['title' => 'Other', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Call', 'icon' => 'phone', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Meeting', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Email', 'icon' => 'mail', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Follow-up', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Presentation', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Demo', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Other', 'icon' => null, 'created_at' => $now, 'updated_at' => $now],
         ];
 
         DB::table('task_types')->upsert(
             $types,
-            ['title'],                 // unique-by
+            ['name'],                 // unique-by
             ['icon', 'updated_at']     // columns to update on conflict
         );
     }
