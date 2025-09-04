@@ -94,7 +94,6 @@ foreach (config('tenancy.central_domains') as $domain) {
 
 // //////////// tenant routes
 Route::middleware([
-    'api',
     \Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class,
     \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
 ])->group(function () {
