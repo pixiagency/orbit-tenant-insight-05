@@ -2,7 +2,7 @@
 
 namespace Database\Seeders\tenant;
 
-use App\Models\User;
+use App\Models\Tenant\User;
 use Hash;
 use Illuminate\Database\Seeder;
 

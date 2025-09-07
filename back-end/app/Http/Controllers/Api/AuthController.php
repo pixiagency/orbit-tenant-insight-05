@@ -6,7 +6,7 @@ use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\SignupRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\Tenant\Users\UserResource;
 use App\Services\AuthService;
 use Exception;
 use Illuminate\Support\Facades\Auth;

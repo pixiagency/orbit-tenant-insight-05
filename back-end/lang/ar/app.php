@@ -36,5 +36,8 @@ return array(
   ],
   'cannot_delete_priority_used_by_tasks' => 'لا يمكن حذف أولوية مستخدمة في المهام.',
   'data changed successfully' => 'تم تغيير البيانات بنجاح',
+  'data created successfully' => 'تم اضافة البيانات بنجاح',
+  'data deleted successfully' => 'تم حذف البيانات بنجاح',
+  'not_found' => 'غير موجود',
 
 );

@@ -22,6 +22,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'image',
         'first_name',
         'last_name',
         'email',
@@ -41,6 +42,25 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'name',
+    ];
+
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -51,5 +71,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+        /**
+     * @param $image
+     * @return string
+     */
+    public function getImageAttribute($image): string
+    {
+        if (!empty($image) && file_exists(public_path('storage/users/' . $image))) {
+            return asset('storage') . '/users/' . $image;
+        }
+        return asset('defaults/default-user.png');
+    }
+
+    /**
+     * @param $image
+     * @return void
+     */
+    public function setImageAttribute($image): void
+    {
+        if (!empty($image)) {
+            $imageFields = $image;
+            if (is_file($image)) {
+                $imageFields = upload($image, 'users');
+            }
+            $this->attributes['image'] = $imageFields;
+        }
     }
 }

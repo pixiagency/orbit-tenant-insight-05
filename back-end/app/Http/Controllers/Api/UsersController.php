@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\DTO\User\UserDTO;
 use App\Http\Requests\Users\AddUserRequest;
-use App\Http\Resources\UserCollection;
-use App\Http\Resources\UserResource;
+
 use Exception;
 use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserStoreRequest;
 use App\Http\Requests\Users\UserUpdateRequest;
 use App\Http\Requests\Users\UserUpdateProfileRequest;
+use App\Http\Resources\Tenant\Users\UserDDLResource;
+use App\Http\Resources\Tenant\Users\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -28,8 +28,14 @@ class UsersController extends Controller
         try {
             $filters = array_filter(request()->query());
             $withRelations = ['roles'];
-            $users = $this->userService->index(filters: $filters, withRelations: $withRelations,  perPage: $filters['per_page'] ?? 10);
-            return ApiResponse(new UserCollection($users), 'Users retrieved successfully');
+            if($request->has('ddl')){
+                $users = $this->userService->index(withRelations: $withRelations);
+                $data = UserDDLResource::collection($users);
+            }else{
+                $users = $this->userService->index(filters: $filters, withRelations: $withRelations,  perPage: $filters['per_page'] ?? 10);
+                $data = UserResource::collection($users)->response()->getData(true);
+            }
+            return ApiResponse($data, 'Users retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }

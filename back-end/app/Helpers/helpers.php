@@ -68,3 +68,13 @@ if (!function_exists('per_page')) {
 
     }
 }
+
+if (!function_exists('upload')) {
+
+    function upload($file, $dir = '')
+    {
+        $fileName = time() . uniqid() . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('public/' . $dir, $fileName);
+        return $fileName;
+    }
+}

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\DTO\User\UserDTO;
-use App\Models\User;
+use App\Models\Tenant\User;
 use App\QueryFilters\UsersFilters;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +20,11 @@ class UserService extends BaseService
         return $this->model;
     }
 
+    public function getAll(array $filters = [])
+    {
+        return $this->queryGet($filters)->get();
+    }
+    
     public function listing(array $filters = [], array $withRelations = [], $perPage = 10): \Illuminate\Contracts\Pagination\CursorPaginator
     {
         return $this->queryGet(filters: $filters, withRelations: $withRelations)->cursorPaginate($perPage);

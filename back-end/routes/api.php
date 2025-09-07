@@ -4,11 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
-use App\Http\Controllers\Api\PriorityController;
-use App\Http\Controllers\Api\PriorityColorController;
-use App\Http\Controllers\Api\ReminderController;
-use App\Http\Controllers\Api\TaskController;
-use App\Http\Controllers\Api\TaskTypeController;
+use App\Http\Controllers\Api\Tasks\{
+    PriorityController,
+    PriorityColorController,
+    ReminderController,
+    TaskController,
+    TaskTypeController
+};
+
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
@@ -129,7 +132,7 @@ Route::middleware([
         });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
-        Route::apiResource('tasks', \App\Http\Controllers\Api\TaskController::class);
+        Route::apiResource('tasks', TaskController::class);
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
     });

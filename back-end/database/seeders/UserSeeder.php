@@ -16,9 +16,9 @@ class UserSeeder extends Seeder
     {
         if (User::count() == 0) {
             User::create([
-                'first_name' => 'abood',
-                'last_name' => 'elnakoury',
-                'email' => 'abood@gmail.com',
+                'first_name' => 'client',
+                'last_name' => 'one',
+                'email' => 'client1@example.com',
                 'password' => Hash::make('123456'),
             ]);
             $this->command->info('UserSeeder: Created default user.');

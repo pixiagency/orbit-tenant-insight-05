@@ -33,7 +33,7 @@ class BaseService
             ->with($withRelations)
             ->find($id, $columns);
         if (!$result)
-            throw new NotFoundException(trans('lang.not_found'));
+            throw new NotFoundException(trans('app.not_found'));
         return  $result;
     }
 

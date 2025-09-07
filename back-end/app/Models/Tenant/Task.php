@@ -8,18 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
-        'task_title',
+        'title',
         'description',
-        'task_type',
+        'task_type_id',
         'status',
         'priority_id',
         'due_date',
         'due_time',
         'assigned_to_id',
-        'reminder_time',
         'lead_id',
         'tags',
-        'Additional Notes'
+        'additional_notes'
+    ];
+
+    protected $casts = [
+        'tags' => 'array',
     ];
 
     public function leads()
@@ -30,6 +33,22 @@ class Task extends Model
     public function followers()
     {
         return $this->belongsToMany(User::class, 'tasks_followers', 'task_id', 'follower_id');
+    }
+
+    /**
+     * Get the priority for the task.
+     */
+    public function priority()
+    {
+        return $this->belongsTo(Priority::class);
+    }
+
+    /**
+     * Get the assigned user for the task.
+     */
+    public function assignedTo()
+    {
+        return $this->belongsTo(User::class, 'assigned_to_id');
     }
 
     /**
@@ -86,5 +105,10 @@ class Task extends Model
             default:
                 return $dueDateTime;
         }
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('created_at', 'asc');
     }
 }

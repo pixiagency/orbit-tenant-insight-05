@@ -14,15 +14,15 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('task_title');
+            $table->foreignId('lead_id')->nullable()->constrained('leads')->onDelete('cascade');
+            $table->string('title');
             $table->text('description');
-            $table->enum('task_type', ['call', 'email', 'meeting', 'task', 'other'])->default('other');
-            $table->enum('status', TaskStatus::values())->default('in_progress');
+            $table->foreignId('task_type_id')->constrained('task_types')->onDelete('cascade');
+            $table->enum('status', TaskStatus::values())->default(TaskStatus::PENDING->value);
             $table->foreignId('priority_id')->constrained('priorities');
             $table->date('due_date');
             $table->time('due_time');
             $table->foreignId('assigned_to_id')->constrained('users');
-            $table->foreignId('lead_id')->constrained('leads');
             $table->json('tags')->nullable();
             $table->text('additional_notes')->nullable();
             $table->timestamps();
