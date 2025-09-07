@@ -14,7 +14,7 @@ class DatabaseTenantSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
-            // CountriesWithCitiesSeeder::class,
+            CountriesWithCitiesSeeder::class,
              UserSeeder::class,
             // SourceSeeder::class,
             // PaymentMethodSeeder::class,
