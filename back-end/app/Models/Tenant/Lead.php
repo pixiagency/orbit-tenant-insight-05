@@ -54,9 +54,15 @@ class Lead extends Model implements Auditable
 
     public function transformAudit(array $data): array
     {
+        // dd($data,$this->getOriginal('stage_id') ,$this->getAttribute('stage_id'));
         if (Arr::has($data, 'new_values.stage_id')) {
-            $data['old_values']['stage'] = Stage::find($this->getOriginal('stage_id'))->name;
-            $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))->name;
+            if ($this->getOriginal('stage_id')) {
+                $data['old_values']['stage'] = Stage::find($this->getOriginal('stage_id'))->name;
+            }   
+            if ($this->getAttribute('stage_id')) {
+                $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))->name;
+            }
+            $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))?->name;
         }
 
         return $data;
