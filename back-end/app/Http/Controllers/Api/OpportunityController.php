@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Opportunity\StoreOpportunityRequest;
 use App\Http\Requests\Opportunity\UpdateOpportunityRequest;
 use App\Http\Resources\AuditOpportunityResource;
-use App\Http\Resources\AuditResource;
 use App\Http\Resources\Opportunity\OpportunityResource;
+use App\Models\Filters\OpportunityFilter;
 use App\Models\Tenant\Contact;
 use App\Models\Tenant\Lead;
 use DB;
@@ -32,41 +32,33 @@ class OpportunityController extends Controller
 
     public function index(Request $request)
     {
-        $query = Lead::query();
+        try {
+            $query = Lead::query();
 
-        // Filter by stage_id
-        if ($request->filled('stage_id')) {
-            $query->where('stage_id', $request->stage_id);
-        }
+            // Apply filters using TierFilter
+            $filters = $request->only([
+                'stage_id',
+                'assigned_to_id',
+                'source_id',
+                'pipeline_id',
+            ]);
 
-        // Filter by assigned_to_id
-        if ($request->filled('assigned_to_id')) {
-            $query->where('assigned_to_id', $request->assigned_to_id);
-        }
-
-        // Filter by source_id
-        if ($request->filled('source_id')) {
-            $query->whereHas('contact', function ($contactQuery) use ($request) {
-                $contactQuery->where('source_id', $request->source_id);
+            // Remove empty values
+            $filters = array_filter($filters, function ($value) {
+                return $value !== null && $value !== '';
             });
+
+            $opportunityFilter = new OpportunityFilter($filters);
+            $query = $opportunityFilter->apply($query);
+
+            $opportunities = $query->with('contact', 'city', 'stage')->paginate(per_page());
+
+            $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
+
+            return ApiResponse($data,  __('app.data retrieved successfully'));
+        } catch (\Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
-
-        // Filter by pipeline_id
-        if ($request->filled('pipeline_id')) {
-            $query->whereHas('stage', function ($stageQuery) use ($request) {
-                $stageQuery->where('pipeline_id', $request->pipeline_id);
-            });
-        }
-
-        // Get pagination per page from request or default to 10
-        $perPage = $request->get('per_page', 10);
-
-        // dd($query->get());
-        // Paginate the results
-        $opportunities = $query->with('contact', 'city', 'stage')->paginate($perPage);
-
-        // $opportunities = Lead::with('contact', 'city', 'stage')->get();
-        return ApiResponse(OpportunityResource::collection($opportunities), 'Opportunities retrieved successfully');
     }
 
     public function store(StoreOpportunityRequest $request)
