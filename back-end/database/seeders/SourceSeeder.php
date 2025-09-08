@@ -12,6 +12,9 @@ class SourceSeeder extends Seeder
      */
     public function run(): void
     {
+        if (Source::count() > 0) {
+            return;
+        }
         Source::factory()->count(10)->withImage()->create();
     }
 }

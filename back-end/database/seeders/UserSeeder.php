@@ -15,15 +15,16 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         if (User::count() == 0) {
-            User::create([
+            User::updateOrCreate([
+                'email' => 'client1@example.com',
+            ], [
                 'first_name' => 'client',
                 'last_name' => 'one',
-                'email' => 'client1@example.com',
                 'password' => Hash::make('123456'),
             ]);
             $this->command->info('UserSeeder: Created default user.');
+            User::factory(10)->create();
         }
 
-        User::factory(10)->create();
     }
 }
