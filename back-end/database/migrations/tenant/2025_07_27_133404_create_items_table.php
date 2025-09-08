@@ -1,6 +1,7 @@
 <?php
 
-use App\Enums\DealType;
+use App\Enums\ItemType;
+use App\Enums\ServiceDuration;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,13 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('sku')->nullable();
             $table->decimal('price', 10, 2);
-            $table->integer('quantity');
-            $table->string('unit');
-            $table->string('image')->nullable();
+            $table->enum('duration', ServiceDuration::values())->nullable();
             $table->foreignId('category_id')->constrained('item_categories');
             $table->foreignId('status_id')->constrained('item_statuses');
-            $table->enum('type', DealType::values());
+            $table->enum('type', ItemType::values());
             $table->timestamps();
         });
     }

@@ -6,35 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Item\ItemStoreRequest;
 use App\Http\Resources\ItemResource;
 use App\Models\Tenant\Item;
+use App\Services\Tenant\ItemService;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
+    public function __construct(public ItemService $itemService) {}
 
     public function index(Request $request)
     {
-        $query = Item::query();
+        $filters = array_filter(request()->query(), function ($value) {
+            return $value !== null && $value !== '';
+        });
 
-        // Search by deal name
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+        if ($request->has('ddl')) {
+            $items = $this->itemService->index($filters);
+            $data = ItemResource::collection($items);
+        } else {
+            $items = $this->itemService->index($filters, perPage: $filters['per_page'] ?? 10);
+            $data = ItemResource::collection($items)->response()->getData(true);
         }
 
-        // Filter by status
-        if ($request->filled('status_id')) {
-            $query->where('status_id', $request->status_id);
-        }
-
-        // Filter by type
-        if ($request->filled('type')) {
-            $query->where('type', $request->type);
-        }
-
-
-        $items = $query->paginate($request->per_page ?? 10);
-        return ApiResponse(message: 'Items retrieved successfully', code: 200, data: ItemResource::collection($items));
+        return ApiResponse(message: 'Items retrieved successfully', code: 200, data: $data);
     }
 
     public function store(ItemStoreRequest $request)
@@ -42,6 +37,7 @@ class ItemController extends Controller
         try {
             DB::beginTransaction();
             $data = $request->validated();
+
             Item::create($data);
             DB::commit();
             return ApiResponse(message: 'Item created successfully', code: 201);
