@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\tenant\ContactSeeder;
+use Database\Seeders\tenant\OpportunitySeeder;
+use Database\Seeders\tenant\PipelineSeeder;
 use Database\Seeders\tenant\RolesAndPermissionsSeeder;
 use Illuminate\Database\Seeder;
 
@@ -15,11 +18,12 @@ class DatabaseTenantSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             CountriesWithCitiesSeeder::class,
-             UserSeeder::class,
-            // SourceSeeder::class,
+            UserSeeder::class,
+            SourceSeeder::class,
+            PipelineSeeder::class,
+            ContactSeeder::class,
+            OpportunitySeeder::class,
             // PaymentMethodSeeder::class,
-            // PipelineSeeder::class,
-            // ContactSeeder::class,
             // ItemStatusSeeder::class,
             // ItemCategorySeeder::class,
             // AppSettingsSeeder::class,

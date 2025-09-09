@@ -17,13 +17,14 @@ class OpportunityResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // dd($this);
         return [
             'id' => $this->id,
-            'company' => $this->contact->company_name,
-            'contact_id' => $this->contact->id,
-            'email' => $this->contact->email,
-            'phone' => $this->contact->business_phone,
-            'source_id' => $this->sourceContact,
+            // 'company' => $this->contact->company_name,
+            // 'contact_id' => $this->contact->id,
+            // 'email' => $this->contact->email,
+            // 'phone' => $this->contact->business_phone,
+            // 'source_id' => $this->sourceContact,
             'status' => $this->status,
             'deal_value' => $this->deal_value,
             'win_probability' => $this->win_probability,
@@ -32,7 +33,6 @@ class OpportunityResource extends JsonResource
             'notes' => $this->notes,
             'description' => $this->description,
             'contact' => $this->whenLoaded('contact', fn() => new ContactResource($this->contact)),
-            'city' => $this->whenLoaded('city', fn() => new CityResource($this->city)),
             'stage' => $this->whenLoaded('stage', fn() => new StageResource($this->stage)),
         ];
     }
