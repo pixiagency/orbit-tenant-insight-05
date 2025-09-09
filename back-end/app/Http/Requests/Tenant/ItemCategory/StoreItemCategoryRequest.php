@@ -11,7 +11,6 @@ class StoreItemCategoryRequest extends BaseRequest
 {
     public function rules(): array
     {
-        // dd($this->all());
         return [
             'name' => 'required|string|unique:item_categories,name|max:255',
             'type' => ['required', Rule::in(ItemType::values())],

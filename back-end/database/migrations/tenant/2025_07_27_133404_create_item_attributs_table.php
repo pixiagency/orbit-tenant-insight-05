@@ -16,14 +16,7 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description')->nullable();
-            $table->string('sku')->unique();
             $table->json('attributes')->unique()->nullable();
-            $table->decimal('price', 10, 2);
-            $table->integer('quantity')->default(0);
-            $table->enum('duration', ServiceDuration::values())->nullable();
-            $table->foreignId('category_id')->constrained('item_categories');
-            $table->enum('type', ItemType::values());
             $table->timestamps();
         });
     }

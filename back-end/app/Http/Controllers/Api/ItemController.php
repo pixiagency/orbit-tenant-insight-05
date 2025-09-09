@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\Item\ItemDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Item\ItemStoreRequest;
 use App\Http\Resources\ItemResource;
-use App\Models\Tenant\Item;
 use App\Services\Tenant\ItemService;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class ItemController extends Controller
 {
@@ -36,14 +37,43 @@ class ItemController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = $request->validated();
-
-            Item::create($data);
+            $itemDTO = ItemDTO::fromRequest($request);
+            $response = $this->itemService->store($itemDTO);
             DB::commit();
-            return ApiResponse(message: 'Item created successfully', code: 201);
+            return ApiResponse(message: 'Item created successfully', code: Response::HTTP_CREATED, data: new ItemResource($response));
         } catch (Exception $e) {
             DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+////////
+    public function getAttributes()
+    {
+        $attributes = $this->itemService->getAttributes();
+        return ApiResponse(message: 'Attributes retrieved successfully', code: 200, data: $attributes);
+    }
+
+    public function getAttribute(string $attribute)
+    {
+        $attribute = $this->itemService->getAttribute($attribute);
+        return ApiResponse(message: 'Attribute retrieved successfully', code: 200, data: $attribute);
+    }
+
+    public function storeAttributes(Request $request)
+    {
+        $attributes = $this->itemService->storeAttributes($request);
+        return ApiResponse(message: 'Attributes stored successfully', code: 200, data: $attributes);
+    }
+/////////
+    public function destroy(int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $this->itemService->destroy($id);
+            DB::commit();
+            return ApiResponse(message: 'Item deleted successfully', code: Response::HTTP_OK);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

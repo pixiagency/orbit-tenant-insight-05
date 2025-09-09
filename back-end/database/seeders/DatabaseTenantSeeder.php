@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\tenant\ItemCategorySeeder;
 use Database\Seeders\tenant\RolesAndPermissionsSeeder;
 use Illuminate\Database\Seeder;
 
@@ -16,6 +17,7 @@ class DatabaseTenantSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             CountriesWithCitiesSeeder::class,
              UserSeeder::class,
+             ItemCategorySeeder::class,
             // SourceSeeder::class,
             // PaymentMethodSeeder::class,
             // PipelineSeeder::class,

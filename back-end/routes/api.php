@@ -121,6 +121,9 @@ Route::middleware([
     Route::get('/contacts/statistics', [\App\Http\Controllers\Api\ContactController::class, 'get_statistics']);
     Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
+    Route::get('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'getAttributes']);
+    Route::get('items/attributes/{attribute}', [\App\Http\Controllers\Api\ItemController::class, 'getAttribute']);
+    Route::post('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'storeAttributes']);
     Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
     Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
     Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);

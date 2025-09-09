@@ -17,8 +17,20 @@ class ItemFilter extends QueryFilter
         return $this->builder->where('name', "LIKE", "%$term%");
     }
 
-    public function category_id($term)
+    public function category($term)
     {
         return $this->builder->where('category_id', $term);
     }
+
+    public function type($term)
+    {
+        return $this->builder->where('type', $term);
+    }
+
+    public function duration($term)
+    {
+        return $this->builder->where('duration', $term);
+    }
+    
+    
 }
