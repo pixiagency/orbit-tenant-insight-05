@@ -21,7 +21,7 @@ class TaskRequest extends BaseRequest
             'assigned_to_id' => 'required|exists:users,id',
             'followers' => 'nullable|array',
             'followers.*' => 'nullable|exists:users,id',
-            'lead_id' => 'nullable|exists:leads,id',
+            'lead_id' => 'required|exists:leads,id',
             'tags' => 'nullable|array',
             'tags.*' => 'nullable|string|max:255',
             'additional_notes' => 'nullable|string',

@@ -28,9 +28,9 @@ class Task extends Model
         'tags' => 'array',
     ];
 
-    public function leads()
+    public function lead()
     {
-        return $this->belongsToMany(Lead::class)->withPivot('weight');
+        return $this->belongsTo(Lead::class);
     }
 
     public function followers()

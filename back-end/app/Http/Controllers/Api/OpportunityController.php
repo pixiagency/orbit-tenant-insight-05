@@ -8,6 +8,7 @@ use App\Http\Requests\Opportunity\UpdateOpportunityRequest;
 use App\Http\Resources\AuditOpportunityResource;
 use App\Http\Resources\AuditResource;
 use App\Http\Resources\Opportunity\OpportunityResource;
+use App\Http\Resources\Tenant\Opportunity\OpportunityDDLResource;
 use App\Models\Filters\OpportunityFilter;
 use App\Models\Tenant\Contact;
 use App\Models\Tenant\Lead;
@@ -62,9 +63,16 @@ class OpportunityController extends Controller
         $opportunityFilter = new OpportunityFilter($filters);
         $query = $opportunityFilter->apply($query);
 
-        // Paginate the results
-        $opportunities = $query->with('contact', 'city', 'stage')->paginate(per_page());
-        $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
+        if($request->has('ddl')){
+            $opportunities = $query->get();
+            $data = OpportunityDDLResource::collection($opportunities);
+        }else{
+            // Paginate the results
+            $opportunities = $query->with('contact', 'city', 'stage')->paginate(per_page());
+            $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
+        }
+
+
         return ApiResponse($data, __('app.data added successfully'));
     }
 

@@ -32,11 +32,11 @@ class TaskResource extends JsonResource
             ],
             'due_date' => $this->due_date,
             'due_time' => $this->due_time,
-            // 'related_to' => [
-            //     'type' => $this->lead_id ? 'lead' : null,
-            //     'id' => $this->lead_id,
-            //     'name' => $this->leads?->first()?->name ?? null,
-            // ],
+            'related_to' => [
+                'id' => $this->lead_id,
+                'name' => $this->lead?->first()?->description ?? null,
+                'type' => $this->lead_id ? 'lead' : null,
+            ],
         ];
     }
 }

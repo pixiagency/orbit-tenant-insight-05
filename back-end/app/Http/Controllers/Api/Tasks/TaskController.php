@@ -31,7 +31,7 @@ class TaskController extends Controller
             $withRelations = [  'assignedTo.roles', 'priority.color'];
             $tasks = $this->taskService->paginate(filters: $filters,withRelations: $withRelations, limit: per_page());
 
-            $data = TaskResource::collection($tasks)->response()->getData(true);
+            $data =  TaskResource::collection($tasks)->response()->getData(true);
             return apiResponse( $data, trans('app.data displayed successfully'));
         } catch (Exception $e) {
             return apiResponse(message: $e->getMessage(), code: 500);
