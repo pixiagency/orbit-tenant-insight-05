@@ -18,7 +18,7 @@ class BaseService
     }
 
 
-    public function getQuery(): ?Builder
+    public function getQuery(?array $filters = []): ?Builder
     {
         return $this
             ->getModel()

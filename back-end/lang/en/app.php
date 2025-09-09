@@ -374,6 +374,9 @@ return array(
   'cannot_delete_priority_used_by_tasks' => 'Cannot delete priority that is being used by tasks.',
   'data changed successfully' => 'data changed successfully',
   'data created successfully' => 'data created successfully',
+  'data updated successfully' => 'data updated successfully',
   'data deleted successfully' => 'data deleted successfully',
   'not_found' => 'not found ',
+  'data not found' => 'data not found',
+
 );

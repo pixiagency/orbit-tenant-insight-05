@@ -3,10 +3,13 @@
 namespace App\Models\Tenant;
 
 use App\Models\TaskReminder;
+use App\Traits\Filterable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
+    use Filterable ;
     protected $fillable = [
         'title',
         'description',
@@ -32,7 +35,8 @@ class Task extends Model
 
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'tasks_followers', 'task_id', 'follower_id');
+        return $this->belongsToMany(User::class, 'tasks_followers', 'task_id', 'follower_id')
+            ->withTimestamps();
     }
 
     /**
@@ -76,7 +80,7 @@ class Task extends Model
     {
         $reminderAt = $reminderAt ?? $this->calculateReminderTime($reminder);
         
-        return $this->reminders()->attach($reminder->id, [
+        $this->reminders()->attach($reminder->id, [
             'reminder_at' => $reminderAt,
             'is_sent' => false,
         ]);
@@ -88,10 +92,10 @@ class Task extends Model
     private function calculateReminderTime(Reminder $reminder)
     {
         if ($reminder->time_unit === 'on_time') {
-            return $this->due_date . ' ' . $this->due_time;
+            return Carbon::parse($this->due_date . ' ' . $this->due_time);
         }
 
-        $dueDateTime = \Carbon\Carbon::parse($this->due_date . ' ' . $this->due_time);
+        $dueDateTime = Carbon::parse($this->due_date . ' ' . $this->due_time);
         
         switch ($reminder->time_unit) {
             case 'minutes':
@@ -109,6 +113,6 @@ class Task extends Model
 
     public function scopeOrdered($query)
     {
-        return $query->orderBy('created_at', 'asc');
+        return $query->orderBy('created_at', 'desc');
     }
 }

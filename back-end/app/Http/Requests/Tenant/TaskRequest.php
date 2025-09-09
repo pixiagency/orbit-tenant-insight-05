@@ -19,10 +19,14 @@ class TaskRequest extends BaseRequest
             'due_date' => 'required|date',
             'due_time' => 'required|date_format:H:i',
             'assigned_to_id' => 'required|exists:users,id',
+            'followers' => 'nullable|array',
+            'followers.*' => 'nullable|exists:users,id',
             'lead_id' => 'nullable|exists:leads,id',
             'tags' => 'nullable|array',
             'tags.*' => 'nullable|string|max:255',
             'additional_notes' => 'nullable|string',
+            'reminders' => 'nullable|array',
+            'reminders.*' => 'required|exists:reminders,id',
         ];
     }
 
@@ -45,12 +49,17 @@ class TaskRequest extends BaseRequest
             'due_time.date_format' => 'Due time must be in H:i format.',
             'assigned_to_id.required' => 'Assigned user is required.',
             'assigned_to_id.exists' => 'Selected user does not exist.',
+            'followers.array' => 'Followers must be an array.',
+            'followers.*.exists' => 'Selected follower does not exist.',
             'lead_id.required' => 'Lead is required.',
             'lead_id.exists' => 'Selected lead does not exist.',
             'tags.array' => 'Tags must be an array.',
             'tags.*.string' => 'Each tag must be a string.',
             'tags.*.max' => 'Each tag may not be greater than 255 characters.',
             'additional_notes.string' => 'Additional notes must be a string.',
+            'reminders.array' => 'Reminders must be an array.',
+            'reminders.*.required' => 'Each reminder ID is required.',
+            'reminders.*.exists' => 'Selected reminder does not exist.',
         ];
     }
 }

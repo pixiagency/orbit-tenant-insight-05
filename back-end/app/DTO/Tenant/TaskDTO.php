@@ -20,6 +20,7 @@ class TaskDTO extends BaseDTO
         public ?array $tags = null,
         public ?string $additional_notes = null,
         public ?array $followers = null,
+        public ?array $reminders = null,
     ) {}
 
     public static function fromRequest($request): BaseDTO
@@ -37,6 +38,7 @@ class TaskDTO extends BaseDTO
             tags: $request->input('tags'),
             additional_notes: $request->input('Additional Notes'),
             followers: $request->input('followers'),
+            reminders: $request->input('reminders'),
         );
     }
 
@@ -72,6 +74,7 @@ class TaskDTO extends BaseDTO
             tags: Arr::get($data, 'tags'),
             additional_notes: Arr::get($data, 'Additional Notes'),
             followers: Arr::get($data, 'followers'),
+            reminders: Arr::get($data, 'reminders'),
         );
     }
 } 

@@ -133,6 +133,9 @@ Route::middleware([
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', TaskController::class);
+        Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
+        Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);
+
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
     });
