@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Tasks\{
     TaskController,
     TaskTypeController
 };
+use App\Http\Controllers\Api\CoreController;
 
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
@@ -136,9 +137,19 @@ Route::middleware([
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
         Route::apiResource('tasks', TaskController::class);
+        Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
+        Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);
+
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
+
+        // Core routes
+        Route::prefix('core')->group(function () {
+            Route::get('/sidebar-counts', [CoreController::class, 'getSidebarCounts']);
+        });
     });
+
+
 
     Route::prefix('forms')->group(function () {
         // Form CRUD

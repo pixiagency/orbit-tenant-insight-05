@@ -6,13 +6,13 @@ use App\DTO\Tenant\TaskDTO;
 use App\Exceptions\GeneralException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\TaskRequest;
+use App\Http\Requests\Tenant\TaskChangeStatusRequest;
 use App\Http\Resources\Tenant\Tasks\TaskResource;
 use App\Http\Resources\Tenant\Tasks\TaskShowResource;
-use App\Models\Tenant\Task;
 use App\Services\Tenant\TaskService;
 use DB;
 use Exception;
-use Request;
+use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -24,11 +24,14 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         try {
-            $tasks = $this->taskService->queryGet([], [
-                'assignedTo.roles',
-                'priority.color'
-            ])->get();
-            $data = TaskResource::collection($tasks);
+    
+            $filters = array_filter($request->all(), function ($value) {
+                return ($value !== null && $value !== false && $value !== '');
+            });
+            $withRelations = [  'assignedTo.roles', 'priority.color'];
+            $tasks = $this->taskService->paginate(filters: $filters,withRelations: $withRelations, limit: per_page());
+
+            $data =  TaskResource::collection($tasks)->response()->getData(true);
             return apiResponse( $data, trans('app.data displayed successfully'));
         } catch (Exception $e) {
             return apiResponse(message: $e->getMessage(), code: 500);
@@ -42,6 +45,23 @@ class TaskController extends Controller
             $data = $this->taskService->store($taskDTO);
             DB::commit();
             return apiResponse(new TaskResource($data), trans('app.data created successfully'), code: 201);
+        } catch (GeneralException $e) {
+            DB::rollBack();
+            return apiResponse(message: $e->getMessage(), code: 400);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return apiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
+    public function update(TaskRequest $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $taskDTO = TaskDTO::fromRequest($request);
+            $data = $this->taskService->update($id, $taskDTO);
+            DB::commit();
+            return apiResponse(new TaskResource($data), trans('app.data updated successfully'));
         } catch (GeneralException $e) {
             DB::rollBack();
             return apiResponse(message: $e->getMessage(), code: 400);
@@ -74,6 +94,25 @@ class TaskController extends Controller
     }
 
     /**
+     * Change task status
+     */
+    public function changeStatus(TaskChangeStatusRequest $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $data = $this->taskService->changeStatus($id, $request->status);
+            DB::commit();
+            return apiResponse([], trans('app.data updated successfully'));
+        } catch (GeneralException $e) {
+            DB::rollBack();
+            return apiResponse(message: $e->getMessage(), code: 400);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return apiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
@@ -88,6 +127,19 @@ class TaskController extends Controller
             return apiResponse(message: $e->getMessage(), code: 400);
         } catch (Exception $e) {
             DB::rollBack();
+            return apiResponse(message: $e->getMessage(), code: 500);
+        }
+    }
+
+    /**
+     * Get task statistics
+     */
+    public function statistics()
+    {
+        try {
+            $statistics = $this->taskService->getStatistics();
+            return apiResponse($statistics, trans('app.data displayed successfully'));
+        } catch (Exception $e) {
             return apiResponse(message: $e->getMessage(), code: 500);
         }
     }
