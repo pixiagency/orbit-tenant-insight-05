@@ -20,13 +20,6 @@ class TaskShowResource extends TaskResource
         $data['tags'] = $this->tags;
         $data['additional_notes'] = $this->additional_notes;
         
-        // Add related lead information
-        // $data['related_to'] = [
-        //     'type' => $this->lead_id ? 'lead' : null,
-        //     'id' => $this->lead_id,
-        //     'name' => $this->leads?->first()?->name ?? null,
-        // ];
-        
         // Add followers information
         $data['followers'] = $this->followers->pluck('id');
         
