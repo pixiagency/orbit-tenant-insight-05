@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('item_attributes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->json('value')->unique()->nullable();
+            $table->json('value')->nullable();
             $table->timestamps();
         });
     }
