@@ -8,14 +8,15 @@ use Illuminate\Database\Eloquent\Builder;
 use App\DTO\Item\ItemDTO;
 use App\Enums\ItemType;
 use App\Models\Filters\ItemFilter;
+use App\Models\Tenant\ItemAttribute;
 use App\Services\BaseService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ItemService extends BaseService
 {
     public function __construct(
         public Item $model,
+        public ItemAttribute $itemAttribute,
     ) {}
 
     public function getModel(): Item
@@ -142,17 +143,25 @@ class ItemService extends BaseService
 
     public function getAttributes()
     {
-        return Item::distinct('attributes')->get();
+        return $this->itemAttribute->ordered()->get();
     }
 
     public function getAttribute(string $attribute)
     {
-        return Item::where('attributes', $attribute)->get();
+        return $this->itemAttribute->where('name', $attribute)->get();
     }
 
-    public function storeAttributes(Request $request)
+    public function storeAttributes(array $data)
     {
-        $attributes = $request->all();
-        return Item::create($attributes);
+        return $this->itemAttribute->create($data);
+    }
+
+    public function destroyAttributes(string $attribute)
+    {
+        $attribute = $this->itemAttribute->where('name', $attribute)->first();
+        if ($attribute->items()->exists()) {
+            throw new GeneralException(__('app.cannot_delete_attribute_used_by_items_or_products'));
+        }
+        return $attribute->delete();
     }
 }

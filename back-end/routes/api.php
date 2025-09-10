@@ -123,6 +123,7 @@ Route::middleware([
     Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
     Route::get('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'getAttributes']);
+    Route::delete('items/attributes/{attribute}', [\App\Http\Controllers\Api\ItemController::class, 'destroyAttributes']);
     Route::get('items/attributes/{attribute}', [\App\Http\Controllers\Api\ItemController::class, 'getAttribute']);
     Route::post('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'storeAttributes']);
     Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
