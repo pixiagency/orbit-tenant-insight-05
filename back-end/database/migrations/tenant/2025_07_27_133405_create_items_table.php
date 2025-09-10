@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('sku')->unique();
-            $table->json('attributes')->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('quantity')->default(0);
             $table->enum('duration', ServiceDuration::values())->nullable();

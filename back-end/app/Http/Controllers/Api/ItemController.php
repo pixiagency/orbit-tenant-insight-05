@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\DTO\Item\ItemDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Item\Attribute\AttributeStoreRequest;
+use App\Http\Requests\Item\ItemBulkStoreWithVariantsRequest;
 use App\Http\Requests\Item\ItemStoreRequest;
 use App\Http\Resources\ItemResource;
-use App\Http\Resources\Tenant\Items\Attribute\AttributeResource;
 use App\Services\Tenant\ItemService;
 use DB;
 use Exception;
@@ -61,27 +60,16 @@ class ItemController extends Controller
         }
     }
 
-    public function getAttributes()
+    public function bulkStoreWithVariants(ItemBulkStoreWithVariantsRequest $request)
     {
-        $attributes = $this->itemService->getAttributes();
-        return ApiResponse(message: 'Attributes retrieved successfully', data: AttributeResource::collection($attributes), code: Response::HTTP_OK);
-    }
-
-    public function getAttribute(string $attribute)
-    {
-        $attribute = $this->itemService->getAttribute($attribute);
-        return ApiResponse(message: 'Attribute retrieved successfully', data: new AttributeResource($attribute), code: Response::HTTP_OK);
-    }
-
-    public function storeAttributes(AttributeStoreRequest $request)
-    {
-        $attributes = $this->itemService->storeAttributes($request->toArray());
-        return ApiResponse(message: 'Attributes stored successfully', data: new AttributeResource($attributes), code: Response::HTTP_OK);
-    }
-
-    public function destroyAttributes(string $attribute)
-    {
-        $this->itemService->destroyAttributes($attribute);
-        return ApiResponse(message: 'Attribute deleted successfully', code: Response::HTTP_OK);
+        dd($request->validated());
+        try {
+            DB::beginTransaction();
+            $this->itemService->bulkStoreWithVariants($request);
+            DB::commit();
+            return ApiResponse(message: 'Items created successfully', code: Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
