@@ -147,6 +147,7 @@ Route::middleware([
         // Core routes
         Route::prefix('core')->group(function () {
             Route::get('/sidebar-counts', [CoreController::class, 'getSidebarCounts']);
+            Route::get('/currencies', [CoreController::class, 'getCurrencies']);
         });
     });
 
@@ -193,6 +194,8 @@ Route::middleware([
     Route::delete('loss-reasons/{lossReasonId}', [\App\Http\Controllers\Api\LossReasonController::class, 'destroy']);
 
     Route::apiResource('payment-methods', \App\Http\Controllers\Api\PaymentMethodController::class);
+    Route::patch('/payment-methods/{id}/set-default', [\App\Http\Controllers\Api\PaymentMethodController::class, 'setDefault']);
+    Route::patch('/payment-methods/{id}/set-checked', [\App\Http\Controllers\Api\PaymentMethodController::class, 'setChecked']);
     Route::get('/locations/countries', [\App\Http\Controllers\Api\LocationController::class, 'getCountries']);
     Route::get('/locations/countries/{countryId}/cities', [\App\Http\Controllers\Api\LocationController::class, 'getCities']);
     Route::get('/locations/cities/{cityId}/areas', [\App\Http\Controllers\Api\LocationController::class, 'getAreas']);

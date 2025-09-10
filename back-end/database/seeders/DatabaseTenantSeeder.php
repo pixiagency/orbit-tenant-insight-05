@@ -5,6 +5,7 @@ namespace Database\Seeders;
 
 use Database\Seeders\tenant\ContactSeeder;
 use Database\Seeders\tenant\OpportunitySeeder;
+use Database\Seeders\tenant\PaymentMethodSeeder;
 use Database\Seeders\tenant\PipelineSeeder;
 use Database\Seeders\tenant\RolesAndPermissionsSeeder;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,7 @@ class DatabaseTenantSeeder extends Seeder
             PipelineSeeder::class,
             ContactSeeder::class,
             OpportunitySeeder::class,
-            // PaymentMethodSeeder::class,
+            PaymentMethodSeeder::class,
             // ItemStatusSeeder::class,
             // ItemCategorySeeder::class,
             // AppSettingsSeeder::class,
