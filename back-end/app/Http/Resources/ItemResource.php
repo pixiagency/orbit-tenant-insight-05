@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Http\Resources\landloardLocation\CityResource;
 use App\Http\Resources\landloardLocation\CountryResource;
+use App\Http\Resources\Tenant\ItemCategory\ItemCategoryDDLResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,11 +21,12 @@ class ItemResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'sku' => $this->when($this->sku !== null, $this->sku),
             'price' => $this->price,
             'type' => $this->type,
-            'quantity' => $this->quantity,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'quantity' => $this->when($this->quantity !== null, $this->quantity),
+            'duration' => $this->when($this->duration !== null, $this->duration),
+            'category' => $this->whenLoaded('category', fn() => new ItemCategoryDDLResource($this->category)),
         ];
     }
 }

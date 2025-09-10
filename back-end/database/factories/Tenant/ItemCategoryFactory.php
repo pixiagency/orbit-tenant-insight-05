@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Tenant;
 
+use App\Enums\ItemType;
 use App\Models\Tenant\ItemCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,10 +20,18 @@ class ItemCategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $type = fake()->randomElement(ItemType::values());
+        
+        $parentId = ItemCategory::where(['type' => $type, 'parent_id' => null])->inRandomOrder()->value('id');
+
+        do {
+            $name = fake()->unique()->word();
+        } while (ItemCategory::where('name', $name)->exists());
+
         return [
-            'name' => fake()->unique()->word(),
-            'description' => fake()->sentence(),
-            'color' => fake()->colorName(),
+            'name' => $name,
+            'type' => $type,
+            'parent_id' => $parentId,
         ];
     }
 }

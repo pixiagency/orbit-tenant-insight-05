@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Item;
 
-use App\Enums\DealType;
+use App\Enums\ItemType;
+use App\Enums\ServiceDuration;
 use App\Http\Requests\BaseRequest;
+use App\Rules\Tenant\ItemCategoryRule;
 use Illuminate\Validation\Rule;
 
 class ItemStoreRequest extends BaseRequest
@@ -25,12 +27,27 @@ class ItemStoreRequest extends BaseRequest
             'name' => 'required|string|unique:items,name',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
-            'quantity' => 'required|integer',
-            'category_id' => 'required|exists:item_categories,id',
-            'unit' => 'required|string',
-            'image' => 'nullable|string',
-            'status_id' => 'required|exists:item_statuses,id',
-            'type' => ['required', Rule::in(DealType::values())],
+            'sku' => 'nullable|string',
+            'quantity' => 'requiredIf:type,product|integer',
+            'category_id' => ['required', new ItemCategoryRule($this->type)],
+            'duration' => ['requiredIf:type,service', Rule::in(ServiceDuration::values())],
+            'type' => ['required', Rule::in(ItemType::values())],
+
+            'variants' => 'requiredIf:type,product|array|min:1',
+            'variants.*.attributes' => 'required|array',
+            'variants.*.attributes.*' => 'required|string|max:100',
+            'variants.*.price' => 'required|numeric|min:0|max:999999.99',
+            'variants.*.quantity' => 'required|integer|min:0|max:999999',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'variants.requiredIf' => 'At least one variant is required.',
+            'variants.*.attributes.required' => 'Each variant must have attributes.',
+            'variants.*.price.required' => 'Each variant must have a price.',
+            'variants.*.quantity.required' => 'Each variant must have a quantity.',
         ];
     }
 }

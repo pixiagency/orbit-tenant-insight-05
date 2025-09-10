@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\ItemType;
+use App\Enums\DealType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,11 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item_categories', function (Blueprint $table) {
+        Schema::create('lead_items', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->foreignId('parent_id')->nullable()->constrained('item_categories');
-            $table->enum('type', ItemType::values());
+            $table->foreignId('lead_id')->constrained('leads');
+            $table->foreignId('item_id')->constrained('items');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('item_categories');
+        Schema::dropIfExists('lead_items');
     }
 };

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+
 use Database\Seeders\tenant\ContactSeeder;
 use Database\Seeders\tenant\OpportunitySeeder;
 use Database\Seeders\tenant\PipelineSeeder;
