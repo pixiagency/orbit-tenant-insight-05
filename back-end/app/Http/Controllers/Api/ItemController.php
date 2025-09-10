@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\DTO\Item\ItemDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Item\Attribute\AttributeStoreRequest;
 use App\Http\Requests\Item\ItemStoreRequest;
 use App\Http\Resources\ItemResource;
+use App\Http\Resources\Tenant\Items\Attribute\AttributeResource;
 use App\Services\Tenant\ItemService;
 use DB;
 use Exception;
@@ -30,7 +32,7 @@ class ItemController extends Controller
             $data = ItemResource::collection($items)->response()->getData(true);
         }
 
-        return ApiResponse(message: 'Items retrieved successfully', code: 200, data: $data);
+        return ApiResponse(message: 'Items retrieved successfully', data: $data, code: Response::HTTP_OK);
     }
 
     public function store(ItemStoreRequest $request)
@@ -40,31 +42,13 @@ class ItemController extends Controller
             $itemDTO = ItemDTO::fromRequest($request);
             $response = $this->itemService->store($itemDTO);
             DB::commit();
-            return ApiResponse(message: 'Item created successfully', code: Response::HTTP_CREATED, data: new ItemResource($response));
+            return ApiResponse(message: 'Item created successfully', data: new ItemResource($response), code: Response::HTTP_CREATED);
         } catch (Exception $e) {
             DB::rollBack();
-            return ApiResponse(message: $e->getMessage(), code: 500);
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-////////
-    public function getAttributes()
-    {
-        $attributes = $this->itemService->getAttributes();
-        return ApiResponse(message: 'Attributes retrieved successfully', code: 200, data: $attributes);
-    }
 
-    public function getAttribute(string $attribute)
-    {
-        $attribute = $this->itemService->getAttribute($attribute);
-        return ApiResponse(message: 'Attribute retrieved successfully', code: 200, data: $attribute);
-    }
-
-    public function storeAttributes(Request $request)
-    {
-        $attributes = $this->itemService->storeAttributes($request);
-        return ApiResponse(message: 'Attributes stored successfully', code: 200, data: $attributes);
-    }
-/////////
     public function destroy(int $id)
     {
         try {
@@ -75,5 +59,29 @@ class ItemController extends Controller
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function getAttributes()
+    {
+        $attributes = $this->itemService->getAttributes();
+        return ApiResponse(message: 'Attributes retrieved successfully', data: AttributeResource::collection($attributes), code: Response::HTTP_OK);
+    }
+
+    public function getAttribute(string $attribute)
+    {
+        $attribute = $this->itemService->getAttribute($attribute);
+        return ApiResponse(message: 'Attribute retrieved successfully', data: new AttributeResource($attribute), code: Response::HTTP_OK);
+    }
+
+    public function storeAttributes(AttributeStoreRequest $request)
+    {
+        $attributes = $this->itemService->storeAttributes($request->toArray());
+        return ApiResponse(message: 'Attributes stored successfully', data: new AttributeResource($attributes), code: Response::HTTP_OK);
+    }
+
+    public function destroyAttributes(string $attribute)
+    {
+        $this->itemService->destroyAttributes($attribute);
+        return ApiResponse(message: 'Attribute deleted successfully', code: Response::HTTP_OK);
     }
 }
