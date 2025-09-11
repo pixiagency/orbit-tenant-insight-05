@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Settings\DealsSettings;
 use App\Settings\TasksSettings;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -125,6 +126,7 @@ class SettingController extends Controller
     {
         $settingsMap = [
             'tasks_settings' => TasksSettings::class,
+            'deals_settings' => DealsSettings::class,
             // Add more settings groups as needed
         ];
 

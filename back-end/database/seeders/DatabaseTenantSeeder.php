@@ -7,6 +7,7 @@ use Database\Seeders\tenant\ContactSeeder;
 use Database\Seeders\tenant\ItemCategorySeeder;
 use Database\Seeders\tenant\ItemSeeder;
 use Database\Seeders\tenant\OpportunitySeeder;
+use Database\Seeders\tenant\PaymentMethodSeeder;
 use Database\Seeders\tenant\PipelineSeeder;
 use Database\Seeders\tenant\RolesAndPermissionsSeeder;
 use Illuminate\Database\Seeder;
@@ -28,7 +29,7 @@ class DatabaseTenantSeeder extends Seeder
             OpportunitySeeder::class,
             ItemCategorySeeder::class,
             ItemSeeder::class,
-            // PaymentMethodSeeder::class,
+            PaymentMethodSeeder::class,
             // ItemStatusSeeder::class,
             // ItemCategorySeeder::class,
             // AppSettingsSeeder::class,

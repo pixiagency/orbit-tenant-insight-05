@@ -8,6 +8,7 @@ return [
      */
     'settings' => [
         \App\Settings\TasksSettings::class,
+        \App\Settings\DealsSettings::class,
     ],
 
     /*
