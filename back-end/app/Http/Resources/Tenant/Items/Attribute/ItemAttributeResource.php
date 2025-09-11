@@ -9,11 +9,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @property int $id
  * @property string $name
- * @property string $value
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class AttributeResource extends JsonResource
+class ItemAttributeResource extends JsonResource
 {
 
     /**
@@ -26,7 +25,7 @@ class AttributeResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'value' => $this->value,
+            'values' => $this->whenLoaded('values', fn() => ItemAttributeValueResource::collection($this->values)),
         ];
     }
 }

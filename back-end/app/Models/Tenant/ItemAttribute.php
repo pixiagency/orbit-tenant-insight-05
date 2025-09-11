@@ -6,22 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class ItemAttribute extends Model
 {
-    public $fillable = [
-        'name',
-        'value'
-    ];
-
-    protected $casts = [
-        'value' => 'array',
-    ];
+    protected $table = 'item_attributes';
+    protected $fillable = ['name'];
+    public function values()
+    {
+        return $this->hasMany(ItemAttributeValue::class);
+    }
 
     public function items()
     {
-        return $this->hasMany(Item::class);
-    }
-
-    public function scopeOrdered($query)
-    {
-        return $query->orderBy('name', 'asc');
+        return $this->belongsToMany(Item::class, 'item_attributes');
     }
 }

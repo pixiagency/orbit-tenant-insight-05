@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AttributeValueController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
@@ -12,7 +13,8 @@ use App\Http\Controllers\Api\Tasks\{
     TaskTypeController
 };
 use App\Http\Controllers\Api\CoreController;
-
+use App\Http\Controllers\Api\ItemAttributeController;
+use App\Http\Controllers\Api\ItemAttributeValueController;
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
@@ -122,13 +124,27 @@ Route::middleware([
     Route::get('/contacts/statistics', [\App\Http\Controllers\Api\ContactController::class, 'get_statistics']);
     Route::get('contacts/contact-methods', [\App\Http\Controllers\Api\ContactController::class, 'getContactMethods']);
     Route::apiResource('contacts', \App\Http\Controllers\Api\ContactController::class);
-    Route::get('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'getAttributes']);
-    Route::delete('items/attributes/{attribute}', [\App\Http\Controllers\Api\ItemController::class, 'destroyAttributes']);
-    Route::get('items/attributes/{attribute}', [\App\Http\Controllers\Api\ItemController::class, 'getAttribute']);
-    Route::post('items/attributes', [\App\Http\Controllers\Api\ItemController::class, 'storeAttributes']);
+    Route::prefix('item-attributes')->group(function () {
+        Route::get('/', [ItemAttributeController::class, 'index']);
+        Route::post('/', [ItemAttributeController::class, 'store']);
+        Route::get('/{attribute}', [ItemAttributeController::class, 'show']);
+        Route::put('/{attribute}', [ItemAttributeController::class, 'update']);
+        Route::delete('/{attribute}', [ItemAttributeController::class, 'destroy']);
+
+        // Attribute values routes
+        Route::post('/{attribute}/values', [ItemAttributeValueController::class, 'store']);
+        Route::put('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'update']);
+        Route::delete('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'destroy']);
+    });
     Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
     Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
     Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
+    Route::prefix('items')->group(function () {
+        // Route::get('/', [ProductController::class, 'index']);
+        Route::post('/bulk-with-variants', [\App\Http\Controllers\Api\ItemController::class, 'bulkStoreWithVariants']);
+        // Route::get('/{product}', [ProductController::class, 'show']);
+        Route::get('/{item}/variants', [\App\Http\Controllers\Api\ItemController::class, 'getVariants']);
+    });
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
