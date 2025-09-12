@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Tenant;
 
 use App\Models\Tenant\Item;
 use App\Models\Tenant\ItemAttribute;

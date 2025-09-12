@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create('item_variants_attribute_values', function (Blueprint $table) {
             $table->id();
             $table->foreignId('variant_id')->constrained('item_variants');
-            $table->foreignId('attribute_id')->constrained('item_attributes');
+            $table->foreignId('item_attribute_id')->constrained('item_attributes');
             $table->foreignId('item_attribute_value_id')->constrained('item_attribute_values');
             $table->timestamps();
 
-            $table->unique(['variant_id', 'attribute_id'], 'variant_attribute_unique');
+            $table->unique(['variant_id', 'item_attribute_id'], 'variant_attribute_unique');
         });
     }
 

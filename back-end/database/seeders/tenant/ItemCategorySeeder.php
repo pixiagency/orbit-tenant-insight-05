@@ -13,7 +13,7 @@ class ItemCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        ItemCategory::updateOrCreate([
+        $productCategory = ItemCategory::updateOrCreate([
             'name' => 'Electronics',
             'type' => ItemType::PRODUCT->value,
             'parent_id' => null,
@@ -23,7 +23,7 @@ class ItemCategorySeeder extends Seeder
             'type' => ItemType::PRODUCT->value,
             'parent_id' => null,
         ]);
-        ItemCategory::updateOrCreate([
+        $serviceCategory = ItemCategory::updateOrCreate([
             'name' => 'Software',
             'type' => ItemType::SERVICE->value,
             'parent_id' => null,
@@ -33,6 +33,16 @@ class ItemCategorySeeder extends Seeder
             'type' => ItemType::SERVICE->value,
             'parent_id' => null,
         ]);
-        ItemCategory::factory()->count(10)->create();
+
+        $productCategory->children()->updateOrCreate([
+            'name' => 'Electronics3',
+            'type' => ItemType::PRODUCT->value,
+            'parent_id' => $productCategory->id,
+        ]);
+        $serviceCategory->children()->updateOrCreate([
+            'name' => 'Software3',
+            'type' => ItemType::SERVICE->value,
+            'parent_id' => $serviceCategory->id,
+        ]);
     }
 }

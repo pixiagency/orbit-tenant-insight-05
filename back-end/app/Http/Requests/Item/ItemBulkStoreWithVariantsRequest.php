@@ -57,6 +57,10 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
                 'string',
                 'max:1000'
             ],
+            'products.*.category_id' => [
+                'required',
+                'exists:item_categories,id',
+            ],
 
             // Variants validation
             'products.*.variants' => [

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Tasks\{
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
+use App\Http\Controllers\Api\ItemVariantController;
 use App\Http\Controllers\Api\TranslatableExampleController;
 use App\Http\Controllers\Central\Api\AuthController as  centralAuthController;
 use App\Http\Controllers\Central\Api\PaymentController;
@@ -140,10 +141,14 @@ Route::middleware([
     Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
     Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
     Route::prefix('items')->group(function () {
-        // Route::get('/', [ProductController::class, 'index']);
         Route::post('/bulk-with-variants', [\App\Http\Controllers\Api\ItemController::class, 'bulkStoreWithVariants']);
-        // Route::get('/{product}', [ProductController::class, 'show']);
-        Route::get('/{item}/variants', [\App\Http\Controllers\Api\ItemController::class, 'getVariants']);
+    });
+    Route::prefix('items/{item}/variants')->group(function () {
+        Route::get('/', [ItemVariantController::class, 'index']); 
+        Route::post('/', [ItemVariantController::class, 'store']); // Create single variant
+        Route::get('/{variant}', [ItemVariantController::class, 'show']); // Show variant
+        Route::put('/{variant}', [ItemVariantController::class, 'update']); // Update variant
+        Route::delete('/{variant}', [ItemVariantController::class, 'destroy']); // Delete variant
     });
 
     Route::middleware('auth:sanctum')->group(function () {

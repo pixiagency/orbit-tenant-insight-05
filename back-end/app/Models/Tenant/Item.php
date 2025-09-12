@@ -63,4 +63,9 @@ class Item extends Model
     {
         return $query->orderBy('created_at', 'asc');
     }
+    
+    public function variants()
+    {
+        return $this->hasMany(ItemVariant::class);
+    }
 }

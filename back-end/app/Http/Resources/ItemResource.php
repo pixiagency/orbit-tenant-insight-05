@@ -27,6 +27,8 @@ class ItemResource extends JsonResource
             'quantity' => $this->when($this->quantity !== null, $this->quantity),
             'duration' => $this->when($this->duration !== null, $this->duration),
             'category' => $this->whenLoaded('category', fn() => new ItemCategoryDDLResource($this->category)),
+            'variants_count' => $this->variants->count(),
+            'variants' => ItemProductVariantResource::collection($this->whenLoaded('variants')),
         ];
     }
 }
