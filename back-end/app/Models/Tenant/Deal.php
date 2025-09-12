@@ -27,6 +27,8 @@ class Deal extends Model implements HasMedia
         'assigned_to_id',
         'stage_id',
         'total_amount',
+        'partial_amount_paid',
+        'partial_amount_due',
     ];
 
     public function contact()

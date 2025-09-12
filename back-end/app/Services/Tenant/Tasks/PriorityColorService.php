@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tenant;
+namespace App\Services\Tenant\Tasks;
 
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Tenant\PriorityColor;

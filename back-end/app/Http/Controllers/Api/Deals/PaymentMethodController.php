@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Deals;
 
 use App\Exceptions\GeneralException;
 
@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant\PaymentMethod;
-use App\Services\Tenant\PaymentMethodService;
+use App\Services\Tenant\Deals\PaymentMethodService;
 use Illuminate\Http\Request;
 
 
@@ -95,18 +95,5 @@ class PaymentMethodController extends Controller
             DB::rollBack();
             return apiResponse(message: $e->getMessage(), code: 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

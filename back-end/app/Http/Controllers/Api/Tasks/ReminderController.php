@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Tasks;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tenant\Tasks\ReminderResource;
 use App\Models\Tenant\Reminder;
-use App\Services\Tenant\ReminderService;
+use App\Services\Tenant\Tasks\ReminderService;
 use Exception;
 use Illuminate\Http\Request;
 

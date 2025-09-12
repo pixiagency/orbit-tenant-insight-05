@@ -12,6 +12,10 @@ use App\Http\Controllers\Api\Tasks\{
     TaskController,
     TaskTypeController
 };
+use \App\Http\Controllers\Api\Deals\{
+    DealController,
+    PaymentMethodController
+};
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -183,7 +187,8 @@ Route::middleware([
         Route::get('/{form}/submissions', [FormSubmissionController::class, 'submissions']);
     });
 
-    Route::apiResource('deals', \App\Http\Controllers\Api\DealController::class);
+    Route::apiResource('deals', DealController::class);
+    Route::get('deals/get/statistics', [DealController::class, 'statistics']);
 
     Route::get('/opportunities/statistics', [\App\Http\Controllers\Api\OpportunityController::class, 'statistics']);
     Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
@@ -209,9 +214,9 @@ Route::middleware([
     Route::put('loss-reasons/{lossReasonId}', [\App\Http\Controllers\Api\LossReasonController::class, 'update']);
     Route::delete('loss-reasons/{lossReasonId}', [\App\Http\Controllers\Api\LossReasonController::class, 'destroy']);
 
-    Route::apiResource('payment-methods', \App\Http\Controllers\Api\PaymentMethodController::class);
-    Route::patch('/payment-methods/{id}/set-default', [\App\Http\Controllers\Api\PaymentMethodController::class, 'setDefault']);
-    Route::patch('/payment-methods/{id}/set-checked', [\App\Http\Controllers\Api\PaymentMethodController::class, 'setChecked']);
+    Route::apiResource('payment-methods', PaymentMethodController::class);
+    Route::patch('/payment-methods/{id}/set-default', [PaymentMethodController::class, 'setDefault']);
+    Route::patch('/payment-methods/{id}/set-checked', [PaymentMethodController::class, 'setChecked']);
     Route::get('/locations/countries', [\App\Http\Controllers\Api\LocationController::class, 'getCountries']);
     Route::get('/locations/countries/{countryId}/cities', [\App\Http\Controllers\Api\LocationController::class, 'getCities']);
     Route::get('/locations/cities/{cityId}/areas', [\App\Http\Controllers\Api\LocationController::class, 'getAreas']);

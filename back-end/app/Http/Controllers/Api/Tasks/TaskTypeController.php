@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Tasks;
 use App\Exceptions\GeneralException;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tenant\Tasks\TaskTypeResource;
-use App\Services\Tenant\TaskTypeService;
+use App\Services\Tenant\Tasks\TaskTypeService;
 use DB;
 use Exception;
 

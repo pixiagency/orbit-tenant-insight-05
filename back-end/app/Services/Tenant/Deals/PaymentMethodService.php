@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tenant;
+namespace App\Services\Tenant\Deals;
 
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\PaymentMethod;

@@ -21,6 +21,8 @@ class DealDTO extends BaseDTO
         public ?int $assigned_to_id = null,
         public ?int $stage_id = null,
         public ?float $total_amount = null,
+        public ?float $partial_amount_paid = null,
+        public ?float $partial_amount_due = null,
         public ?array $items = null,
         public ?array $attachments = null,
     ) {}
@@ -41,6 +43,8 @@ class DealDTO extends BaseDTO
             assigned_to_id: $request->input('assigned_to_id'),
             stage_id: $request->input('stage_id'),
             total_amount: $request->input('total_amount'),
+            partial_amount_paid: $request->input('partial_amount_paid'),
+            partial_amount_due: $request->input('partial_amount_due'),
             items: $request->input('items'),
             attachments: $request->file('attachments'),
         );
@@ -62,6 +66,8 @@ class DealDTO extends BaseDTO
             'assigned_to_id' => $this->assigned_to_id,
             'stage_id' => $this->stage_id,
             'total_amount' => $this->total_amount,
+            'partial_amount_paid' => $this->partial_amount_paid,
+            'partial_amount_due' => $this->partial_amount_due,
             'items' => $this->items,
             'attachments' => $this->attachments,
         ];
@@ -83,6 +89,8 @@ class DealDTO extends BaseDTO
             assigned_to_id: Arr::get($data, 'assigned_to_id'),
             stage_id: Arr::get($data, 'stage_id'),
             total_amount: Arr::get($data, 'total_amount'),
+            partial_amount_paid: Arr::get($data, 'partial_amount_paid'),
+            partial_amount_due: Arr::get($data, 'partial_amount_due'),
             items: Arr::get($data, 'items'),
             attachments: Arr::get($data, 'attachments'),
         );

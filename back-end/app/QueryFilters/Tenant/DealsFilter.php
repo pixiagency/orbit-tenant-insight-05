@@ -1,9 +1,8 @@
 <?php
 
-namespace App\QueryFilters;
+namespace App\QueryFilters\Tenant;
 
 use App\Abstracts\QueryFilter;
-use Carbon\Carbon;
 
 class DealsFilter extends QueryFilter
 {
@@ -19,11 +18,11 @@ class DealsFilter extends QueryFilter
     {
         return $this->builder->where(function ($query) use ($term) {
             $query->where('deal_name', 'LIKE', "%$term%")
-                  ->orWhereHas('contact', function ($q) use ($term) {
-                      $q->where('first_name', 'LIKE', "%$term%")
+                ->orWhereHas('contact', function ($q) use ($term) {
+                    $q->where('first_name', 'LIKE', "%$term%")
                         ->orWhere('last_name', 'LIKE', "%$term%")
                         ->orWhere('company_name', 'LIKE', "%$term%");
-                  });
+                });
         });
     }
 
@@ -58,16 +57,28 @@ class DealsFilter extends QueryFilter
      */
     public function value_range($term)
     {
-        if (is_array($term)) {
-            if (isset($term['min']) && !empty($term['min'])) {
-                $this->builder->where('total_amount', '>=', $term['min']);
-            }
-            if (isset($term['max']) && !empty($term['max'])) {
-                $this->builder->where('total_amount', '<=', $term['max']);
-            }
+        // Expect one of: all | small | medium | large
+        $value = is_string($term) ? strtolower(trim($term)) : '';
+
+        // Thresholds in the same currency unit as total_amount
+        $smallMax = 50000;    // < 50k
+        $mediumMin = 50000;   // >= 50k
+        $mediumMax = 100000;  // <= 100k
+        $largeMin = 100000;   // > 100k
+
+        switch ($value) {
+            case 'small':
+                return $this->builder->where('total_amount', '<', $smallMax);
+            case 'medium':
+                return $this->builder
+                    ->where('total_amount', '>=', $mediumMin)
+                    ->where('total_amount', '<=', $mediumMax);
+            case 'large':
+                return $this->builder->where('total_amount', '>', $largeMin);
+            case 'all':
+            default:
+                return $this->builder; // no filtering
         }
-        
-        return $this->builder;
     }
 
     /**
@@ -86,7 +97,7 @@ class DealsFilter extends QueryFilter
             // Handle single date string
             $this->builder->where('created_at', '>=', $term);
         }
-        
+
         return $this->builder;
     }
 
@@ -106,7 +117,7 @@ class DealsFilter extends QueryFilter
             // Handle single date string
             $this->builder->where('sale_date', '>=', $term);
         }
-        
+
         return $this->builder;
     }
 
@@ -134,7 +145,7 @@ class DealsFilter extends QueryFilter
         if (is_array($term)) {
             return $this->builder->whereIn('stage_id', $term);
         }
-        
+
         return $this->builder->where('stage_id', $term);
     }
 
@@ -146,7 +157,7 @@ class DealsFilter extends QueryFilter
         if (is_array($term)) {
             return $this->builder->whereIn('assigned_to_id', $term);
         }
-        
+
         return $this->builder->where('assigned_to_id', $term);
     }
 
@@ -160,7 +171,7 @@ class DealsFilter extends QueryFilter
                 $query->whereIn('source_id', $term);
             });
         }
-        
+
         return $this->builder->whereHas('contact', function ($query) use ($term) {
             $query->where('source_id', $term);
         });

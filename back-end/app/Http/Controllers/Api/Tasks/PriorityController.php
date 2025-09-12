@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 use App\DTO\Priority\PriorityDTO;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Tenant\PriorityRequest;
+use App\Http\Requests\Tenant\Tasks\PriorityRequest;
 use App\Http\Resources\Tenant\Tasks\PriorityResource;
-use App\Services\Tenant\PriorityService;
+use App\Services\Tenant\Tasks\PriorityService;
 
 class PriorityController extends Controller
 {

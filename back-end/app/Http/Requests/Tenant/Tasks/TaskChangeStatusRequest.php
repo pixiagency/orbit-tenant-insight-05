@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Tenant;
+namespace App\Http\Requests\Tenant\Tasks;
 
 use App\Enums\TaskStatus;
 use App\Http\Requests\BaseRequest;

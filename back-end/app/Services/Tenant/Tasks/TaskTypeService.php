@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tenant;
+namespace App\Services\Tenant\Tasks;
 
 use App\Exceptions\GeneralException;
 use Illuminate\Database\Eloquent\Builder;

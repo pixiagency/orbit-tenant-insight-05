@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Services\Tenant;
+namespace App\Services\Tenant\Tasks;
 
 use App\DTO\Tenant\TaskDTO;
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\Reminder;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Tenant\Task;
-use App\QueryFilters\TaskFilters;
+use App\QueryFilters\Tenant\TaskFilters;
 use App\Services\BaseService;
 use DB;
 use Illuminate\Contracts\Pagination\CursorPaginator;

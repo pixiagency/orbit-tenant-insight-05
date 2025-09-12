@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Tenant\Deals;
 
 use App\DTO\Tenant\DealDTO;
 use App\Enums\DealType;
 use App\Models\Tenant\Deal;
 use App\Models\Tenant\DealAttachment;
 use App\Models\Tenant\Item;
-use App\QueryFilters\DealsFilter;
+use App\QueryFilters\Tenant\DealsFilter;
+use App\Services\BaseService;
 use App\Settings\DealsSettings;
+use Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -43,38 +45,55 @@ class DealService extends BaseService
         return $query->paginate(per_page());
     }
 
-    public function create(DealDTO $dealDTO): Deal
+    /**
+     * Get a single deal with all relationships
+     */
+    public function show(int $dealId): Deal
     {
-        // Validate payment status if partial payment
-        if ($dealDTO->payment_status === 'partial') {
-            $settings = app(DealsSettings::class);
-            if (!$settings->enable_partial_payments) {
-                throw ValidationException::withMessages([
-                    'payment_status' => ['Partial payments are not enabled in the system settings.']
-                ]);
-            }
-        }
+        return $this->model
+            ->with([
+                'contact',
+                'stage.pipeline',
+                'assigned_to',
+                'items',
+                'attachments'
+            ])
+            ->findOrFail($dealId);
+    }
 
-        // Validate discount settings
-        if ($dealDTO->discount_value && $dealDTO->discount_value > 0) {
-            $settings = app(DealsSettings::class);
-            
-            // Check if discounts are enabled
-            if (!$settings->enable_discounts) {
-                throw ValidationException::withMessages([
-                    'discount_value' => ['Discounts are not enabled in the system settings.']
-                ]);
-            }
-            
-            // Check maximum discount percentage if discount type is percentage
-            if ($dealDTO->discount_type === 'percentage') {
-                if ($dealDTO->discount_value > $settings->maximum_discount_percentage) {
-                    throw ValidationException::withMessages([
-                        'discount_value' => ["Discount percentage cannot exceed {$settings->maximum_discount_percentage}%."]
-                    ]);
-                }
-            }
-        }
+    /**
+     * Get simple statistics for deals
+     */
+    public function statistics(): array
+    {
+        $totalDeals = (int) $this->model->count();
+        $pipelineValue = (float) $this->model->sum('total_amount');
+        $wonDeals = (int) $this->model->where('payment_status', 'paid')->count();
+        $avgDealSize = $totalDeals > 0 ? round($pipelineValue / $totalDeals, 2) : 0.0;
+
+        return [
+            'total_deals' => $totalDeals,
+            'pipeline_value' => $pipelineValue,
+            'won_deals' => $wonDeals,
+            'avg_deal_size' => $avgDealSize,
+        ];
+    }
+
+    /**
+     * Delete a deal and its related resources (media/attachments via cascades)
+     */
+    public function destroy(int $dealId): void
+    {
+        $deal = $this->model->findOrFail($dealId);
+        // Deleting the model will cascade delete deal_attachments (FK) and
+        // Spatie MediaLibrary will cleanup media for the model automatically.
+        $deal->delete();
+    }
+
+    public function store(DealDTO $dealDTO): Deal
+    {
+        // Validate deal settings
+        $this->validateDealSettings($dealDTO);
         
 
         return DB::transaction(function () use ($dealDTO) {
@@ -97,21 +116,8 @@ class DealService extends BaseService
             $totalAmount = $this->afterTax($afterDiscount, $dealDTO->tax_rate ?? 0);
 
             // Create deal
-            $deal = $this->model->create([
-                'deal_type' => $dealDTO->deal_type,
-                'deal_name' => $dealDTO->deal_name,
-                'contact_id' => $dealDTO->contact_id,
-                'sale_date' => $dealDTO->sale_date,
-                'discount_type' => $dealDTO->discount_type,
-                'discount_value' => $dealDTO->discount_value,
-                'tax_rate' => $dealDTO->tax_rate,
-                'payment_status' => $dealDTO->payment_status,
-                'payment_method_id' => $dealDTO->payment_method_id,
-                'notes' => $dealDTO->notes,
-                'assigned_to_id' => $dealDTO->assigned_to_id,
-                'stage_id' => $dealDTO->stage_id,
-                'total_amount' => $totalAmount,
-            ]);
+            $dealDTO->total_amount = $totalAmount ;
+            $deal = $this->model->create( Arr::except($dealDTO->toArray(), ['items','attachments']));
 
             // Attach items
             $deal->items()->attach($itemsData['pivot']);
@@ -123,6 +129,94 @@ class DealService extends BaseService
 
             return $deal->load('items', 'stage.pipeline', 'attachments');
         });
+    }
+
+    public function update(DealDTO $dealDTO, int $dealId): Deal
+    {
+        // Validate deal settings
+        $this->validateDealSettings($dealDTO);
+
+        return DB::transaction(function () use ($dealDTO, $dealId) {
+            $deal = $this->model->findOrFail($dealId);
+            
+            $items = $dealDTO->items ?? [];
+
+            if (empty($items)) {
+                throw ValidationException::withMessages(['items' => ['At least one item is required.']]);
+            }
+
+            // Merge duplicate items
+            $mergedItems = $this->mergeItems($items);
+
+            // Validate and prepare items
+            $itemsData = $this->prepareItems($mergedItems);
+
+            $total = collect($itemsData['pivot'])->sum('total');
+
+            $afterDiscount = $this->afterDiscount($total, $dealDTO->discount_value ?? 0, $dealDTO->discount_type ?? 'fixed');
+
+            $totalAmount = $this->afterTax($afterDiscount, $dealDTO->tax_rate ?? 0);
+
+            // Update deal
+            $dealDTO->total_amount = $totalAmount ;
+            $deal->update( Arr::except($dealDTO->toArray(), ['items','attachments']));
+
+            // Sync items (remove old, add new)
+            $deal->items()->sync($itemsData['pivot']);
+
+            // Handle attachments if provided
+            if ($dealDTO->attachments && count($dealDTO->attachments) > 0) {
+                $this->handleAttachments($deal, $dealDTO->attachments);
+            }
+
+            return $deal->load('items', 'stage.pipeline', 'attachments');
+        });
+    }
+
+    /**
+     * Validate deal settings (shared between create and update)
+     */
+    private function validateDealSettings(DealDTO $dealDTO): void
+    {
+        $settings = app(DealsSettings::class);
+
+        // Validate attachments feature toggle
+        if (!$settings->enable_attachments && !empty($dealDTO->attachments)) {
+            throw ValidationException::withMessages([
+                'attachments' => ['Attachments are disabled in the system settings.']
+            ]);
+        }
+
+        // Validate payment status if partial payment
+        if ($dealDTO->payment_status === 'partial') {
+            if (!$settings->enable_partial_payments) {
+                throw ValidationException::withMessages([
+                    'payment_status' => ['Partial payments are not enabled in the system settings.']
+                ]);
+            }
+        }
+
+        // Validate discount settings
+        if ($dealDTO->discount_value && $dealDTO->discount_value > 0) {
+            // Using settings loaded above
+            
+            // Check if discounts are enabled
+            if (!$settings->enable_discounts) {
+                throw ValidationException::withMessages([
+                    'discount_value' => ['Discounts are not enabled in the system settings.']
+                ]);
+            }
+            
+            // Check maximum discount percentage if discount type is percentage
+            if ($dealDTO->discount_type === 'percentage') {
+                if ($dealDTO->discount_value > $settings->maximum_discount_percentage) {
+                    throw ValidationException::withMessages([
+                        'discount_value' => ["Discount percentage cannot exceed {$settings->maximum_discount_percentage}%."]
+                    ]);
+                }
+            }
+        }
+        
     }
 
     private function mergeItems(array $items): array

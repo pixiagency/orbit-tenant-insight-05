@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Tenant\Tasks\PriorityColorResource;
-use App\Services\Tenant\PriorityColorService;
+use App\Services\Tenant\Tasks\PriorityColorService;
 
 class PriorityColorController extends Controller
 {

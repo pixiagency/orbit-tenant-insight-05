@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Tenant\Task;
 use App\Models\Tenant\Lead;
-use App\Services\Tenant\TaskService;
+use App\Services\Tenant\Tasks\TaskService;
 use Exception;
 
 class CoreService extends BaseService

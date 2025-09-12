@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Deal;
+namespace App\Http\Requests\Tenant\Deals;
 
 use App\Enums\DealTypeEnum;
 use App\Enums\DiscountTypeEnum;
@@ -9,7 +9,7 @@ use App\Settings\DealsSettings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreDealRequest extends FormRequest
+class DealRequest extends FormRequest
 {
 
     public function authorize(): bool
@@ -29,9 +29,14 @@ class StoreDealRequest extends FormRequest
             'tax_rate' => 'required|numeric',
             'assigned_to_id' => 'required|exists:users,id',
             'payment_status' => ['required', Rule::in(PaymentStatusEnum::values())],
-            'payment_method_id' => 'required|exists:payment_methods,id',
+            'payment_method_id' => [
+                'required',
+                Rule::exists('payment_methods', 'id')->where(fn($q) => $q->where('is_checked', 1))
+            ],
             'notes' => 'nullable|string|max:255',
             'stage_id' => 'required|exists:stages,id',
+            'partial_amount_paid' => 'required_if:payment_status,partial|nullable|numeric|min:0',
+            'partial_amount_due' => 'required_if:payment_status,partial|nullable|numeric|min:0',
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.quantity' => 'sometimes|integer',

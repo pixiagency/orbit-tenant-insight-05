@@ -1,6 +1,6 @@
 <?php
 
-namespace App\QueryFilters;
+namespace App\QueryFilters\Tenant;
 
 use App\Abstracts\QueryFilter;
 use Carbon\Carbon;

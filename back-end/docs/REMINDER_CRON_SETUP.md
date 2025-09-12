@@ -82,7 +82,7 @@ For multi-tenant applications, you can process reminders for specific tenants:
 
 ### In Controllers
 ```php
-use App\Services\Tenant\ReminderService;
+use App\Services\Tenant\Tasks\ReminderService;
 
 public function getReminders()
 {

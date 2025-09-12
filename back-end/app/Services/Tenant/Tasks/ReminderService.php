@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tenant;
+namespace App\Services\Tenant\Tasks;
 
 use App\Models\Tenant\Reminder;
 use Carbon\Carbon;

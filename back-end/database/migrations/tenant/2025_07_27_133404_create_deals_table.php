@@ -36,13 +36,13 @@ return new class extends Migration
             $table->foreignId('stage_id')->constrained('stages');
 
             // total amount
-            $table->decimal('total_amount', 10, 2);
+            $table->decimal('total_amount', 10, 2)->default(0);
             
             $table->decimal('partial_amount_paid', 10, 2)->default(0);
             $table->decimal('partial_amount_due', 10, 2)->default(0);
 
             // Notes
-            $table->text('notes');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
