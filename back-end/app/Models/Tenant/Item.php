@@ -4,6 +4,7 @@ namespace App\Models\Tenant;
 
 use App\Enums\ItemType;
 use App\Enums\ServiceDuration;
+use App\Enums\ServiceType;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,6 +20,7 @@ class Item extends Model
         'quantity',
         'category_id',
         'duration',
+        'service_type',
         'type',
         'attributes',
     ];
@@ -27,6 +29,7 @@ class Item extends Model
         'attributes' => 'array',
         'duration' => ServiceDuration::class,
         'type' => ItemType::class,
+        'service_type' => ServiceType::class,
         'price' => 'decimal:2'
     ];
 
@@ -51,7 +54,7 @@ class Item extends Model
 
     public function opportunities()
     {
-        return $this->belongsToMany(Lead::class, 'lead_items', 'item_id', 'lead_id');
+        return $this->belongsToMany(Lead::class, 'leads_items', 'item_id', 'lead_id');
     }
 
     public function category()
@@ -63,7 +66,7 @@ class Item extends Model
     {
         return $query->orderBy('created_at', 'asc');
     }
-    
+
     public function variants()
     {
         return $this->hasMany(ItemVariant::class);

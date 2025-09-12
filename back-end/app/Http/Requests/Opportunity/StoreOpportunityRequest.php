@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Opportunity;
 
 use App\Enums\OpportunityStatus;
+use App\Rules\Tenant\ItemQuantityRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +26,10 @@ class StoreOpportunityRequest extends FormRequest
             'assigned_to_id' => 'required|exists:users,id',
             'notes' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:255',
-
+            'items' => 'nullable|array',
+            'items.*.id' => 'required|exists:items,id',
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'items.*.price' => 'nullable|numeric',
         ];
     }
 }

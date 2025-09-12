@@ -12,6 +12,7 @@ use App\Http\Resources\Tenant\Opportunity\OpportunityDDLResource;
 use App\Models\Filters\OpportunityFilter;
 use App\Models\Tenant\Contact;
 use App\Models\Tenant\Lead;
+use App\Services\LeadService;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 
 class OpportunityController extends Controller
 {
+    public function __construct(public LeadService $leadService) {}
 
     public function statistics()
     {
@@ -63,12 +65,12 @@ class OpportunityController extends Controller
         $opportunityFilter = new OpportunityFilter($filters);
         $query = $opportunityFilter->apply($query);
 
-        if($request->has('ddl')){
+        if ($request->has('ddl')) {
             $opportunities = $query->get();
             $data = OpportunityDDLResource::collection($opportunities);
-        }else{
+        } else {
             // Paginate the results
-            $opportunities = $query->with('contact', 'city', 'stage')->paginate(per_page());
+            $opportunities = $query->with('contact', 'city', 'stage', 'items')->paginate(per_page());
             $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
         }
 
@@ -80,21 +82,9 @@ class OpportunityController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = $request->validated();
-
-            Lead::create([
-                'contact_id' => $data['contact_id'],
-                'stage_id' => $data['stage_id'],
-                'status' => $data['status'],
-                'deal_value' => $data['deal_value'],
-                'win_probability' => $data['win_probability'],
-                'expected_close_date' => $data['expected_close_date'],
-                'assigned_to_id' => $data['assigned_to_id'],
-                'notes' => $data['notes'],
-                'description' => $data['description'],
-            ]);
+            $lead = $this->leadService->store($request->validated());
             DB::commit();
-            return ApiResponse(message: 'Opportunity created successfully', code: 201);
+            return ApiResponse(message: 'Opportunity created successfully', code: 201, data: new OpportunityResource($lead));
         } catch (Exception $e) {
             DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: 500);
