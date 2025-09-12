@@ -1,6 +1,8 @@
 <?php
 
-use App\Enums\DealType;
+use App\Enums\DealTypeEnum;
+use App\Enums\DiscountTypeEnum;
+use App\Enums\PaymentStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('deals', function (Blueprint $table) {
             $table->id();
-            $table->enum('deal_type', DealType::values());
+            $table->enum('deal_type', DealTypeEnum::values());
 
             // basic info
             $table->string('deal_name');
@@ -23,18 +25,21 @@ return new class extends Migration
 
 
             // tax info & discount
-            $table->enum('discount_type', ['percentage', 'fixed']);
-            $table->decimal('discount_value', 10, 2);
+            $table->enum('discount_type', DiscountTypeEnum::values())->nullable();
+            $table->decimal('discount_value', 10, 2)->nullable();
             $table->decimal('tax_rate', 10, 2);
 
             // Assignment
             $table->foreignId('assigned_to_id')->constrained('users');
-            $table->enum('payment_status', ['paid', 'unpaid', 'partial']);
+            $table->enum('payment_status', PaymentStatusEnum::values());
             $table->foreignId('payment_method_id')->constrained('payment_methods');
             $table->foreignId('stage_id')->constrained('stages');
 
             // total amount
             $table->decimal('total_amount', 10, 2);
+            
+            $table->decimal('partial_amount_paid', 10, 2)->default(0);
+            $table->decimal('partial_amount_due', 10, 2)->default(0);
 
             // Notes
             $table->text('notes');

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tenant\Contact;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

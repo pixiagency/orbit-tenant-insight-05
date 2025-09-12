@@ -45,6 +45,13 @@ class Contact extends Model
         'tags' => 'array', // Automatically handle JSON encoding/decoding
     ];
 
+    /**
+     * Get the full name by combining first_name and last_name
+     */
+    public function getNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
 
     public function city(): BelongsTo
     {
