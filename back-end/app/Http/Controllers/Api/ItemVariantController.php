@@ -11,22 +11,20 @@ use App\Models\Tenant\Item;
 use App\Models\Tenant\ItemAttribute;
 use App\Models\Tenant\ItemAttributeValue;
 use App\Models\Tenant\ItemVariant;
+use App\Services\Tenant\ItemVariantService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ItemVariantController extends Controller
 {
+    public function __construct(public ItemVariantService $itemVariantService) {}
     /**
      * Display a listing of the variants for a product.
      */
     public function index(Item $item)
     {
-        $variants = $item->variants()
-            ->with(['attributeValues.attribute'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(request()->per_page ?? 10);
-
+        $variants = $this->itemVariantService->index(itemId: $item->id, withRelations: ['attributeValues.attribute'], perPage: $filters['per_page'] ?? 10);
         $data = ItemProductVariantResource::collection($variants)->response()->getData(true);
         return apiResponse($data, 'Product variants retrieved successfully', Response::HTTP_OK);
     }
