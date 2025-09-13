@@ -14,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property Carbon $updated_at
  * @property mixed $roles
  */
-class UserDDLResource extends JsonResource
+class DepartmentResource extends JsonResource
 {
 
     /**
@@ -26,11 +26,8 @@ class UserDDLResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'image' => $this->image,
             'name' => $this->name,
-            // 'role' => $this->roles?->first()?->name,
-            'role' => 'No Role',
-            'department' => $this->department?->localized_name,
+            'description' => $this->description,
         ];
     }
 }

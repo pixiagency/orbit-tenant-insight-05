@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 
 use Database\Seeders\tenant\ContactSeeder;
+use Database\Seeders\Tenant\DepartmentSeeder;
 use Database\Seeders\tenant\ItemCategorySeeder;
 use Database\Seeders\tenant\ItemSeeder;
 use Database\Seeders\tenant\OpportunitySeeder;
@@ -22,6 +23,7 @@ class DatabaseTenantSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             CountriesWithCitiesSeeder::class,
+            DepartmentSeeder::class,
             UserSeeder::class,
             SourceSeeder::class,
             PipelineSeeder::class,

@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use App\Enums\UserType;
-use App\Services\UserService;
+use App\Services\Tenant\Users\UserService;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

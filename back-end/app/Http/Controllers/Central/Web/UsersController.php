@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Central\Web;
 
 use Exception;
 use Illuminate\Http\Request;
-use App\Services\UserService;
+use App\Services\Tenant\Users\UserService;
 use App\DataTables\UsersDatatable;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;

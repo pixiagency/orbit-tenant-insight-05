@@ -49,4 +49,10 @@ class UsersFilters extends QueryFilter
     {
         return $this->builder->role($term);
     }
+
+    
+    public function department_id($term)
+    {
+        return $this->builder->where('department_id', $term);
+    }
 }

@@ -16,6 +16,10 @@ use \App\Http\Controllers\Api\Deals\{
     DealController,
     PaymentMethodController
 };
+use \App\Http\Controllers\Api\Users\{
+    DepartmentController,
+    UserController
+};
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -156,7 +160,8 @@ Route::middleware([
             return response()->json(Auth::user());
         });
         // Route::middleware('role:admin')->group(function () {
-        Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
+        Route::apiResource('users', UserController::class);
+        Route::get('departments', [DepartmentController::class,'index']);
         Route::apiResource('tasks', TaskController::class);
         Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
         Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);

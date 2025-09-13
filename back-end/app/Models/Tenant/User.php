@@ -29,6 +29,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'department_id',
     ];
 
     /**
@@ -73,7 +74,7 @@ class User extends Authenticatable
         ];
     }
 
-        /**
+    /**
      * @param $image
      * @return string
      */
@@ -98,5 +99,10 @@ class User extends Authenticatable
             }
             $this->attributes['image'] = $imageFields;
         }
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

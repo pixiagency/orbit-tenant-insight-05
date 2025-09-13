@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Tenant\Users;
 
 use App\DTO\User\UserDTO;
 use App\Models\Tenant\User;
@@ -60,9 +60,9 @@ class UserService extends BaseService
 
         $data = $userDTO->toArray();
         $user = $this->getModel()->create($data);
-        if (Role::where('name', $userDTO->role)->exists()) {
-            $user->assignRole($userDTO->role);
-        }
+        // if (Role::where('name', $userDTO->role)->exists()) {
+        //     $user->assignRole($userDTO->role);
+        // }
         return $user->load('roles');
     }
 
