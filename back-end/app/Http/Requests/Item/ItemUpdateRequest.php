@@ -3,7 +3,10 @@
 namespace App\Http\Requests\Item;
 
 use App\Enums\DealType;
+use App\Enums\ItemType;
+use App\Enums\ServiceDuration;
 use App\Http\Requests\BaseRequest;
+use App\Rules\Tenant\ItemCategoryRule;
 use Illuminate\Validation\Rule;
 
 class ItemUpdateRequest extends BaseRequest
@@ -24,15 +27,14 @@ class ItemUpdateRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'sametime|string|unique:items,name',
+            'name' => 'nullable|string|unique:items,name,' . $this->route('item'),
             'description' => 'nullable|string',
-            'price' => 'sametime|numeric',
-            'quantity' => 'sametime|integer',
-            'category_id' => 'sametime|exists:item_categories,id',
-            'unit' => 'sametime|string',
-            'image' => 'nullable|string',
-            'status' => 'sametime|exists:item_statuses,id',
-            'type' => ['sametime', Rule::in(DealType::values())],
+            'price' => 'nullable|numeric',
+            'sku' => 'nullable|string|unique:items,sku,' . $this->route('item'),
+            'quantity' => 'nullable|integer',
+            'category_id' => ['nullable', new ItemCategoryRule($this->type)],
+            'duration' => ['nullable', Rule::in(ServiceDuration::values())],
+            'type' => ['nullable', Rule::in(ItemType::values())],
         ];
     }
 }

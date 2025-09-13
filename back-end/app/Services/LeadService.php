@@ -6,12 +6,15 @@ namespace App\Services;
 use App\QueryFilters\LeadFilters;
 use Illuminate\Database\Eloquent\Builder;
 use App\DTO\Lead\LeadDTO;
+use App\Exceptions\GeneralException;
+use App\Models\Tenant\Item;
 use App\Models\Tenant\Lead;
 
 class LeadService extends BaseService
 {
     public function __construct(
         public Lead $model,
+        public Item $itemModel,
     ) {}
 
     public function getModel(): Lead
@@ -46,41 +49,60 @@ class LeadService extends BaseService
         return $leads->filter(new LeadFilters($filters));
     }
 
-    public function store(LeadDTO $leadDTO)
+    private function checkItemQuantityThenUpdate(int $itemId, int $quantity)
     {
-        $leadData = $leadDTO->toArray();
-        // dd( $leadData);
-        // Create the lead
-        $lead = $this->model->create($leadData);
-        // Sync industries
-        if ($leadDTO->industries) {
-            $lead->industries()->sync($leadDTO->industries);
+        $item = $this->itemModel->find($itemId);
+        if ($item->quantity < $quantity) {
+            throw new GeneralException(__('app.item_quantity_not_enough') . " with id :" . ' ' . $item->id);
         }
-        // Sync services correctly
-        if ($leadDTO->services) {
-            $servicesData = [];
-            foreach ($leadDTO->services as $serviceId) {
-                if (is_numeric($serviceId) && $serviceId > 0) {
-                    $categoryId = $leadDTO->serviceCategories[$serviceId] ?? null;
-                    $servicesData[$serviceId] = ['category_id' => $categoryId];
-                }
+        $item->quantity -= $quantity;
+        $item->save();
+    }
+
+    public function store(array $data)
+    {
+        if ($data['items']) {
+            $deal_value = 0;
+            foreach ($data['items'] as $item) {
+                $this->checkItemQuantityThenUpdate($item['id'], $item['quantity']);
+
+                $deal_value += $item['price'] * $item['quantity'];
             }
-            $lead->services()->sync($servicesData);
-        }
-        // Sync custom fields
-        if ($leadDTO->customFields) {
-            $customFieldsData = [];
-            foreach ($leadDTO->customFields as $fieldId => $value) {
-                $customFieldsData[$fieldId] = ['value' => $value];
+
+            $lead = Lead::create([
+                'contact_id' => $data['contact_id'],
+                'stage_id' => $data['stage_id'],
+                'status' => $data['status'],
+                'deal_value' => $deal_value,
+                'win_probability' => $data['win_probability'],
+                'expected_close_date' => $data['expected_close_date'],
+                'assigned_to_id' => $data['assigned_to_id'],
+                'notes' => $data['notes'],
+                'description' => $data['description'],
+            ]);
+
+            foreach ($data['items'] as $item) {
+                $lead->items()->attach($item['id'], [
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
             }
-            $lead->customFields()->sync($customFieldsData);
-        }
-        // Assign stage
-        if ($leadDTO->stage_id) {
-            $lead->stages()->attach($leadDTO->stage_id, [
-                'start_date' => now(),
+
+            $lead->load('items');
+        } else {
+            $lead = Lead::create([
+                'contact_id' => $data['contact_id'],
+                'stage_id' => $data['stage_id'],
+                'status' => $data['status'],
+                'deal_value' => $data['deal_value'],
+                'win_probability' => $data['win_probability'],
+                'expected_close_date' => $data['expected_close_date'],
+                'assigned_to_id' => $data['assigned_to_id'],
+                'notes' => $data['notes'],
+                'description' => $data['description'],
             ]);
         }
+
         return $lead;
     }
 
@@ -120,7 +142,8 @@ class LeadService extends BaseService
             $lead->customFields()->sync($customFieldsData);
         } else {
             $lead->customFields()->detach();
-        } if ($leadDTO->stage_id) {
+        }
+        if ($leadDTO->stage_id) {
             // Mark the previous stage exit date
             $previousStage = $lead->stages()->latest('pivot_created_at')->first();
             if ($previousStage) {
@@ -140,5 +163,4 @@ class LeadService extends BaseService
     {
         return $this->getQuery()->where('id', $id)->delete();
     }
-
 }

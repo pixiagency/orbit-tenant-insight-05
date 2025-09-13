@@ -12,12 +12,12 @@ class ItemDTO extends BaseDTO
      * @param string $name,
      * @param string $description,
      * @param float $price,
-     * @param string $quantity,
-     * @param string $sku,
+     * @param ?string $quantity,
+     * @param ?string $sku,
      * @param int $category_id,
      * @param string $type,
-     * @param string $duration,
-     * @param array $variants,
+     * @param ?string $duration,
+     * @param ?string $service_type,
      */
     public function __construct(
         public string $name,
@@ -28,7 +28,7 @@ class ItemDTO extends BaseDTO
         public string $type,
         public ?string $duration,
         public ?int $quantity,
-        public ?array $variants,
+        public ?string $service_type = null,
     ) {}
 
     public static function fromRequest($request): BaseDTO
@@ -42,7 +42,7 @@ class ItemDTO extends BaseDTO
             type: $request->type,
             duration: $request->duration,
             quantity: $request->quantity,
-            variants: $request->variants,
+            service_type: $request->service_type ?? null,
         );
     }
 
@@ -62,7 +62,7 @@ class ItemDTO extends BaseDTO
             type: Arr::get($data, 'type'),
             duration: Arr::get($data, 'duration'),
             quantity: Arr::get($data, 'quantity'),
-            variants: Arr::get($data, 'variants'),
+            service_type: Arr::get($data, 'service_type') ?? null,
         );
     }
 
@@ -80,6 +80,7 @@ class ItemDTO extends BaseDTO
             'type' => $this->type,
             'duration' => $this->duration,
             'quantity' => $this->quantity,
+            'service_type' => $this->service_type ?? null,
         ];
     }
 }

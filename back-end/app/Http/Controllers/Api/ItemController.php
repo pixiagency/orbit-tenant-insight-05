@@ -6,6 +6,7 @@ use App\DTO\Item\ItemDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Item\ItemBulkStoreWithVariantsRequest;
 use App\Http\Requests\Item\ItemStoreRequest;
+use App\Http\Requests\Item\ItemUpdateRequest;
 use App\Http\Resources\ItemResource;
 use App\Services\Tenant\ItemService;
 use DB;
@@ -24,10 +25,10 @@ class ItemController extends Controller
         });
 
         if ($request->has('ddl')) {
-            $items = $this->itemService->index($filters);
+            $items = $this->itemService->index(filters: $filters, withRelations: ['variants.attributeValues.attribute']);
             $data = ItemResource::collection($items);
         } else {
-            $items = $this->itemService->index($filters, perPage: $filters['per_page'] ?? 10);
+            $items = $this->itemService->index(filters: $filters, withRelations: ['variants.attributeValues.attribute'], perPage: $filters['per_page'] ?? 10);
             $data = ItemResource::collection($items)->response()->getData(true);
         }
 
@@ -48,6 +49,20 @@ class ItemController extends Controller
         }
     }
 
+    public function update(ItemUpdateRequest $request, int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $itemDTO = ItemDTO::fromRequest($request);
+            $response = $this->itemService->update($id, $itemDTO);
+            DB::commit();
+            return ApiResponse(message: 'Item updated successfully', data: new ItemResource($response), code: Response::HTTP_OK);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function destroy(int $id)
     {
         try {
@@ -62,14 +77,14 @@ class ItemController extends Controller
 
     public function bulkStoreWithVariants(ItemBulkStoreWithVariantsRequest $request)
     {
-        dd($request->validated());
         try {
             DB::beginTransaction();
-            $this->itemService->bulkStoreWithVariants($request);
+            $this->itemService->bulkStoreWithVariants($request->validated());
             DB::commit();
             return ApiResponse(message: 'Items created successfully', code: Response::HTTP_CREATED);
         } catch (Exception $e) {
-            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
+            DB::rollback();
+            return ApiResponse(message: 'Failed to create products: ' . $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

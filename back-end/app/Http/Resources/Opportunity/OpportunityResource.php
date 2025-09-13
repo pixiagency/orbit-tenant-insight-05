@@ -3,8 +3,10 @@
 namespace App\Http\Resources\Opportunity;
 
 use App\Http\Resources\ContactResource;
+use App\Http\Resources\ItemResource;
 use App\Http\Resources\landloardLocation\CityResource;
 use App\Http\Resources\StageResource;
+use App\Http\Resources\Tenant\Items\ItemPovitResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -34,6 +36,7 @@ class OpportunityResource extends JsonResource
             'description' => $this->description,
             'contact' => $this->whenLoaded('contact', fn() => new ContactResource($this->contact)),
             'stage' => $this->whenLoaded('stage', fn() => new StageResource($this->stage)),
+            'items' => $this->whenLoaded('items', fn() => ItemPovitResource::collection($this->items)),
         ];
     }
 }

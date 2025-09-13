@@ -15,8 +15,8 @@ class ItemVariant extends Model
 
     public function attributeValues()
     {
-        return $this->belongsToMany(ItemAttributeValue::class, 'item_variants_attribute_values')
-            ->withPivot('attribute_id');
+        return $this->belongsToMany(ItemAttributeValue::class, 'item_variants_attribute_values', 'variant_id', 'item_attribute_value_id')
+            ->withPivot('item_attribute_id');
     }
 
     public function getAttributesArray()
@@ -25,7 +25,7 @@ class ItemVariant extends Model
             ->with('attribute')
             ->get()
             ->mapWithKeys(function ($attributeValue) {
-                return [$attributeValue->attribute->slug => $attributeValue->value];
+                return [$attributeValue->attribute->name => $attributeValue->value];
             });
     }
 }
