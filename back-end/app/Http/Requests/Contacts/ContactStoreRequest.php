@@ -29,9 +29,9 @@ class ContactStoreRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:contacts,email',
-            'business_phone' => 'required|string|max:20',
-            'mobile_phone' => 'required|string|max:20',
+            'email' => ['required', 'email', Rule::unique('contacts', 'email')->ignore($this->route('contact'))],
+            'contact_phones' => 'required|array',
+            'contact_phones.*' => 'required|string|unique:contact_phones,phone|max:20',
             'job_title' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'status' => ['required', Rule::enum(ContactStatus::class)],

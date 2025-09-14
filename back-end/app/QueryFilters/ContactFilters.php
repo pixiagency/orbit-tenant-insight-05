@@ -16,4 +16,11 @@ class ContactFilters extends QueryFilter
     {
         return $this->builder->where('name', "LIKE", "%$term%");
     }
+
+    public function contact_numbers($term)
+    {
+        return $this->builder->whereHas('contactNumbers', function ($query) use ($term) {
+            $query->where('number', "LIKE", "%$term%");
+        });
+    }
 }

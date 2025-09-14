@@ -20,8 +20,6 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
-            $table->string('business_phone');
-            $table->string('mobile_phone');
             $table->string('job_title');
             $table->string('department');
             $table->enum('status', ContactStatus::values())->default('active');
