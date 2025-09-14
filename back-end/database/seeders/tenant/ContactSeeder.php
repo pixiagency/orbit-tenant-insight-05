@@ -18,7 +18,7 @@ class ContactSeeder extends Seeder
     {
         if (Contact::count() > 0) return;
         $contact1 = Contact::updateOrCreate(
-            ['mobile_phone' => '1234567890'],
+            ['email' => 'john.doe@example.com'],
             [
                 'first_name' => 'John',
                 'last_name' => 'Doe',
@@ -46,15 +46,15 @@ class ContactSeeder extends Seeder
             ]
         );
 
-        $contact1->contactNumbers()->createMany([
+        $contact1->contactPhones()->createMany([
             [
-                'number' => '1234567890',
+                'phone' => '1234567890',
             ],
             [
-                'number' => '4561237890',
+                'phone' => '4561237890',
             ],
             [
-                'number' => '7891234560',
+                'phone' => '7891234560',
             ],
         ]);
     }

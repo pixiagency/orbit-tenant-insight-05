@@ -23,7 +23,7 @@ class ContactResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
-            'contact_numbers' => $this->whenLoaded('contactNumbers', fn() => ContactNumberResource::collection($this->contactNumbers)),
+            'contact_phones' => $this->whenLoaded('contactPhones', fn() => ContactPhoneResource::collection($this->contactPhones)),
             'job_title' => $this->job_title,
             'department' => $this->department,
             'status' => $this->status,
