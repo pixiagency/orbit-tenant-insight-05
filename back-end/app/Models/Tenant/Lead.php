@@ -77,7 +77,7 @@ class Lead extends Model implements Auditable
     // Lead belongs to a User (Sales Representative)
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'assigned_to_id');
     }
 
     // Lead belongs to a Reason (if lost)

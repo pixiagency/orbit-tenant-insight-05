@@ -16,7 +16,7 @@ class OpportunityFilter extends QueryFilter
 
     public function status($term)
     {
-        return $this->builder->where('status', 'LIKE', "%$term%");
+        return $this->builder->where('status', $term);
     }
 
     public function assigned_to_id($term)
@@ -29,11 +29,25 @@ class OpportunityFilter extends QueryFilter
         return $this->builder->where('stage_id', $term);
     }
 
+    public function pipeline_id($term)
+    {
+        return $this->builder->whereHas('stage', function ($query) use ($term) {
+            $query->where('pipeline_id', $term);
+        });
+    }
+
+    public function source_id($term)
+    {
+        return $this->builder->whereHas('contact', function ($query) use ($term) {
+            $query->where('source_id', $term);
+        });
+    }
+
     public function deal_value($term)
     {
         return $this->builder->where('deal_value', $term);
     }
-    
+
     public function win_probability($term)
     {
         return $this->builder->where('win_probability', $term);
@@ -48,7 +62,7 @@ class OpportunityFilter extends QueryFilter
     {
         return $this->builder->where('notes', $term);
     }
-    
+
     public function description($term)
     {
         return $this->builder->where('description', $term);

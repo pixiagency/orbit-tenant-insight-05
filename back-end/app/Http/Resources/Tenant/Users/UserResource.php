@@ -32,8 +32,6 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'address' => $this->address,
             'roles' => $this->whenLoaded('roles', fn() => $this->roles->pluck('name')->toArray()), // ✅ Only role names
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }
