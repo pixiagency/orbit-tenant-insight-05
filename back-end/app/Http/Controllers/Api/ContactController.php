@@ -44,7 +44,7 @@ class ContactController extends Controller
             $filters = array_filter($request->get('filters', []), function ($value) {
                 return ($value !== null && $value !== false && $value !== '');
             });
-            $withRelations = ['country', 'city', 'user', 'source', 'contactNumbers'];
+            $withRelations = ['country', 'city', 'user', 'source', 'contactPhones'];
             $contacts = $this->contactService->index($filters, $withRelations, $perPage);
             $data = ContactResource::collection($contacts)->response()->getData(true);
             return apiResponse($data, 'Contacts retrieved successfully');
@@ -208,7 +208,7 @@ class ContactController extends Controller
     public function show(int $contact)
     {
         try {
-            $withRelations = ['country', 'city', 'user', 'source', 'contactNumbers'];
+            $withRelations = ['country', 'city', 'user', 'source', 'contactPhones'];
             $contact = $this->contactService->show($contact, $withRelations);
 
             return ApiResponse(new ContactResource($contact), 'Contact retrieved successfully');

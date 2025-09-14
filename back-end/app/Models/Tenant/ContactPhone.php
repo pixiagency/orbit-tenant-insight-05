@@ -2,14 +2,14 @@
 
 namespace App\Models\Tenant;
 
-use App\Models\Tenant\Contact;
+
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableTrait;
 
-class ContactNumber extends Model implements Auditable
+class ContactPhone extends Model implements Auditable
 {
     use HasFactory, Filterable, AuditableTrait;
     /**
@@ -17,7 +17,7 @@ class ContactNumber extends Model implements Auditable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['contact_id', 'number'];
+    protected $fillable = ['contact_id', 'phone'];
 
     public function transformAudit(array $data): array
     {

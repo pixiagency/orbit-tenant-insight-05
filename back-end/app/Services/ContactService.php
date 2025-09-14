@@ -53,13 +53,13 @@ class ContactService extends BaseService
         // Create the contact
         $contact = $this->model->create($contactData);
 
-        foreach ($contactDTO->contact_numbers as $number) {
-            $contact->contactNumbers()->create([
-                'number' => $number
+        foreach ($contactDTO->contact_phones as $number) {
+            $contact->contactPhones()->create([
+                'phone' => $number
             ]);
         }
 
-        $contact->load('country', 'city', 'user', 'source', 'contactNumbers');
+        $contact->load('country', 'city', 'user', 'source', 'contactPhones');
         return $contact;
     }
 
@@ -73,17 +73,17 @@ class ContactService extends BaseService
     {
         $contact = $this->findById($id);
         $contactData = $contactDTO->toArray();
-        if (count($contactDTO->contact_numbers) > 0) {
-            $this->syncContactNumbers($contact, $contactDTO->contact_numbers);
+        if (count($contactDTO->contact_phones) > 0) {
+            $this->syncContactPhones($contact, $contactDTO->contact_phones);
         }
         $contact->update($contactData);
-        return $contact->load('contactNumbers', 'country', 'city', 'user', 'source');
+        return $contact->load('contactPhones', 'country', 'city', 'user', 'source');
     }
 
     public function delete(int $id)
     {
         $contact = $this->findById($id);
-        $contact->contactNumbers()->delete();
+        $contact->contactPhones()->delete();
         $contact->delete();
         return $contact;
     }
@@ -310,29 +310,29 @@ class ContactService extends BaseService
         ];
     }
 
-    private function syncContactNumbers(Contact $contact, array $newNumbers): void
+    private function syncContactPhones(Contact $contact, array $newNumbers): void
     {
         // Get existing contact numbers
-        $existingNumbers = $contact->contactNumbers()->pluck('number')->toArray();
+        $existingPhones = $contact->contactPhones()->pluck('phone')->toArray();
 
         // Determine what to add, keep, and remove
-        $numbersToAdd = array_diff($newNumbers, $existingNumbers);
-        $numbersToRemove = array_diff($existingNumbers, $newNumbers);
+        $numbersToAdd = array_diff($newNumbers, $existingPhones);
+        $numbersToRemove = array_diff($existingPhones, $newNumbers);
 
         // Remove numbers that are no longer needed
         if (!empty($numbersToRemove)) {
-            $contact->contactNumbers()
-                ->whereIn('number', $numbersToRemove)
+            $contact->contactPhones()
+                ->whereIn('phone', $numbersToRemove)
                 ->delete();
         }
 
         // Add new numbers
         if (!empty($numbersToAdd)) {
-            $contactNumbersData = collect($numbersToAdd)->map(function ($number) {
-                return ['number' => $number];
+            $contactPhonesData = collect($numbersToAdd)->map(function ($number) {
+                return ['phone' => $number];
             })->toArray();
 
-            $contact->contactNumbers()->createMany($contactNumbersData);
+            $contact->contactPhones()->createMany($contactPhonesData);
         }
     }
 }
