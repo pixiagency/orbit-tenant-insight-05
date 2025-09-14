@@ -38,21 +38,17 @@ class OpportunityController extends Controller
     {
         $query = Lead::query();
 
-        // Apply filters using OpportunityFilter
         $filters = $request->only([
             'status',
             'assigned_to_id',
             'stage_id',
+            'pipeline_id',
             'deal_value',
             'win_probability',
             'expected_close_date',
             'notes',
             'description',
             'status',
-            'stage_id',
-            'deal_value',
-            'win_probability',
-            'expected_close_date',
             'notes',
             'description',
         ]);
@@ -70,7 +66,7 @@ class OpportunityController extends Controller
             $data = OpportunityDDLResource::collection($opportunities);
         } else {
             // Paginate the results
-            $opportunities = $query->with('contact', 'city', 'stage', 'items')->paginate(per_page());
+            $opportunities = $query->with('contact', 'city', 'stage', 'items', 'user')->paginate(per_page());
             $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
         }
 
@@ -94,7 +90,7 @@ class OpportunityController extends Controller
     public function show($id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage')->findOrFail($id);
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
             return ApiResponse(new OpportunityResource($opportunity), 'Opportunity retrieved successfully');
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Opportunity not found', code: 404);
@@ -106,7 +102,7 @@ class OpportunityController extends Controller
     public function update(UpdateOpportunityRequest $request, $id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage')->findOrFail($id);
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
             $opportunity->update($request->validated());
             return ApiResponse(message: 'Opportunity updated successfully', code: 200);
         } catch (ModelNotFoundException $e) {
