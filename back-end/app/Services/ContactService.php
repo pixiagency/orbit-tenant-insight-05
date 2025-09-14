@@ -49,34 +49,52 @@ class ContactService extends BaseService
     public function store(ContactDTO $contactDTO)
     {
         $contactData = $contactDTO->toArray();
+
         // Create the contact
         $contact = $this->model->create($contactData);
 
-        $contact->load('country', 'city', 'user', 'source');
+        foreach ($contactDTO->contact_numbers as $number) {
+            $contact->contactNumbers()->create([
+                'number' => $number
+            ]);
+        }
+
+        $contact->load('country', 'city', 'user', 'source', 'contactNumbers');
+        return $contact;
+    }
+
+    public function show(int $id, array $withRelations = [])
+    {
+        $contact = $this->findById($id, ['*'], $withRelations);
         return $contact;
     }
 
     public function update(int $id, ContactDTO $contactDTO)
     {
-        // Find the contact by ID or fail if not found
-        $contact = $this->model->findOrFail($id);
-        // Update contact fields
+        $contact = $this->findById($id);
         $contactData = $contactDTO->toArray();
+        if (count($contactDTO->contact_numbers) > 0) {
+            $this->syncContactNumbers($contact, $contactDTO->contact_numbers);
+        }
         $contact->update($contactData);
-        return $contact;
+        return $contact->load('contactNumbers', 'country', 'city', 'user', 'source');
     }
-
 
     public function delete(int $id)
     {
-        $contact = $this->model->findOrFail($id);
+        $contact = $this->findById($id);
+        $contact->contactNumbers()->delete();
         $contact->delete();
         return $contact;
     }
 
-    public function getContacts(array $filters = [], array $withRelations = [], $perPage = 5)
+    public function index(array $filters = [], array $withRelations = [], ?int $perPage = null)
     {
-        return $this->queryGet(filters: $filters, withRelations: $withRelations)->paginate($perPage);
+        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
+        if ($perPage) {
+            return $query->paginate($perPage);
+        }
+        return $query->get();
     }
 
 
@@ -290,5 +308,31 @@ class ContactService extends BaseService
             'inactive_contacts' => $inactive_contacts,
             'pending_contacts' => $pending_contacts
         ];
+    }
+
+    private function syncContactNumbers(Contact $contact, array $newNumbers): void
+    {
+        // Get existing contact numbers
+        $existingNumbers = $contact->contactNumbers()->pluck('number')->toArray();
+
+        // Determine what to add, keep, and remove
+        $numbersToAdd = array_diff($newNumbers, $existingNumbers);
+        $numbersToRemove = array_diff($existingNumbers, $newNumbers);
+
+        // Remove numbers that are no longer needed
+        if (!empty($numbersToRemove)) {
+            $contact->contactNumbers()
+                ->whereIn('number', $numbersToRemove)
+                ->delete();
+        }
+
+        // Add new numbers
+        if (!empty($numbersToAdd)) {
+            $contactNumbersData = collect($numbersToAdd)->map(function ($number) {
+                return ['number' => $number];
+            })->toArray();
+
+            $contact->contactNumbers()->createMany($contactNumbersData);
+        }
     }
 }

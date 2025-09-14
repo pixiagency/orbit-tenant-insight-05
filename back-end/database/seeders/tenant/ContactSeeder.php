@@ -16,12 +16,12 @@ class ContactSeeder extends Seeder
      */
     public function run(): void
     {
-        Contact::updateOrCreate(
+        if (Contact::count() > 0) return;
+        $contact1 = Contact::updateOrCreate(
             ['mobile_phone' => '1234567890'],
             [
                 'first_name' => 'John',
                 'last_name' => 'Doe',
-                'business_phone' => '1234567890',
                 'job_title' => 'Software Engineer',
                 'department' => 'IT',
                 'status' => ContactStatus::ACTIVE,
@@ -45,5 +45,17 @@ class ContactSeeder extends Seeder
                 'tags' => json_encode(['tag1', 'tag2']),
             ]
         );
+
+        $contact1->contactNumbers()->createMany([
+            [
+                'number' => '1234567890',
+            ],
+            [
+                'number' => '4561237890',
+            ],
+            [
+                'number' => '7891234560',
+            ],
+        ]);
     }
 }

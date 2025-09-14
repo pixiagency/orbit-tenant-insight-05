@@ -29,9 +29,9 @@ class ContactUpdateRequest extends FormRequest
         return [
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:contacts,email',
-            'business_phone' => 'sometimes|string|max:20',
-            'mobile_phone' => 'sometimes|string|max:20',
+            'email' => ['sometimes', 'email', Rule::unique('contacts', 'email')->ignore($this->route('contact'))],
+            'contact_numbers' => 'sometimes|array',
+            'contact_numbers.*' => ['sometimes', 'string', Rule::unique('contact_numbers', 'number')->ignore($this->route('contact'))],
             'job_title' => 'sometimes|string|max:255',
             'department' => 'sometimes|string|max:255',
             'status' => ['sometimes', Rule::enum(ContactStatus::class)],

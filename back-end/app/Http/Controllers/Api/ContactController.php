@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contacts\ContactStoreRequest;
 use App\Http\Requests\Contacts\ContactUpdateRequest;
-use App\Http\Resources\ContactCollection;
 use App\Http\Resources\ContactResource;
 use App\Imports\ContactsImport;
 use App\Models\Tenant\Contact;
@@ -45,9 +44,10 @@ class ContactController extends Controller
             $filters = array_filter($request->get('filters', []), function ($value) {
                 return ($value !== null && $value !== false && $value !== '');
             });
-            $withRelations = ['country', 'city', 'user', 'source'];
-            $contacts = $this->contactService->getContacts($filters, $withRelations, $perPage);
-            return apiResponse(ContactResource::collection($contacts), 'Contacts retrieved successfully');
+            $withRelations = ['country', 'city', 'user', 'source', 'contactNumbers'];
+            $contacts = $this->contactService->index($filters, $withRelations, $perPage);
+            $data = ContactResource::collection($contacts)->response()->getData(true);
+            return apiResponse($data, 'Contacts retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
@@ -58,7 +58,6 @@ class ContactController extends Controller
         try {
             DB::beginTransaction();
             $contactDTO = ContactDTO::fromRequest($request);
-
             $contact = $this->contactService->store($contactDTO);
             DB::commit();
             return ApiResponse(new ContactResource($contact), 'Contact created successfully', code: 201);
@@ -192,12 +191,16 @@ class ContactController extends Controller
     public function update(ContactUpdateRequest $request, Contact $contact)
     {
         try {
+            DB::beginTransaction();
             $contactDTO = ContactDTO::fromRequest($request);
             $contact = $this->contactService->update($contact->id, $contactDTO);
+            DB::commit();
             return ApiResponse(new ContactResource($contact), 'Contact updated successfully');
         } catch (GeneralException $e) {
+            DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: $e->getCode());
         } catch (Exception $e) {
+            DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
@@ -205,7 +208,8 @@ class ContactController extends Controller
     public function show(int $contact)
     {
         try {
-            $contact = Contact::findOrFail($contact);
+            $withRelations = ['country', 'city', 'user', 'source', 'contactNumbers'];
+            $contact = $this->contactService->show($contact, $withRelations);
 
             return ApiResponse(new ContactResource($contact), 'Contact retrieved successfully');
         } catch (ModelNotFoundException $e) {

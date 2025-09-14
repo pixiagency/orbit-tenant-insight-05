@@ -5,9 +5,11 @@ namespace App\Models\Tenant;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Source;
+use App\Models\Tenant\ContactNumber;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contact extends Model
 {
@@ -17,8 +19,7 @@ class Contact extends Model
         'first_name',
         'last_name',
         'email',
-        'business_phone',
-        'mobile_phone',
+        'contact_numbers',
         'job_title',
         'department',
         'status',
@@ -43,6 +44,7 @@ class Contact extends Model
 
     protected $casts = [
         'tags' => 'array', // Automatically handle JSON encoding/decoding
+        'contact_numbers' => 'array',
     ];
 
     /**
@@ -51,6 +53,11 @@ class Contact extends Model
     public function getNameAttribute()
     {
         return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+    public function contactNumbers(): HasMany
+    {
+        return $this->hasMany(ContactNumber::class, 'contact_id');
     }
 
     public function city(): BelongsTo

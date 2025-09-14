@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Http\Resources\landloardLocation\CityResource;
 use App\Http\Resources\landloardLocation\CountryResource;
+use App\Http\Resources\ContactNumberResource;
 use App\Http\Resources\Tenant\Users\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,12 +23,11 @@ class ContactResource extends JsonResource
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
-            'business_phone' => $this->business_phone,
-            'mobile_phone' => $this->mobile_phone,
+            'contact_numbers' => $this->whenLoaded('contactNumbers', fn() => ContactNumberResource::collection($this->contactNumbers)),
             'job_title' => $this->job_title,
             'department' => $this->department,
             'status' => $this->status,
-            'source_id' => $this->source_id,
+            'source' => $this->whenLoaded('source', fn() => new SourceResource($this->source)),
             'contact_method' => $this->contact_method,
             'email_permission' => $this->email_permission,
             'phone_permission' => $this->phone_permission,
