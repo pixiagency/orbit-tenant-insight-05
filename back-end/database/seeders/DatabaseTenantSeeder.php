@@ -11,6 +11,7 @@ use Database\Seeders\tenant\OpportunitySeeder;
 use Database\Seeders\tenant\PaymentMethodSeeder;
 use Database\Seeders\tenant\PipelineSeeder;
 use Database\Seeders\tenant\RolesAndPermissionsSeeder;
+use Database\Seeders\tenant\RoleSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseTenantSeeder extends Seeder
@@ -21,7 +22,8 @@ class DatabaseTenantSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolesAndPermissionsSeeder::class,
+            // RolesAndPermissionsSeeder::class,
+            RoleSeeder::class,
             CountriesWithCitiesSeeder::class,
             DepartmentSeeder::class,
             UserSeeder::class,

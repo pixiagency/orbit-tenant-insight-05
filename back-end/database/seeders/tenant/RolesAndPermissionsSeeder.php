@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\tenant;
 
+use App\Enums\RolesEnum;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -31,12 +32,13 @@ class RolesAndPermissionsSeeder extends Seeder
 
 
         // Create roles if they don't exist
+
         $roles = [
-            'super-admin',
-            'admin',
-            'sales',
-            'leader',
+            RolesEnum::ADMIN->value,
+            RolesEnum::MANAGER->value,
+            RolesEnum::AGENT->value,
         ];
+
 
         foreach ($roles as $roleName) {
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);

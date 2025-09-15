@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Tasks\{
     PriorityController,
     PriorityColorController,
@@ -20,6 +21,7 @@ use \App\Http\Controllers\Api\Users\{
     DepartmentController,
     UserController
 };
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -169,6 +171,19 @@ Route::middleware([
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
 
+        // Notification routes
+        Route::prefix('notifications')->group(function () {
+            Route::get('/', [NotificationController::class, 'index']);
+            Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+            Route::get('/statistics', [NotificationController::class, 'statistics']);
+            Route::get('/recent', [NotificationController::class, 'recent']);
+            Route::get('/{id}', [NotificationController::class, 'show']);
+            Route::patch('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+            Route::patch('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+            Route::delete('/{id}', [NotificationController::class, 'destroy']);
+            Route::delete('/delete-all', [NotificationController::class, 'deleteAll']);
+        });
+
         // Core routes
         Route::prefix('core')->group(function () {
             Route::get('/sidebar-counts', [CoreController::class, 'getSidebarCounts']);
@@ -199,7 +214,7 @@ Route::middleware([
     Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
     Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
-    Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
+    Route::get('/roles', [RoleController::class, 'index']);
 
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);

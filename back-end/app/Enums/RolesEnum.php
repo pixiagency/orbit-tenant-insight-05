@@ -4,19 +4,22 @@ namespace App\Enums;
 
 enum RolesEnum: string
 {
-    case SALES = 'sales';
-    case LEADER = 'leader';
     case ADMIN = 'admin';
-    case SUPERADMIN = 'super-admin';
+    case MANAGER = 'manager';
+    case AGENT = 'agent';
 
 
     public function label(): string
     {
         return match ($this) {
-            static::SALES => 'Sales',
-            static::LEADER => 'Leader',
-            static::ADMIN => 'Admin',
-            static::SUPERADMIN => 'Super Admin',
+            static::ADMIN => 'admin',
+            static::MANAGER => 'manager',
+            static::AGENT => 'agent',
         };
+    }
+
+    public static function values(): array
+    {
+        return array_map(fn($case) => $case->value, self::cases());
     }
 }

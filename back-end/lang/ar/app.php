@@ -32,7 +32,7 @@ return array(
     'completed' => 'مكتمل',
     'cancelled' => 'ملغي',
     'on_hold' => 'معلق',
-
+    'overdue' => 'متأخر',
   ],
   'cannot_delete_priority_used_by_tasks' => 'لا يمكن حذف أولوية مستخدمة في المهام.',
   'data changed successfully' => 'تم تغيير البيانات بنجاح',

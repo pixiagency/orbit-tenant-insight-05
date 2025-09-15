@@ -1,26 +1,5 @@
 <?php
 
-namespace App\Enums;
-
-enum Availability: string
-{
-    case PUBLIC = "public";
-    case PRIVATE = "private";
-
-    public function label(): string
-    {
-        return match ($this) {
-            self::PUBLIC => __('app.public'),
-            self::PRIVATE => __('app.private'),
-        };
-    }
-
-    public static function values(): array
-    {
-        return array_map(fn($case) => $case->value, self::cases());
-    }
-}
-
 return array(
   'actions' => 'Actions',
   'back' => 'Back',
@@ -370,6 +349,7 @@ return array(
     'completed' => 'Completed',
     'cancelled' => 'Cancelled',
     'on_hold' => 'On hold',
+    'overdue' => 'overdue',
   ],
   'cannot_delete_priority_used_by_tasks' => 'Cannot delete priority that is being used by tasks.',
   'data changed successfully' => 'data changed successfully',

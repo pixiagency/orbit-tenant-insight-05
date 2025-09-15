@@ -8,6 +8,8 @@ class TasksSettings extends Settings
 {
     public bool $enable_escalation;
     public int $escalation_time_hours;
+    public int $default_notified_users;
+    public int $notify_manager;
 
     public static function group(): string
     {
@@ -19,6 +21,8 @@ class TasksSettings extends Settings
         return [
             'enable_escalation' => true,
             'escalation_time_hours' => 24,
+            'default_notified_users' => [1,2,3],
+            'notify_manager' => false,
         ];
     }
 }

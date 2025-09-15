@@ -33,7 +33,6 @@ return new class extends Migration
             $table->foreignId('assigned_to_id')->constrained('users');
             $table->enum('payment_status', PaymentStatusEnum::values());
             $table->foreignId('payment_method_id')->constrained('payment_methods');
-            $table->foreignId('stage_id')->constrained('stages');
 
             // total amount
             $table->decimal('total_amount', 10, 2)->default(0);
