@@ -2,13 +2,14 @@
 
 namespace App\Enums;
 
-enum TaskStatus: string
+enum TaskStatusEnum: string
 {
     case PENDING = 'pending';
     case IN_PROGRESS = 'in_progress';
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
     case on_hold = 'on_hold';
+    case overdue = 'overdue';
 
 
     public function label(): string
@@ -19,6 +20,7 @@ enum TaskStatus: string
             static::COMPLETED => __('app.task_status.completed'),
             static::CANCELLED => __('app.task_status.cancelled'),
             static::on_hold => __('app.task_status.on_hold'),
+            static::overdue => __('app.task_status.overdue'),
         };
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Tenant\Users;
 
 use App\DTO\User\UserDTO;
 use App\Models\Tenant\User;
@@ -24,7 +24,7 @@ class UserService extends BaseService
     {
         return $this->queryGet($filters)->get();
     }
-    
+
     public function listing(array $filters = [], array $withRelations = [], $perPage = 10): \Illuminate\Contracts\Pagination\CursorPaginator
     {
         return $this->queryGet(filters: $filters, withRelations: $withRelations)->cursorPaginate($perPage);
@@ -48,7 +48,7 @@ class UserService extends BaseService
 
     public function index(array $filters = [], array $withRelations = [], ?int $perPage = null)
     {
-        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
+        $query = $this->queryGet(filters: $filters, withRelations: $withRelations)->orderBy('id','desc');
         if ($perPage) {
             return $query->paginate($perPage);
         }
@@ -57,10 +57,10 @@ class UserService extends BaseService
 
     public function store(UserDTO $userDTO)
     {
-
         $data = $userDTO->toArray();
         $user = $this->getModel()->create($data);
-        if (Role::where('name', $userDTO->role)->exists()) {
+        // Get role by ID and assign by name
+        if ($userDTO->role) {
             $user->assignRole($userDTO->role);
         }
         return $user->load('roles');
@@ -70,10 +70,25 @@ class UserService extends BaseService
     {
         $user = $this->findById($id);
         $data = $userDTO->toArray();
+
+        // Remove role from data before updating user
+        $roleId = $data['role'] ?? null;
+        unset($data['role']);
+
         if (!isset($data['password']))
             $user->update(Arr::except($data, ['password']));
         else
             $user->update($data);
+
+        // Handle role assignment
+        if ($roleId) {
+            $role = Role::find($roleId);
+            if ($role) {
+                // Remove existing roles and assign new one
+                $user->syncRoles([$role->name]);
+            }
+        }
+
         return true;
     }
 

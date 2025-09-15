@@ -27,7 +27,7 @@ class DealRequest extends FormRequest
             'discount_type' => ['nullable', Rule::in(DiscountTypeEnum::values())],
             'discount_value' => 'nullable|numeric',
             'tax_rate' => 'required|numeric',
-            'assigned_to_id' => 'required|exists:users,id',
+            'assigned_to_id' => 'required|exists:users,id,department_id,1',
             'payment_status' => ['required', Rule::in(PaymentStatusEnum::values())],
             'payment_method_id' => [
                 'required',

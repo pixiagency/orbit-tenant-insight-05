@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-use function Laravel\Prompts\table;
-
 return new class extends Migration
 {
     /**
@@ -13,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lead_task', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
-            $table->foreignId('assigned_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->date('assigned_at')->nullable();
+            $table->json('name'); // Multilingual names: {en: "Sales", ar: "المبيعات", fr: "Ventes", es: "Ventas"}
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lead_task');
+        Schema::dropIfExists('departments');
     }
 };

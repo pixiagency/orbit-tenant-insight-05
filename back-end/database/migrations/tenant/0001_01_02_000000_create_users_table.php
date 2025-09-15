@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
-use App\Models\User;
+use App\Models\Tenant\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -25,10 +25,15 @@ class AuthService extends BaseService
     {
         $identifierField = is_numeric($identifier) ? 'phone' : 'email';
         $credential = [$identifierField => $identifier, 'password' => $password];
-        if (!auth()->attempt($credential))
+
+        $user = $this->model->where('email', $credential['email'])->first();
+        if (! $user || ! Hash::check($credential['password'], $user->password)) {
             throw new NotFoundException(__('app.login_failed'));
-        return $this->model->where($identifierField, $identifier)->first();
+        }
+
+        return $user;
     }
+
 
     public function signup(string $first_name, string $last_name, string $email, string $password, string $type): User|Model
     {

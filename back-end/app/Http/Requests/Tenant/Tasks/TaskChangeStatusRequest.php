@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Tenant\Tasks;
 
-use App\Enums\TaskStatus;
+use App\Enums\TaskStatusEnum;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +11,7 @@ class TaskChangeStatusRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::in(TaskStatus::values())],
+            'status' => ['required', Rule::in(TaskStatusEnum::values())],
         ];
     }
 

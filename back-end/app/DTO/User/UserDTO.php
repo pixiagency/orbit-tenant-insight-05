@@ -14,6 +14,7 @@ class UserDTO extends BaseDTO
      * @param ?string $password',
      * @param string $phone',
      * @param ?string $role',
+     * @param ?int $department_id',
      */
     
     public function __construct(
@@ -23,6 +24,7 @@ class UserDTO extends BaseDTO
         public readonly ?string $password,
         public readonly string $phone,
         public readonly ?string $role,
+        public readonly ?int $department_id,
     ) {}
 
     public static function fromRequest($request): UserDTO
@@ -33,7 +35,8 @@ class UserDTO extends BaseDTO
             email: $request->email,
             password: $request->password,
             phone: $request->phone,
-            role: $request->role
+            role: $request->role,
+            department_id: $request->department_id
         );
     }
 
@@ -49,7 +52,8 @@ class UserDTO extends BaseDTO
             email: Arr::get($data, 'email'),
             password: Arr::get($data, 'password'),
             phone: Arr::get($data, 'phone'),
-            role: Arr::get($data, 'role')
+            role: Arr::get($data, 'role'),
+            department_id: Arr::get($data, 'department_id')
         );
     }
 
@@ -64,7 +68,8 @@ class UserDTO extends BaseDTO
             'email' => $this->email,
             'password' => $this->password,
             'phone' => $this->phone,
-            'role' => $this->role
+            'role' => $this->role,
+            'department_id' => $this->department_id
         ];
     }
 }

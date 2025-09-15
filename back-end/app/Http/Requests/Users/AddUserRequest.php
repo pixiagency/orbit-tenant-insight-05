@@ -26,7 +26,8 @@ class AddUserRequest extends BaseRequest
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'phone' => 'required|numeric|unique:users,phone',
-            'role' => ['required', Rule::in(RolesEnum::cases())],
+            'department_id' => 'required|exists:departments,id,is_active,1',
+            'role' => ['required', Rule::exists('roles','name')],
         ];
     }
 

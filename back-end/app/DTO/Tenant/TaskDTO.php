@@ -19,8 +19,8 @@ class TaskDTO extends BaseDTO
         public ?int $lead_id = null,
         public ?array $tags = null,
         public ?string $additional_notes = null,
+        public ?bool $escalation_sent = false,
         public ?array $followers = null,
-
         public ?array $reminders = null,
     ) {}
 
@@ -38,6 +38,7 @@ class TaskDTO extends BaseDTO
             lead_id: $request->input('lead_id'),
             tags: $request->input('tags'),
             additional_notes: $request->input('additional_notes'),
+            escalation_sent: $request->input('escalation_sent', false),
             followers: $request->input('followers'),
             reminders: $request->input('reminders'),
         );
@@ -57,6 +58,7 @@ class TaskDTO extends BaseDTO
             'lead_id' => $this->lead_id,
             'tags' => $this->tags,
             'additional_notes' => $this->additional_notes,
+            'escalation_sent' => $this->escalation_sent,
         ];
     }
 
@@ -74,6 +76,7 @@ class TaskDTO extends BaseDTO
             lead_id: Arr::get($data, 'lead_id'),
             tags: Arr::get($data, 'tags'),
             additional_notes: Arr::get($data, 'additional_notes'),
+            escalation_sent: Arr::get($data, 'escalation_sent', false),
             followers: Arr::get($data, 'followers'),
             reminders: Arr::get($data, 'reminders'),
         );

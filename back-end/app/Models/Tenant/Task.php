@@ -21,11 +21,13 @@ class Task extends Model
         'assigned_to_id',
         'lead_id',
         'tags',
-        'additional_notes'
+        'additional_notes',
+        'escalation_sent'
     ];
 
     protected $casts = [
         'tags' => 'array',
+        'escalation_sent' => 'boolean',
     ];
 
     public function lead()

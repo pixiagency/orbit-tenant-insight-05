@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Users;
 
 use App\DTO\User\UserDTO;
 use App\Http\Requests\Users\AddUserRequest;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
-use App\Services\UserService;
+use App\Services\Tenant\Users\UserService;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\UserUpdateRequest;
@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class UsersController extends Controller
+class UserController extends Controller
 {
     public function __construct(private readonly UserService $userService) {}
 
@@ -29,7 +29,7 @@ class UsersController extends Controller
             $filters = array_filter(request()->query());
             $withRelations = ['roles'];
             if($request->has('ddl')){
-                $users = $this->userService->index(withRelations: $withRelations);
+                $users = $this->userService->index(filters: $filters,withRelations: $withRelations);
                 $data = UserDDLResource::collection($users);
             }else{
                 $users = $this->userService->index(filters: $filters, withRelations: $withRelations,  perPage: $filters['per_page'] ?? 10);

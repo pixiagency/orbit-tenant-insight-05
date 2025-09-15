@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormController;
 use App\Http\Controllers\Api\FormSubmissionController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\Tasks\{
     PriorityController,
     PriorityColorController,
@@ -16,6 +17,11 @@ use \App\Http\Controllers\Api\Deals\{
     DealController,
     PaymentMethodController
 };
+use \App\Http\Controllers\Api\Users\{
+    DepartmentController,
+    UserController
+};
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -112,9 +118,9 @@ Route::middleware([
     Route::get('/test', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
 
     Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
-        Route::post('/login', [AuthController::class, 'login'])->name('tenant.login');
         Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
     });
+    Route::post('authentication/login', [AuthController::class, 'login'])->middleware('redirect_if_authenticated:api_tenant')->name('tenant.login');
 
     Route::prefix('contacts/import')->group(function () {
         Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
@@ -156,18 +162,32 @@ Route::middleware([
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('authentication/logout', [AuthController::class, 'logout']);
         Route::get('/user', function () {
             return response()->json(Auth::user());
         });
         // Route::middleware('role:admin')->group(function () {
-        Route::apiResource('users', \App\Http\Controllers\Api\UsersController::class);
+        Route::apiResource('users', UserController::class);
+        Route::get('departments', [DepartmentController::class, 'index']);
         Route::apiResource('tasks', TaskController::class);
         Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
         Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);
 
         Route::apiResource('custom-fields', \App\Http\Controllers\Api\CustomFieldController::class);
         // });
+
+        // Notification routes
+        Route::prefix('notifications')->group(function () {
+            Route::get('/', [NotificationController::class, 'index']);
+            Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+            Route::get('/statistics', [NotificationController::class, 'statistics']);
+            Route::get('/recent', [NotificationController::class, 'recent']);
+            Route::get('/{id}', [NotificationController::class, 'show']);
+            Route::patch('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+            Route::patch('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+            Route::delete('/{id}', [NotificationController::class, 'destroy']);
+            Route::delete('/delete-all', [NotificationController::class, 'deleteAll']);
+        });
 
         // Core routes
         Route::prefix('core')->group(function () {
@@ -199,7 +219,7 @@ Route::middleware([
     Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
     Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
-    Route::get('/roles', [\App\Http\Controllers\Api\RoleController::class, 'index']);
+    Route::get('/roles', [RoleController::class, 'index']);
 
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);

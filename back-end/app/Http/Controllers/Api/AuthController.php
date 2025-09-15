@@ -44,7 +44,6 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-       
         try {
             // Authenticate user
             $user = $this->authService->loginWithEmailOrPhone(

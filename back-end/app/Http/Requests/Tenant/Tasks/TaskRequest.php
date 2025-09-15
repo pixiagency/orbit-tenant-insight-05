@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Tenant\Tasks;
 
-use App\Enums\TaskStatus;
+use App\Enums\TaskStatusEnum;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
@@ -14,7 +14,7 @@ class TaskRequest extends BaseRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'task_type_id' => 'required|exists:task_types,id',
-            'status' => ['required', Rule::in(TaskStatus::values())],
+            'status' => ['required', Rule::in(TaskStatusEnum::values())],
             'priority_id' => 'required|exists:priorities,id',
             'due_date' => 'required|date',
             'due_time' => 'required|date_format:H:i',
