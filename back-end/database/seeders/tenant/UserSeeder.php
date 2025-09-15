@@ -10,15 +10,74 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::create([
-            'first_name' => 'abood',
-            'last_name' => 'Admin',
-            'email' => 'abood@gamil.com',
-            'password' => Hash::make(123456),
-            'phone' => '01010101010',
-        ]);
-        $user->assignRole('admin');
+        User::updateOrCreate(
+            [
+                'email' => 'admin1@gamil.com',
+            ],
+            [
+                'first_name' => 'first',
+                'last_name' => 'admin',
+                'email' => 'admin1@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '01569207834',
+            ]
+        )->syncRoles('admin');
 
-//        User::factory()->count(10)->create();
+        User::updateOrCreate(
+            [
+                'email' => 'admin2@gamil.com',
+            ],
+            [
+                'first_name' => 'second',
+                'last_name' => 'admin',
+                'email' => 'admin2@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '01207834569',
+            ]
+        )->syncRoles('admin');
+
+        User::updateOrCreate(
+            ['email' => 'manager1@gamil.com'],
+            [
+                'first_name' => 'first',
+                'last_name' => 'manager',
+                'email' => 'manager1@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '01234569078',
+            ]
+        )->syncRoles('manager');
+
+        User::updateOrCreate(
+            ['email' => 'manager2@gamil.com'],
+            [
+                'first_name' => 'second',
+                'last_name' => 'manager',
+                'email' => 'manager2@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '01234569078',
+            ]
+        )->syncRoles('manager');
+
+        User::updateOrCreate(
+            ['email' => 'agent1@gamil.com'],
+            [
+                'first_name' => 'first',
+                'last_name' => 'agent',
+                'email' => 'agent1@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '01234567890',
+            ]
+        )->syncRoles('agent');
+
+        User::updateOrCreate(
+            ['email' => 'agent2@gamil.com'],
+            [
+                'first_name' => 'second',
+                'last_name' => 'agent',
+                'email' => 'agent2@gamil.com',
+                'password' => Hash::make(123456),
+                'phone' => '23401567890',
+            ]
+        )->syncRoles('agent');
     }
 }

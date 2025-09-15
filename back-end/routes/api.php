@@ -117,9 +117,9 @@ Route::middleware([
     Route::get('/test', fn() => \Illuminate\Support\Facades\DB::getDatabaseName());
 
     Route::group(['prefix' => 'authentication', 'middleware' => 'guest', 'name' => 'authentication.'], function () {
-        Route::post('/login', [AuthController::class, 'login'])->name('tenant.login');
         Route::post('/signup', [AuthController::class, 'signup'])->name('tenant.signup');
     });
+    Route::post('authentication/login', [AuthController::class, 'login'])->middleware('redirect_if_authenticated:api_tenant')->name('tenant.login');
 
     Route::prefix('contacts/import')->group(function () {
         Route::post('/preview', [\App\Http\Controllers\Api\ContactController::class, 'importPreview']);
@@ -157,13 +157,13 @@ Route::middleware([
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('authentication/logout', [AuthController::class, 'logout']);
         Route::get('/user', function () {
             return response()->json(Auth::user());
         });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', UserController::class);
-        Route::get('departments', [DepartmentController::class,'index']);
+        Route::get('departments', [DepartmentController::class, 'index']);
         Route::apiResource('tasks', TaskController::class);
         Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
         Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);

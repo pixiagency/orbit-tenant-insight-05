@@ -5,7 +5,6 @@ namespace Database\Seeders\tenant;
 use App\Enums\RolesEnum;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RoleSeeder extends Seeder
 {
@@ -14,12 +13,14 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = [
-            ['name' => RolesEnum::ADMIN->value, 'guard_name' => 'api','created_at'=> now(),'updated_at'=> now()],
-            ['name' => RolesEnum::MANAGER->value, 'guard_name' => 'api','created_at'=> now(),'updated_at'=> now()],
-            ['name' => RolesEnum::AGENT->value, 'guard_name' => 'api','created_at'=> now(),'updated_at'=> now()],
-        ];
+        if (Role::count() == 0) {
+            $roles = [
+                ['name' => RolesEnum::ADMIN->value, 'guard_name' => 'api_tenant', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => RolesEnum::MANAGER->value, 'guard_name' => 'api_tenant', 'created_at' => now(), 'updated_at' => now()],
+                ['name' => RolesEnum::AGENT->value, 'guard_name' => 'api_tenant', 'created_at' => now(), 'updated_at' => now()],
+            ];
 
-        Role::insert($roles);
+            Role::insert($roles);
+        }
     }
 }

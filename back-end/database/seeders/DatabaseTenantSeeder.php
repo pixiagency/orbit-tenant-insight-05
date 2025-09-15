@@ -7,6 +7,7 @@ use Database\Seeders\tenant\ContactSeeder;
 use Database\Seeders\Tenant\DepartmentSeeder;
 use Database\Seeders\tenant\ItemCategorySeeder;
 use Database\Seeders\tenant\ItemSeeder;
+use Database\Seeders\tenant\UserSeeder;
 use Database\Seeders\tenant\OpportunitySeeder;
 use Database\Seeders\tenant\PaymentMethodSeeder;
 use Database\Seeders\tenant\PipelineSeeder;

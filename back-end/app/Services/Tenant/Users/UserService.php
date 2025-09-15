@@ -24,7 +24,7 @@ class UserService extends BaseService
     {
         return $this->queryGet($filters)->get();
     }
-    
+
     public function listing(array $filters = [], array $withRelations = [], $perPage = 10): \Illuminate\Contracts\Pagination\CursorPaginator
     {
         return $this->queryGet(filters: $filters, withRelations: $withRelations)->cursorPaginate($perPage);
@@ -59,10 +59,9 @@ class UserService extends BaseService
     {
         $data = $userDTO->toArray();
         $user = $this->getModel()->create($data);
-        
         // Get role by ID and assign by name
         if ($userDTO->role) {
-                $user->assignRole($userDTO->role);
+            $user->assignRole($userDTO->role);
         }
         return $user->load('roles');
     }
@@ -71,16 +70,16 @@ class UserService extends BaseService
     {
         $user = $this->findById($id);
         $data = $userDTO->toArray();
-        
+
         // Remove role from data before updating user
         $roleId = $data['role'] ?? null;
         unset($data['role']);
-        
+
         if (!isset($data['password']))
             $user->update(Arr::except($data, ['password']));
         else
             $user->update($data);
-            
+
         // Handle role assignment
         if ($roleId) {
             $role = Role::find($roleId);
@@ -89,7 +88,7 @@ class UserService extends BaseService
                 $user->syncRoles([$role->name]);
             }
         }
-        
+
         return true;
     }
 
