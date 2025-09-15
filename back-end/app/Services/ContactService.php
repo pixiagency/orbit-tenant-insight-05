@@ -73,7 +73,7 @@ class ContactService extends BaseService
     {
         $contact = $this->findById($id);
         $contactData = $contactDTO->toArray();
-        if (count($contactDTO->contact_phones) > 0) {
+        if ($contactDTO->contact_phones && count($contactDTO->contact_phones) > 0) {
             $this->syncContactPhones($contact, $contactDTO->contact_phones);
         }
         $contact->update($contactData);

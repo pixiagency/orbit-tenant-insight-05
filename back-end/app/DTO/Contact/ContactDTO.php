@@ -11,7 +11,7 @@ class ContactDTO extends BaseDTO
         public string $first_name,
         public string $last_name,
         public string $email,
-        public array $contact_phones,
+        public ?array $contact_phones,
         public string $job_title,
         public string $department,
         public string $status,
