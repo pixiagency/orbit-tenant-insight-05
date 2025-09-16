@@ -8,7 +8,7 @@ class TasksSettings extends Settings
 {
     public bool $enable_escalation;
     public int $escalation_time_hours;
-    public int $default_notified_users;
+    public ?array $default_notified_users;
     public int $notify_manager;
 
     public static function group(): string
@@ -25,4 +25,5 @@ class TasksSettings extends Settings
             'notify_manager' => false,
         ];
     }
+
 }

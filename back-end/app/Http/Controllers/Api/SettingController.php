@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tenant\SettingRequest;
 use App\Settings\DealsSettings;
 use App\Settings\TasksSettings;
 use Illuminate\Http\Request;
@@ -56,13 +57,8 @@ class SettingController extends Controller
     /**
      * Handle change-value action - update any setting value
      */
-    public function changeValue(Request $request): JsonResponse
+    public function changeValue(SettingRequest $request): JsonResponse
     {
-        $request->validate([
-            'setting' => 'required|string',
-            'value' => 'required',
-            'group' => 'nullable|string'
-        ]);
 
         try {
             $setting = $request->input('setting');
@@ -78,6 +74,10 @@ class SettingController extends Controller
 
             // Update the setting
             $settings = app($settingsClass);
+            
+            // Handle array values - ensure proper array conversion
+            $value = $this->prepareValueForSaving($setting, $value, $settings);
+            
             $settings->$setting = $value;
             $settings->save();
             $data =[
@@ -132,4 +132,69 @@ class SettingController extends Controller
 
         return $settingsMap[$group] ?? null;
     }
+
+    /**
+     * Prepare value for saving based on the property type
+     */
+    private function prepareValueForSaving(string $setting, $value, $settings)
+    {
+        // Handle array values - if the property is typed as array and value is a JSON string, decode it
+        $reflection = new \ReflectionClass($settings);
+        if ($reflection->hasProperty($setting)) {
+            $property = $reflection->getProperty($setting);
+            $propertyType = $property->getType();
+            
+            if ($propertyType) {
+                $typeName = $propertyType->getName();
+                
+                // Handle array types
+                if ($typeName === 'array' || $typeName === '?array') {
+                    if (is_string($value)) {
+                        $decodedValue = json_decode($value, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decodedValue)) {
+                            $value = $decodedValue;
+                        }
+                    }
+                    
+                    if (is_array($value)) {
+                        // Special handling for default_notified_users - convert to integers
+                        if ($setting === 'default_notified_users') {
+                            if (empty($value)) {
+                                return [];
+                            }
+                            // Convert to integers and filter out invalid values (0, negative)
+                            return array_filter(array_map('intval', $value), function($id) {
+                                return $id > 0;
+                            });
+                        }
+                        return $value;
+                    }
+                    
+                    // Handle null values for array properties
+                    if (is_null($value) && ($typeName === 'array' || $typeName === '?array')) {
+                        return null;
+                    }
+                    
+                    return [];
+                }
+                
+                // Handle boolean types
+                if ($typeName === 'bool' || $typeName === '?bool') {
+                    if (is_string($value)) {
+                        return in_array(strtolower($value), ['true', '1', 'on', 'yes']);
+                    }
+                    return (bool) $value;
+                }
+                
+                // Handle integer types
+                if ($typeName === 'int' || $typeName === '?int') {
+                    return (int) $value;
+                }
+            }
+        }
+        
+        return $value;
+    }
+
 }
+
