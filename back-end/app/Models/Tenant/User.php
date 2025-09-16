@@ -4,6 +4,7 @@ namespace App\Models\Tenant;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\FcmToken;
 use App\Traits\Filterable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -104,5 +105,13 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get the FCM tokens for the user.
+     */
+    public function fcm_tokens()
+    {
+        return $this->hasMany(FcmToken::class);
     }
 }

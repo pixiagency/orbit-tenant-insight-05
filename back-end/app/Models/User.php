@@ -28,6 +28,8 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'lang',
+        'department_id',
     ];
 
     protected $guard_name = 'api';
@@ -58,5 +60,13 @@ class User extends Authenticatable
     public function tenant()
     {
         return $this->hasOne(Tenant::class);
+    }
+
+    /**
+     * Get the FCM tokens for the user.
+     */
+    public function fcm_tokens()
+    {
+        return $this->hasMany(FcmToken::class);
     }
 }

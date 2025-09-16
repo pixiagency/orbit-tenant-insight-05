@@ -3,8 +3,15 @@
 namespace App\Services\Tenant\Tasks;
 
 use App\Models\Tenant\Reminder;
+use App\Models\Tenant\Task;
+use App\Models\TaskReminder;
+use App\Mail\TaskReminderMail;
+use App\Notifications\Tenant\TaskReminderNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Log;
 
 class ReminderService
 {
@@ -91,20 +98,98 @@ class ReminderService
      */
     public function getTasksForReminder(Reminder $reminder)
     {
-        // This method should be implemented based on your Task model structure
-        // For now, returning empty collection as placeholder
-        return collect();
+        $now = now();
+
+        return Task::whereHas('taskReminders', function ($query) use ( $reminder, $now) {
+                $query->where('is_sent', false)
+                      ->whereNotNull('reminder_at')
+                      ->where('reminder_id', $reminder->id)
+                      ->where('reminder_at', '<=', $now);
+            })
+            ->with(['assignedTo', 'priority', 'taskReminders' => function ($query) use ( $reminder, $now) {
+                $query->where('is_sent', false)
+                      ->whereNotNull('reminder_at')
+                      ->where('reminder_id', $reminder->id)
+                      ->where('reminder_at', '<=', $now);
+            }])
+            ->get();
     }
 
     /**
      * Send reminder notification
      */
-    public function sendReminderNotification($task, Reminder $reminder)
+    public function sendReminderNotification(Task $task, Reminder $reminder)
     {
-        // This method should implement the actual notification logic
-        // Could send email, push notification, SMS, etc.
-        // For now, just logging as placeholder
-        \Log::info("Sending reminder for task {$task->id} with reminder: {$reminder->display_name}");
+        try {
+            // Check if the task has an assigned user
+            if (!$task->assignedTo) {
+                Log::warning("Task {$task->id} has no assigned user, skipping reminder");
+                return;
+            }
+
+            $assignedUser = $task->assignedTo;
+            $userName = $assignedUser->name ?? $assignedUser->first_name . ' ' . $assignedUser->last_name;
+
+            // Send email notification
+            // $this->sendEmailReminder($task, $reminder, $assignedUser, $userName);
+
+            // Send in-app notification
+            $this->sendInAppNotification($task, $reminder, $assignedUser);
+
+            // Mark the reminder as sent
+            $this->markReminderAsSent($task, $reminder);
+
+            Log::info("Reminder sent successfully for task {$task->id} to user {$assignedUser->id}");
+
+        } catch (\Exception $e) {
+            Log::error("Failed to send reminder for task {$task->id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    /**
+     * Send email reminder
+     */
+    private function sendEmailReminder(Task $task, Reminder $reminder, $user, string $userName)
+    {
+        try {
+            Mail::to($user->email)->send(new TaskReminderMail($task, $reminder, $userName));
+            Log::info("Email reminder sent to {$user->email} for task {$task->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send email reminder to {$user->email} for task {$task->id}", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Send in-app notification
+     */
+    private function sendInAppNotification(Task $task, Reminder $reminder, $user)
+    {
+        try {
+            $user->notify(new TaskReminderNotification($task, $reminder));
+            Log::info("In-app notification sent to user {$user->id} for task {$task->id}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send in-app notification to user {$user->id} for task {$task->id}", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Mark reminder as sent
+     */
+    private function markReminderAsSent(Task $task, Reminder $reminder)
+    {
+        TaskReminder::where('task_id', $task->id)
+            ->where('reminder_id', $reminder->id)
+            ->update([
+                'is_sent' => true,
+                'sent_at' => now()
+            ]);
     }
 
     /**
@@ -112,18 +197,30 @@ class ReminderService
      */
     public function processPendingReminders()
     {
+        // 1) Always process backlog: any unsent reminders whose reminder_at is now or in the past
+        $this->processOverdueUnsentTaskReminders();
+
+        // 2) Then process near-future window similarly to previous behavior (next 60 minutes)
         $now = now();
         $nextHour = $now->copy()->addHour();
-        
+
+        Log::info("Processing upcoming reminders from {$now} to {$nextHour}");
+
         $reminders = $this->getRemindersForTimeRange($now, $nextHour);
-        
+
+        Log::info("Found " . count($reminders) . " applicable reminder definitions");
+
         foreach ($reminders as $reminder) {
             $tasks = $this->getTasksForReminder($reminder);
-            
+
+            Log::info("Found " . count($tasks) . " tasks for reminder: {$reminder->display_name}");
+
             foreach ($tasks as $task) {
                 $this->sendReminderNotification($task, $reminder);
             }
         }
+
+        Log::info("Finished processing reminders");
     }
 
     /**
@@ -139,5 +236,49 @@ class ReminderService
                 ->pluck('count', 'time_unit')
                 ->toArray(),
         ];
+    }
+
+    /**
+     * Process all unsent task_reminders whose reminder_at <= now (backlog and due).
+     */
+    private function processOverdueUnsentTaskReminders(): void
+    {
+        try {
+            $dueTaskReminders = TaskReminder::with(['task.assignedTo', 'reminder'])
+                ->where('is_sent', false)
+                ->whereNotNull('reminder_at')
+                ->where('reminder_at', '<=', now())
+                ->get();
+
+            if ($dueTaskReminders->isEmpty()) {
+                Log::info('No overdue unsent task reminders found.');
+                return;
+            }
+
+            Log::info('Processing ' . $dueTaskReminders->count() . ' overdue unsent task reminders.');
+
+            foreach ($dueTaskReminders as $taskReminder) {
+                $task = $taskReminder->task;
+                $reminder = $taskReminder->reminder;
+
+                if (!$task || !$reminder) {
+                    continue;
+                }
+
+                if (!$task->assignedTo) {
+                    Log::warning("Task {$task->id} has no assigned user, skipping overdue reminder");
+                    // Still mark as sent to avoid infinite retries with no recipient
+                    $this->markReminderAsSent($task, $reminder);
+                    continue;
+                }
+
+                $this->sendReminderNotification($task, $reminder);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed processing overdue unsent task reminders', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 }

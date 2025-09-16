@@ -154,7 +154,7 @@ Route::middleware([
         Route::post('/bulk-with-variants', [\App\Http\Controllers\Api\ItemController::class, 'bulkStoreWithVariants']);
     });
     Route::prefix('items/{item}/variants')->group(function () {
-        Route::get('/', [ItemVariantController::class, 'index']); 
+        Route::get('/', [ItemVariantController::class, 'index']);
         Route::post('/', [ItemVariantController::class, 'store']); // Create single variant
         Route::get('/{variant}', [ItemVariantController::class, 'show']); // Show variant
         Route::put('/{variant}', [ItemVariantController::class, 'update']); // Update variant
@@ -193,6 +193,12 @@ Route::middleware([
         Route::prefix('core')->group(function () {
             Route::get('/sidebar-counts', [CoreController::class, 'getSidebarCounts']);
             Route::get('/currencies', [CoreController::class, 'getCurrencies']);
+        });
+
+        Route::prefix('settings')->group(function () {
+            Route::get('get', [TenantSettingController::class, 'getSettingsByGroup']);
+            Route::post('switcher', [TenantSettingController::class, 'switcher']);
+            Route::post('change-value', [TenantSettingController::class, 'changeValue']);
         });
     });
 
@@ -278,9 +284,12 @@ Route::middleware([
     Route::apiResource('reminders', ReminderController::class);
     Route::patch('reminders/{reminder}/set-default', [ReminderController::class, 'setDefault']);
 
-    Route::prefix('settings')->group(function () {
-        Route::get('get', [TenantSettingController::class, 'getSettingsByGroup']);
-        Route::post('switcher', [TenantSettingController::class, 'switcher']);
-        Route::post('change-value', [TenantSettingController::class, 'changeValue']);
+    // FCM Token routes
+    Route::prefix('fcm-tokens')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\FcmTokenController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\FcmTokenController::class, 'store']);
+        Route::delete('/', [App\Http\Controllers\Api\FcmTokenController::class, 'destroy']);
     });
+
+    
 });

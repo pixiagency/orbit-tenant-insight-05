@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Models\User;
+use App\Models\Tenant\User;
 use App\Models\Stage;
 use App\Models\Reason;
 use App\Models\Contact;

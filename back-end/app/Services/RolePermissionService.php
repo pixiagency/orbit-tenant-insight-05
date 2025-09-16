@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\QueryFilters\RoleFilters;
 use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Builder;

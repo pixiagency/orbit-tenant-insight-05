@@ -42,4 +42,23 @@ return array(
   'not_found' => 'غير موجود',
   'data not found' => 'البيانات غير موجوده',
 
+  // Task Escalation Notifications
+  'task_escalation_subject' => 'تصعيد المهمة',
+  'task_reminder_subject' => 'تذكير بالمهمه',
+  'task_escalation_greeting' => 'مرحباً :name،',
+  'task_escalation_intro' => 'هذا إشعار تصعيد لمهمة متأخرة.',
+  'task_escalation_details' => '**تفاصيل المهمة:**',
+  'task_escalation_title' => '• **العنوان:** :title',
+  'task_escalation_description' => '• **الوصف:** :description',
+  'task_escalation_due_date' => '• **تاريخ الاستحقاق:** :due_date',
+  'task_escalation_hours_overdue' => '• **ساعات التأخير:** :hours ساعة',
+  'task_escalation_priority' => '• **الأولوية:** :priority',
+  'task_escalation_assigned_to' => '• **المكلف:** :assigned_to',
+  'task_escalation_action_required' => 'يرجى اتخاذ إجراء فوري لإكمال هذه المهمة.',
+  'task_escalation_view_task' => 'عرض المهمة',
+  'task_escalation_thanks' => 'شكراً لاهتمامك بهذا الأمر.',
+  'task_escalation_message' => 'المهمة ":title" متأخرة :hours ساعة وتتطلب اهتماماً فورياً.',
+  'task_escalation_not_specified' => 'غير محدد',
+  'task_escalation_not_assigned' => 'غير مكلف',
+
 );

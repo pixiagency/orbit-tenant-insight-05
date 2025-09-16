@@ -75,7 +75,7 @@ return [
 
         'users_tenant' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\Tenant\User::class),
+            'model' => env('AUTH_MODEL_TENANT', App\Models\Tenant\User::class),
         ],
 
         // 'users' => [

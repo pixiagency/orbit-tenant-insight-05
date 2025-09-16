@@ -19,20 +19,13 @@ class NotificationResource extends JsonResource
         
         return [
             'id' => $this->id,
-            'type' => $this->type,
-            'type_display' => $this->getTypeDisplayName(),
+            'type' => $this->getTypeDisplayName(),
             'title' => $this->getTitle(),
             'message' => $this->getMessage(),
-            'data' => $data,
             'is_read' => $this->read_at !== null,
-            'read_at' => $this->read_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'created_at_human' => $this->created_at->diffForHumans(),
-            'time_ago' => $this->getTimeAgo(),
             'action_url' => $this->getActionUrl(),
-            'icon' => $this->getIcon(),
-            'priority' => $this->getPriority(),
-            'category' => $this->getCategory(),
         ];
     }
 
@@ -62,7 +55,9 @@ class NotificationResource extends JsonResource
         
         // For task escalation notifications
         if ($this->type === 'App\\Notifications\\Tenant\\TaskEscalationNotification') {
-            return 'Task Escalation: ' . ($data['task_title'] ?? 'Unknown Task');
+            return trans('app.task_escalation_subject');
+        }elseif ($this->type === 'App\\Notifications\\Tenant\\TaskReminderNotification') {
+            return trans('app.task_reminder_subject');
         }
         
         // For other notification types, try to get title from data
@@ -77,7 +72,20 @@ class NotificationResource extends JsonResource
         $data = $this->data ?? [];
         
         // For task escalation notifications
-        if ($this->type === 'App\\Notifications\\Tenant\\TaskEscalationNotification') {
+        if ($this->type === 'App\\Notifications\\Tenant\\TaskEscalationNotification' || $this->type === 'App\\Notifications\\Tenant\\TaskReminderNotification') {
+            $locale = app()->getLocale();
+            if (isset($data['messages']) && is_array($data['messages'])) {
+                if (!empty($data['messages'][$locale])) {
+                    return (string) $data['messages'][$locale];
+                }
+                if (!empty($data['messages']['en'])) {
+                    return (string) $data['messages']['en'];
+                }
+                $firstMessage = reset($data['messages']);
+                if (is_string($firstMessage) && $firstMessage !== '') {
+                    return $firstMessage;
+                }
+            }
             return $data['message'] ?? 'A task requires your immediate attention.';
         }
         
@@ -152,11 +160,5 @@ class NotificationResource extends JsonResource
         };
     }
 
-    /**
-     * Get human-readable time ago
-     */
-    private function getTimeAgo(): string
-    {
-        return $this->created_at->diffForHumans();
-    }
+
 }

@@ -12,4 +12,4 @@ Artisan::command('inspire', function () {
 Schedule::command('tasks:escalate')->everyMinute()->withoutOverlapping();
 
 // Schedule reminder processing to run every 15 minutes
-Schedule::command('reminders:process')->everyFifteenMinutes()->withoutOverlapping();
+Schedule::command('tasks:reminders')->everyMinute()->withoutOverlapping();

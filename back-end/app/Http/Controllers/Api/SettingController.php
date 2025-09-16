@@ -157,8 +157,8 @@ class SettingController extends Controller
                     }
                     
                     if (is_array($value)) {
-                        // Special handling for default_notified_users - convert to integers
-                        if ($setting === 'default_notified_users') {
+                        // Special handling for default_followers_users - convert to integers
+                        if ($setting === 'default_followers_users') {
                             if (empty($value)) {
                                 return [];
                             }

@@ -54,10 +54,9 @@ class SettingRequest extends FormRequest
                 $rules[] = 'max:8760'; // 1 year in hours
                 break;
                 
-            case 'default_notified_users':
+            case 'default_followers_users':
                 $rules[] = 'nullable';
                 $rules[] = 'array';
-                $rules[] = 'max:50';
                 $rules[] = function ($attribute, $value, $fail) {
                     // Allow null values
                     if (is_null($value)) {
@@ -73,7 +72,7 @@ class SettingRequest extends FormRequest
                         // Check if all items are integers
                         foreach ($value as $item) {
                             if (!is_numeric($item) || (int)$item != $item) {
-                                $fail('All items in default_notified_users must be integers.');
+                                $fail('All items in default_followers_users must be integers.');
                                 return;
                             }
                         }
@@ -184,8 +183,8 @@ class SettingRequest extends FormRequest
         $setting = $this->input('setting');
         $value = $this->input('value');
 
-        // Handle default_notified_users array conversion
-        if ($setting === 'default_notified_users') {
+        // Handle default_followers_users array conversion
+        if ($setting === 'default_followers_users') {
             // Allow null values
             if (is_null($value)) {
                 $convertedValue = null;

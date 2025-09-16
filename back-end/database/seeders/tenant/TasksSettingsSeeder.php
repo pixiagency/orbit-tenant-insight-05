@@ -17,7 +17,7 @@ class TasksSettingsSeeder extends Seeder
         // Set default values
         $tasksSettings->enable_escalation = true;
         $tasksSettings->escalation_time_hours = 24;
-        $tasksSettings->default_notified_users = [1,2,3];
+        $tasksSettings->default_followers_users = [];
         $tasksSettings->notify_manager = true;
         
         // Save the settings
