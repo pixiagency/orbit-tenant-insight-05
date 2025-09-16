@@ -1,9 +1,5 @@
 <?php
 
-use App\Enums\CompanySizes;
-use App\Enums\ContactMethods;
-use App\Enums\ContactStatus;
-use App\Enums\IndustryStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +14,8 @@ return new class extends Migration
         Schema::create('contact_phones', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
+            $table->boolean('is_primary')->default(false);
+            $table->boolean('enable_whatsapp')->default(false);
             $table->string('phone')->unique();
             $table->timestamps();
         });

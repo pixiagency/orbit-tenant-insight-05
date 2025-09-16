@@ -12,15 +12,23 @@ class ContactFilters extends QueryFilter
         parent::__construct($params);
     }
 
-    public function name($term)
+    public function search($term)
     {
-        return $this->builder->where('name', "LIKE", "%$term%");
+        return $this->builder->where(function ($q) use ($term) {
+            $q->where('email', 'LIKE', "%{$term}%")
+                ->orWhereHas('contactPhones', function ($qq) use ($term) {
+                    $qq->where('phone', 'LIKE', "%{$term}%");
+                });
+        });
     }
 
-    public function contact_numbers($term)
+    public function status($term)
     {
-        return $this->builder->whereHas('contactNumbers', function ($query) use ($term) {
-            $query->where('number', "LIKE", "%$term%");
-        });
+        return $this->builder->where('status', $term);
+    }
+
+    public function source_id($term)
+    {
+        return $this->builder->where('source_id', $term);
     }
 }

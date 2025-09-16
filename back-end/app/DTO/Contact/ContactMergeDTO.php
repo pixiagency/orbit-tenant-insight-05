@@ -5,9 +5,12 @@ namespace App\DTO\Contact;
 use App\DTO\BaseDTO;
 use Illuminate\Support\Arr;
 
-class ContactDTO extends BaseDTO
+class ContactMergeDTO extends BaseDTO
 {
     public function __construct(
+        public ?string $contact_id,
+        public ?string $identical_contact_type,
+        public ?string $merge_status,
         public ?string $first_name,
         public ?string $last_name,
         public ?string $email,
@@ -16,10 +19,10 @@ class ContactDTO extends BaseDTO
         public ?string $department,
         public ?string $status,
         public ?string $source_id,
-        public ?string $contact_method,
-        public ?bool $email_permission,
-        public ?bool $phone_permission,
-        public ?bool $whatsapp_permission,
+        public ?bool   $contact_method,
+        public ?bool   $email_permission,
+        public ?bool   $phone_permission,
+        public ?string $whatsapp_permission,
         public ?string $company_name,
         public ?string $website,
         public ?string $industry,
@@ -37,10 +40,13 @@ class ContactDTO extends BaseDTO
     public static function fromRequest($request): BaseDTO
     {
         return new self(
+            contact_id: $request->input('contact_id'),
+            identical_contact_type: $request->input('identical_contact_type'),
+            merge_status: $request->input('merge_status'),
             first_name: $request->input('first_name'),
             last_name: $request->input('last_name'),
             email: $request->input('email'),
-            contact_phones: self::processContactPhones($request->input('contact_phones', [])),
+            contact_phones: $request->input('contact_phones'),
             job_title: $request->input('job_title'),
             department: $request->input('department'),
             status: $request->input('status'),
@@ -59,58 +65,20 @@ class ContactDTO extends BaseDTO
             state: $request->input('state'),
             zip_code: $request->input('zip_code'),
             user_id: $request->input('user_id'),
-            tags: json_encode($request->input('tags')),
+            tags: json_encode($request->input('tags') ?? []),
             notes: $request->input('notes'),
         );
-    }
-
-    /**
-     * Process contact phones array to ensure proper structure
-     */
-    protected static function processContactPhones(array $contactPhones): array
-    {
-        return collect($contactPhones)
-            ->map(function ($phone) {
-                // Handle both array format and object format
-                if (is_array($phone)) {
-                    return [
-                        'phone' => $phone['phone'] ?? '',
-                        'is_primary' => (bool) ($phone['is_primary'] ?? false),
-                        'enable_whatsapp' => (bool) ($phone['enable_whatsapp'] ?? false),
-                    ];
-                }
-
-                // Handle object format (if coming from JSON)
-                if (is_object($phone)) {
-                    return [
-                        'phone' => $phone->phone ?? '',
-                        'is_primary' => (bool) ($phone->is_primary ?? false),
-                        'enable_whatsapp' => (bool) ($phone->enable_whatsapp ?? false),
-                    ];
-                }
-
-                // Handle string format (just phone number)
-                if (is_string($phone)) {
-                    return [
-                        'phone' => $phone,
-                        'is_primary' => false,
-                        'enable_whatsapp' => false,
-                    ];
-                }
-
-                return null;
-            })
-            ->filter() // Remove null values
-            ->values() // Re-index array
-            ->toArray();
     }
 
     public function toArray(): array
     {
         return [
+            'contact_id' => $this->contact_id,
+            'identical_contact_type' => $this->identical_contact_type,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
+            'contact_phones' => $this->contact_phones,
             'job_title' => $this->job_title,
             'department' => $this->department,
             'status' => $this->status,
@@ -129,7 +97,7 @@ class ContactDTO extends BaseDTO
             'state' => $this->state,
             'zip_code' => $this->zip_code,
             'user_id' => $this->user_id,
-            'tags' => $this->tags,
+            'tags' => $this->tags ?? [],
             'notes' => $this->notes,
         ];
     }
@@ -137,6 +105,9 @@ class ContactDTO extends BaseDTO
     public static function fromArray(array $data): self
     {
         return new self(
+            contact_id: Arr::get($data, 'contact_id'),
+            identical_contact_type: Arr::get($data, 'identical_contact_type'),
+            merge_status: Arr::get($data, 'merge_status'),
             first_name: Arr::get($data, 'first_name'),
             last_name: Arr::get($data, 'last_name'),
             email: Arr::get($data, 'email'),
@@ -159,7 +130,7 @@ class ContactDTO extends BaseDTO
             state: Arr::get($data, 'state'),
             zip_code: Arr::get($data, 'zip_code'),
             user_id: Arr::get($data, 'user_id'),
-            tags: Arr::get($data, 'tags'),
+            tags: Arr::get($data, 'tags') ?? [],
             notes: Arr::get($data, 'notes'),
         );
     }

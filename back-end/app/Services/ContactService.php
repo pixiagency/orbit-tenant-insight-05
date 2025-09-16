@@ -12,6 +12,7 @@ class ContactService extends BaseService
 {
     public function __construct(
         public Contact $model,
+        public ContactPhoneService $contactPhoneService,
     ) {}
 
     public function getModel(): Contact
@@ -52,12 +53,7 @@ class ContactService extends BaseService
 
         // Create the contact
         $contact = $this->model->create($contactData);
-
-        foreach ($contactDTO->contact_phones as $number) {
-            $contact->contactPhones()->create([
-                'phone' => $number
-            ]);
-        }
+        $this->contactPhoneService->store($contactDTO->contact_phones, $contact->id);
 
         $contact->load('country', 'city', 'user', 'source', 'contactPhones');
         return $contact;
@@ -72,11 +68,10 @@ class ContactService extends BaseService
     public function update(int $id, ContactDTO $contactDTO)
     {
         $contact = $this->findById($id);
-        $contactData = $contactDTO->toArray();
-        if (count($contactDTO->contact_phones) > 0) {
-            $this->syncContactPhones($contact, $contactDTO->contact_phones);
+        if ($contactDTO->contact_phones && count($contactDTO->contact_phones) > 0) {
+            $this->contactPhoneService->update($contactDTO->contact_phones, $contact);
         }
-        $contact->update($contactData);
+        $contact->update($contactDTO->toArray());
         return $contact->load('contactPhones', 'country', 'city', 'user', 'source');
     }
 
@@ -96,8 +91,6 @@ class ContactService extends BaseService
         }
         return $query->get();
     }
-
-
 
     public function getDatabaseFields()
     {

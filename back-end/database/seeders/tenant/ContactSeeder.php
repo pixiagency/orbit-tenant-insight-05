@@ -49,12 +49,18 @@ class ContactSeeder extends Seeder
         $contact1->contactPhones()->createMany([
             [
                 'phone' => '1234567890',
+                'is_primary' => true,
+                'enable_whatsapp' => true,
             ],
             [
                 'phone' => '4561237890',
+                'is_primary' => false,
+                'enable_whatsapp' => false,
             ],
             [
                 'phone' => '7891234560',
+                'is_primary' => false,
+                'enable_whatsapp' => true,
             ],
         ]);
     }
