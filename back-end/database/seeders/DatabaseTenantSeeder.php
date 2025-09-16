@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Database\Seeders\tenant\AttributeWithValueProductSeeder;
 use Database\Seeders\tenant\ContactSeeder;
-use Database\Seeders\Tenant\DepartmentSeeder;
+use Database\Seeders\tenant\DepartmentSeeder;
 use Database\Seeders\tenant\ItemCategorySeeder;
 use Database\Seeders\tenant\ItemSeeder;
 use Database\Seeders\tenant\UserSeeder;
