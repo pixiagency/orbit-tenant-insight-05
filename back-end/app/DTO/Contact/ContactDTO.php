@@ -40,7 +40,7 @@ class ContactDTO extends BaseDTO
             first_name: $request->input('first_name'),
             last_name: $request->input('last_name'),
             email: $request->input('email'),
-            contact_phones: $request->input('contact_phones'),
+            contact_phones: self::processContactPhones($request->input('contact_phones', [])),
             job_title: $request->input('job_title'),
             department: $request->input('department'),
             status: $request->input('status'),
@@ -62,6 +62,47 @@ class ContactDTO extends BaseDTO
             tags: json_encode($request->input('tags')),
             notes: $request->input('notes'),
         );
+    }
+
+    /**
+     * Process contact phones array to ensure proper structure
+     */
+    protected static function processContactPhones(array $contactPhones): array
+    {
+        return collect($contactPhones)
+            ->map(function ($phone) {
+                // Handle both array format and object format
+                if (is_array($phone)) {
+                    return [
+                        'phone' => $phone['phone'] ?? '',
+                        'is_primary' => (bool) ($phone['is_primary'] ?? false),
+                        'enable_whatsapp' => (bool) ($phone['enable_whatsapp'] ?? false),
+                    ];
+                }
+
+                // Handle object format (if coming from JSON)
+                if (is_object($phone)) {
+                    return [
+                        'phone' => $phone->phone ?? '',
+                        'is_primary' => (bool) ($phone->is_primary ?? false),
+                        'enable_whatsapp' => (bool) ($phone->enable_whatsapp ?? false),
+                    ];
+                }
+
+                // Handle string format (just phone number)
+                if (is_string($phone)) {
+                    return [
+                        'phone' => $phone,
+                        'is_primary' => false,
+                        'enable_whatsapp' => false,
+                    ];
+                }
+
+                return null;
+            })
+            ->filter() // Remove null values
+            ->values() // Re-index array
+            ->toArray();
     }
 
     public function toArray(): array

@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\AbstractPaginator;
 use App\Exceptions\GeneralException;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,8 +11,6 @@ use App\Exports\ContactsExport;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contacts\ContactRequest;
-use App\Http\Requests\Contacts\ContactStoreRequest;
-use App\Http\Requests\Contacts\ContactUpdateRequest;
 use App\Http\Resources\ContactResource;
 use App\Imports\ContactsImport;
 use App\Models\Tenant\Contact;
@@ -201,6 +196,7 @@ class ContactController extends Controller
             return ApiResponse(message: $e->getMessage(), code: $e->getCode());
         } catch (Exception $e) {
             DB::rollBack();
+            dd($e);
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }

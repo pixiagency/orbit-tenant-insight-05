@@ -15,7 +15,7 @@ class ContactPhone extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['contact_id', 'phone'];
+    protected $fillable = ['contact_id', 'phone', 'is_primary', 'enable_whatsapp'];
 
     public function contact()
     {
