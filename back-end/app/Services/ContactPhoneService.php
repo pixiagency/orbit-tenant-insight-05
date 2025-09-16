@@ -52,6 +52,16 @@ class ContactPhoneService extends BaseService
         }
     }
 
+    public function storeOnePhone(array $phone, int $contactId)
+    {
+        $this->model->create([
+            'phone' => $phone['phone'],
+            'is_primary' => $phone['is_primary'],
+            'enable_whatsapp' => $phone['enable_whatsapp'],
+            'contact_id' => $contactId
+        ]);
+    }
+
     public function update(array $contactPhones, Contact $Contact): void
     {
         $this->syncContactPhones($Contact, $contactPhones);

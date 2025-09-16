@@ -53,7 +53,6 @@ class ContactService extends BaseService
 
         // Create the contact
         $contact = $this->model->create($contactData);
-
         $this->contactPhoneService->store($contactDTO->contact_phones, $contact->id);
 
         $contact->load('country', 'city', 'user', 'source', 'contactPhones');
