@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Settings\TasksSettings;
 
 class TaskEscalationNotification extends Notification
 {
@@ -31,7 +32,15 @@ class TaskEscalationNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $settings = new TasksSettings();
+        $channels = [];
+        if ($settings->mail_notification) {
+            $channels[] = 'mail';
+        }
+        if ($settings->system_notification) {
+            $channels[] = 'database';
+        }
+        return $channels;
     }
 
     /**
@@ -39,7 +48,12 @@ class TaskEscalationNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $dueDateTime = Carbon::parse($this->task->due_date . ' ' . $this->task->due_time);
+        // Build due datetime safely: due_date may be cast to Carbon (midnight time)
+        // and due_time is a time string; avoid concatenation that can double-specify time
+        $date = $this->task->due_date instanceof Carbon
+            ? $this->task->due_date->copy()
+            : Carbon::parse($this->task->due_date);
+        $dueDateTime = (clone $date)->setTimeFromTimeString((string) $this->task->due_time);
         $hoursOverdue = Carbon::now()->diffInHours($dueDateTime);
         
         $assignedTo = $this->task->assignedTo ? 
@@ -134,7 +148,10 @@ class TaskEscalationNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $dueDateTime = Carbon::parse($this->task->due_date . ' ' . $this->task->due_time);
+        $date = $this->task->due_date instanceof Carbon
+            ? $this->task->due_date->copy()
+            : Carbon::parse($this->task->due_date);
+        $dueDateTime = (clone $date)->setTimeFromTimeString((string) $this->task->due_time);
         $hoursOverdue = intval(Carbon::now()->floatDiffInHours($dueDateTime));
         
         // Store messages in all 4 languages for future use

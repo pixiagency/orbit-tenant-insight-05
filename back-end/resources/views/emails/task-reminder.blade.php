@@ -35,6 +35,9 @@
         .priority-low {
             border-left: 4px solid #28a745;
         }
+        .priority-high .priority-label { color: #dc3545; }
+        .priority-medium .priority-label { color: #ffc107; }
+        .priority-low .priority-label { color: #28a745; }
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -68,7 +71,12 @@
         <p>Hello {{ $userName }}!</p>
     </div>
 
-    <div class="task-details priority-{{ strtolower($task->priority->name ?? 'medium') }}">
+    @php
+        $priority = optional($task->priority);
+        $priorityName = strtolower($priority->name ?? 'medium');
+        $priorityColor = $priority->color ?? '#6c757d';
+    @endphp
+    <div class="task-details priority-{{ $priorityName }}">
         <h2>{{ $task->title }}</h2>
         
         @if($task->description)
@@ -76,14 +84,14 @@
         @endif
 
         <div style="margin: 15px 0;">
-            <p><strong>Due Date:</strong> {{ $task->due_date->format('M d, Y') }}</p>
+            <p><strong>Due Date:</strong> {{ \Carbon\Carbon::parse($task->due_date)->format('M d, Y') }}</p>
             <p><strong>Due Time:</strong> {{ $task->due_time }}</p>
         </div>
 
         @if($task->priority)
             <p><strong>Priority:</strong> 
-                <span style="color: {{ $task->priority->color ?? '#6c757d' }}">
-                    {{ $task->priority->name }}
+                <span class="priority-label">
+                    {{ $priority->name }}
                 </span>
             </p>
         @endif
