@@ -56,7 +56,7 @@ class PipelineService extends BaseService
         $pipeline = $this->model->create([
             'name' => $pipelineDTO->name,
         ]);
-       
+
         return $pipeline;
     }
 

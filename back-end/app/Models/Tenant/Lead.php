@@ -8,11 +8,9 @@ use App\Models\CustomField;
 use App\Models\Industry;
 use App\Models\Reason;
 use App\Models\Service;
-use App\Models\Source;
 use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Arr;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -58,7 +56,7 @@ class Lead extends Model implements Auditable
         if (Arr::has($data, 'new_values.stage_id')) {
             if ($this->getOriginal('stage_id')) {
                 $data['old_values']['stage'] = Stage::find($this->getOriginal('stage_id'))->name;
-            }   
+            }
             if ($this->getAttribute('stage_id')) {
                 $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))->name;
             }
@@ -67,12 +65,6 @@ class Lead extends Model implements Auditable
 
         return $data;
     }
-
-    // public function sourceContact(): HasOneThrough
-    // {
-    //     return $this->through('contact')->has('source');
-    // }
-
 
     // Lead belongs to a User (Sales Representative)
     public function user()
@@ -113,13 +105,5 @@ class Lead extends Model implements Auditable
     public function items()
     {
         return $this->belongsToMany(Item::class, 'leads_items', 'lead_id', 'item_id')->withPivot('quantity', 'price');
-    }
-
-    // Lead has many Stages (Many-to-Many)
-    public function stages()
-    {
-        return $this->belongsToMany(Stage::class, 'lead_stage')
-            ->withPivot('start_date', 'exit_date', 'pipline_id')
-            ->withTimestamps();
     }
 }

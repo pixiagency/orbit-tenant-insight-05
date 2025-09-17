@@ -9,12 +9,14 @@ use App\DTO\Lead\LeadDTO;
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\Lead;
+use Auth;
 
 class LeadService extends BaseService
 {
     public function __construct(
         public Lead $model,
         public Item $itemModel,
+        public StageService $stageService,
     ) {}
 
     public function getModel(): Lead
@@ -109,58 +111,29 @@ class LeadService extends BaseService
 
     public function update(int $id, LeadDTO $leadDTO)
     {
-        // Find the lead by ID or fail if not found
-        $lead = $this->model->findOrFail($id);
-        // Update lead fields
-        $leadData = $leadDTO->toArray();
-        $lead->update($leadData);
-        // Handle industries relationship
-        if (!empty($leadDTO->industries)) {
-            $lead->industries()->sync($leadDTO->industries);
-        } else {
-            $lead->industries()->detach(); // Remove all industries if empty
-        }
-        // Handle services and categories
-        $servicesData = [];
-        if (!empty($leadDTO->services)) {
-            foreach ($leadDTO->services as $serviceId) {
-                if (is_numeric($serviceId) && $serviceId > 0) {
-                    $categoryId = $leadDTO->serviceCategories[$serviceId] ?? null;
-                    $servicesData[$serviceId] = ['category_id' => $categoryId];
-                }
-            }
-            $lead->services()->sync($servicesData);
-        } else {
-            $lead->services()->detach();
-        }
-        // Handle custom fields relationship
-        $customFieldsData = [];
-        if (!empty($leadDTO->customFields)) {
-            foreach ($leadDTO->customFields as $fieldId => $value) {
-                $customFieldsData[$fieldId] = ['value' => $value];
-            }
-            $lead->customFields()->sync($customFieldsData);
-        } else {
-            $lead->customFields()->detach();
-        }
-        if ($leadDTO->stage_id) {
-            // Mark the previous stage exit date
-            $previousStage = $lead->stages()->latest('pivot_created_at')->first();
-            if ($previousStage) {
-                $previousStage->pivot->update(['exit_date' => now()]);
-            }
-
-            // Attach new stage with start date
-            $lead->stages()->attach($leadDTO->stage_id, [
-                'start_date' => now(),
-            ]);
-        }
-        return $lead;
+        $lead = $this->findById($id);
+        $lead->update($leadDTO->toArray());
+        // if ($leadDTO->items) {
+        //     $lead->items()->sync($leadDTO->items);
+        // }
+        return $lead->load('items'); 
     }
-
 
     public function delete(int $id)
     {
         return $this->getQuery()->where('id', $id)->delete();
+    }
+
+    public function kanbanList()
+    {
+        return $this->stageService->queryGet(
+            withRelations: [
+                'leads' => function ($query) {
+                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'items']);
+                },
+                'pipeline'
+            ],
+            filters: ['assigned_to_id' => Auth::user()->id]
+        )->get();
     }
 }
