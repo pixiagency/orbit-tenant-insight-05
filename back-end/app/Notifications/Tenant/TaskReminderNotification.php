@@ -3,7 +3,7 @@
 namespace App\Notifications\Tenant;
 
 use App\Models\Tenant\Task;
-use App\Models\Tenant\Reminder;
+use App\Settings\TasksSettings;
 use App\Traits\NotifyFcm;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -35,7 +35,15 @@ class TaskReminderNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $settings = new TasksSettings();
+        $channels = [];
+        if ($settings->mail_notification) {
+            $channels[] = 'mail';
+        }
+        if ($settings->system_notification) {
+            $channels[] = 'database';
+        }
+        return $channels;
     }
 
     /**
@@ -125,6 +133,7 @@ class TaskReminderNotification extends Notification
     private function getTaskUrl(): string
     {
         // This should be replaced with the actual task URL in your application
+        //TODO: add here task link of FrontEnd Not Backend
         return url("/tasks/{$this->task->id}");
     }
 }

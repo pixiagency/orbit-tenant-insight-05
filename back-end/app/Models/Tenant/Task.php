@@ -28,6 +28,7 @@ class Task extends Model
     protected $casts = [
         'tags' => 'array',
         'escalation_sent' => 'boolean',
+        'due_date' => 'date',
     ];
 
     public function lead()
@@ -94,10 +95,16 @@ class Task extends Model
     private function calculateReminderTime(Reminder $reminder)
     {
         if ($reminder->time_unit === 'on_time') {
-            return Carbon::parse($this->due_date . ' ' . $this->due_time);
+            $date = $this->due_date instanceof Carbon
+                ? $this->due_date->copy()
+                : Carbon::parse($this->due_date);
+            return (clone $date)->setTimeFromTimeString((string) $this->due_time);
         }
 
-        $dueDateTime = Carbon::parse($this->due_date . ' ' . $this->due_time);
+        $date = $this->due_date instanceof Carbon
+            ? $this->due_date->copy()
+            : Carbon::parse($this->due_date);
+        $dueDateTime = (clone $date)->setTimeFromTimeString((string) $this->due_time);
         
         switch ($reminder->time_unit) {
             case 'minutes':
