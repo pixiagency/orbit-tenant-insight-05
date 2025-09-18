@@ -17,7 +17,7 @@ class Item extends Model
         'description',
         'price',
         'sku',
-        'quantity',
+        'stock',
         'category_id',
         'duration',
         'service_type',

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('sku')->unique();
             $table->decimal('price', 10, 2)->nullable();
-            $table->integer('quantity')->nullable();
+            $table->integer('stock')->nullable();
             $table->enum('service_type', ServiceType::values())->nullable();
             $table->enum('duration', ServiceDuration::values())->nullable();
             $table->foreignId('category_id')->constrained('item_categories');
