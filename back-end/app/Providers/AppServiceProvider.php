@@ -19,12 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                \App\Console\Commands\ProcessTaskEscalations::class,
-                \App\Console\Commands\ProcessTaskReminders::class,
-                \App\Console\Commands\ManageTranslations::class,
-            ]);
-        }
+
     }
 }

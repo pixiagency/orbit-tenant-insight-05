@@ -11,11 +11,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withCommands([
-        \App\Console\Commands\ProcessTaskEscalations::class,
-        \App\Console\Commands\ProcessTaskReminders::class,
-        \App\Console\Commands\ManageTranslations::class,
-    ])
     ->withMiddleware(function (Middleware $middleware) {
         // Add global middleware for API locale detection
         $middleware->append(\App\Http\Middleware\SetLocaleFromHeader::class);
