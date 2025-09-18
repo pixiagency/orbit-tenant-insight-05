@@ -19,12 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Artisan::starting(function ($artisan) {
-            $artisan->resolveCommands([
-                \App\Console\Commands\ProcessTaskEscalations::class,
-                \App\Console\Commands\ProcessTaskReminders::class,
-                \App\Console\Commands\ManageTranslations::class,
-            ]);
-        });
+        $this->commands([
+            \App\Console\Commands\ProcessTaskEscalations::class,
+            \App\Console\Commands\ProcessTaskReminders::class,
+            \App\Console\Commands\ManageTranslations::class,
+        ]);
     }
 }
