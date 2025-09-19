@@ -152,12 +152,15 @@ Route::middleware([
         Route::put('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'update']);
         Route::delete('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'destroy']);
     });
-    Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
-    Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
-    Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
+
     Route::prefix('items')->group(function () {
         Route::post('/bulk-with-variants', [\App\Http\Controllers\Api\ItemController::class, 'bulkStoreWithVariants']);
     });
+    Route::get('items/all', [\App\Http\Controllers\Api\ItemVariantController::class, 'getAll']);
+    Route::delete('items/variants/{id}', [\App\Http\Controllers\Api\ItemVariantController::class, 'destroyVariant']);
+    Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
+    Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
+    Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
     Route::prefix('items/{item}/variants')->group(function () {
         Route::get('/', [ItemVariantController::class, 'index']);
         Route::post('/', [ItemVariantController::class, 'store']); // Create single variant
@@ -295,6 +298,4 @@ Route::middleware([
         Route::post('/', [App\Http\Controllers\Api\FcmTokenController::class, 'store']);
         Route::delete('/', [App\Http\Controllers\Api\FcmTokenController::class, 'destroy']);
     });
-
-    
 });

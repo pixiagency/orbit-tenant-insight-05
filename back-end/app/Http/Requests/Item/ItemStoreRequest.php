@@ -22,12 +22,12 @@ class ItemStoreRequest extends BaseRequest
             'name' => 'required|string|unique:items,name',
             'description' => 'nullable|string',
             'price' => 'required|numeric',
-            'sku' => 'nullable|string|unique:items,sku',
-            'quantity' => 'requiredIf:type,product|integer',
-            'category_id' => ['required', new ItemCategoryRule($this->type)],
-            'duration' => ['requiredIf:type,service', Rule::in(ServiceDuration::values())],
             'type' => ['required', Rule::in(ItemType::values())],
-            'service_type' => ['nullable', Rule::in(ServiceType::values())],
+            'category_id' => ['required', new ItemCategoryRule($this->type)],
+            'sku' => ['exclude_unless:type,product', 'required', 'string', 'unique:items,sku'],
+            'quantity' => ['exclude_unless:type,product', 'required', 'integer'],
+            'service_type' => ['exclude_unless:type,service', 'requiredIf:type,service', Rule::in(ServiceType::values())],
+            'duration' => ['exclude_unless:service_type,recurring', 'exclude_unless:type,service', 'requiredIf:service_type,recurring', Rule::in(ServiceDuration::values())],
         ];
     }
 }

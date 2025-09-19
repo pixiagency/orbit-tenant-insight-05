@@ -149,7 +149,7 @@ class UpdateProductVariantRequest extends FormRequest
         $attributes = $this->input('attributes', []);
         $attributeSlugs = array_keys($attributes);
 
-        $existingAttributes = ItemAttribute::whereIn('name', $attributeSlugs)->pluck('name')->toArray();
+        $existingAttributes = ItemAttribute::whereIn('id', $attributeSlugs)->pluck('id')->toArray();
         $missingAttributes = array_diff($attributeSlugs, $existingAttributes);
 
         foreach ($missingAttributes as $missingAttribute) {
@@ -168,17 +168,17 @@ class UpdateProductVariantRequest extends FormRequest
         $attributes = $this->input('attributes', []);
 
         foreach ($attributes as $attributeSlug => $value) {
-            $attribute = ItemAttribute::where('name', $attributeSlug)->first();
+            $attribute = ItemAttribute::where('id', $attributeSlug)->first();
 
             if ($attribute) {
-                $attributeValue = ItemAttributeValue::where('attribute_id', $attribute->id)
+                $attributeValue = ItemAttributeValue::where('item_attribute_id', $attribute->id)
                     ->where('value', $value)
                     ->first();
 
                 if (!$attributeValue) {
                     $validator->errors()->add(
                         "attributes.{$attributeSlug}",
-                        "Value '{$value}' does not exist for attribute '{$attribute->name}'."
+                        "Value '{$value}' does not exist for attribute '{$attribute->id}'."
                     );
                 }
             }
@@ -226,16 +226,16 @@ class UpdateProductVariantRequest extends FormRequest
         $attributes = $this->input('attributes', []);
         $providedAttributes = array_keys($attributes);
 
-        $requiredAttributes = ItemAttribute::pluck('name')->toArray();
+        $requiredAttributes = ItemAttribute::pluck('id')->toArray();
         $missingAttributes = array_diff($requiredAttributes, $providedAttributes);
 
         foreach ($missingAttributes as $missingAttribute) {
-            $attribute = ItemAttribute::where('name', $missingAttribute)->first();
-            $attributeName = $attribute ? $attribute->name : $missingAttribute;
+            $attribute = ItemAttribute::where('id', $missingAttribute)->first();
+            $attributeName = $attribute ? $attribute->id : $missingAttribute;
 
             $validator->errors()->add(
                 "attributes.{$missingAttribute}",
-                "Required attribute '{$attributeName}' is missing."
+                "Required attribute '{$attributeName}' is missing." . $missingAttribute
             );
         }
     }

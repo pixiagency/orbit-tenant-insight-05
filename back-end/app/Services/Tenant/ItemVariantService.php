@@ -9,6 +9,8 @@ use App\DTO\Item\ItemDTO;
 use App\Enums\ItemType;
 use App\Models\Filters\ItemFilter;
 use App\Models\Tenant\ItemAttribute;
+use App\Models\Tenant\ItemVariant;
+use App\QueryFilters\Tenant\ItemVariantFilters;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
@@ -16,11 +18,11 @@ use Illuminate\Support\Facades\DB;
 class ItemVariantService extends BaseService
 {
     public function __construct(
-        public Item $model,
+        public ItemVariant $model,
         public ItemAttribute $itemAttribute,
     ) {}
 
-    public function getModel(): Item
+    public function getModel(): ItemVariant
     {
         return $this->model;
     }
@@ -28,6 +30,21 @@ class ItemVariantService extends BaseService
     public function getAll(int $itemId, array $filters = [])
     {
         return $this->queryGet($itemId, $filters)->get();
+    }
+
+    public function queryVariantGet(array $filters = [], array $withRelations = []): Builder
+    {
+        $query = $this->model->with($withRelations)->ordered();
+        return $query->filter(new ItemVariantFilters($filters));
+    }
+
+    public function getAllVariant(array $filters = [], array $withRelations = [], ?int $perPage = null)
+    {
+        $query = $this->queryVariantGet(filters: $filters, withRelations: $withRelations);
+        if ($perPage) {
+            return $query->paginate($perPage);
+        }
+        return $query->get();
     }
 
     public function getTableName(): string
@@ -42,7 +59,7 @@ class ItemVariantService extends BaseService
 
     public function queryGet(int $itemId, array $filters = [], array $withRelations = []): HasMany
     {
-        $item = $this->model->query()->findOrFail($itemId);        
+        $item = $this->model->query()->findOrFail($itemId);
         $query = $item->variants()
             ->with($withRelations);
         return $query;
@@ -93,5 +110,12 @@ class ItemVariantService extends BaseService
         }
         $result = $item->delete();
         return $result;
+    }
+
+    public function destroyVariant(int $id): bool
+    {
+        $variant = $this->findById($id);
+        $variant->attributeValues()->detach();
+        return $variant->delete();
     }
 }
