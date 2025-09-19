@@ -58,7 +58,7 @@ class Lead extends Model implements Auditable
         if (Arr::has($data, 'new_values.stage_id')) {
             if ($this->getOriginal('stage_id')) {
                 $data['old_values']['stage'] = Stage::find($this->getOriginal('stage_id'))->name;
-            }   
+            }
             if ($this->getAttribute('stage_id')) {
                 $data['new_values']['stage'] = Stage::find($this->getAttribute('stage_id'))->name;
             }
@@ -110,10 +110,11 @@ class Lead extends Model implements Auditable
         return $this->belongsTo(Stage::class);
     }
 
-    public function items()
+    public function variants()
     {
-        return $this->belongsToMany(Item::class, 'leads_items', 'lead_id', 'item_id')->withPivot('quantity', 'price');
+        return $this->belongsToMany(ItemVariant::class, 'leads_variants', 'lead_id', 'item_variant_id')->withPivot('quantity', 'price');
     }
+
 
     // Lead has many Stages (Many-to-Many)
     public function stages()

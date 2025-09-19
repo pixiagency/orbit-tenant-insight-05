@@ -25,6 +25,10 @@ class UpdateOpportunityRequest extends FormRequest
             'assigned_to_id' => 'sometimes|exists:users,id',
             'notes' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:255',
+            'items' => 'sometimes|array',
+            'items.*.id' => 'sometimes|exists:item_variants,id',
+            'items.*.quantity' => 'sometimes|numeric',
+            'items.*.price' => 'sometimes|numeric',
         ];
     }
 }

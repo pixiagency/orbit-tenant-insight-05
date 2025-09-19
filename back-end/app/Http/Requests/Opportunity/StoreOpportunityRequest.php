@@ -27,8 +27,8 @@ class StoreOpportunityRequest extends FormRequest
             'notes' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:255',
             'items' => 'nullable|array',
-            'items.*.id' => 'required|exists:items,id',
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'items.*.id' => 'required|exists:item_variants,id',
+            'items.*.quantity' => ['nullable', 'integer', 'min:1'],
             'items.*.price' => 'nullable|numeric',
         ];
     }

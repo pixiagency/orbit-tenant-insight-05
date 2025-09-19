@@ -49,6 +49,15 @@ class LeadService extends BaseService
         return $leads->filter(new LeadFilters($filters));
     }
 
+    public function index(array $filters = [], array $withRelations = [], ?int $perPage = null)
+    {
+        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
+        if ($perPage) {
+            return $query->paginate($perPage);
+        }
+        return $query->get();
+    }
+
     private function checkItemQuantityThenUpdate(int $itemId, int $quantity)
     {
         $item = $this->itemModel->find($itemId);
@@ -64,11 +73,8 @@ class LeadService extends BaseService
         if ($data['items']) {
             $deal_value = 0;
             foreach ($data['items'] as $item) {
-                $this->checkItemQuantityThenUpdate($item['id'], $item['quantity']);
-
                 $deal_value += $item['price'] * $item['quantity'];
             }
-
             $lead = Lead::create([
                 'contact_id' => $data['contact_id'],
                 'stage_id' => $data['stage_id'],
@@ -82,13 +88,13 @@ class LeadService extends BaseService
             ]);
 
             foreach ($data['items'] as $item) {
-                $lead->items()->attach($item['id'], [
+                $lead->variants()->attach($item['id'], [
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
                 ]);
             }
 
-            $lead->load('items');
+            $lead->load('variants.item');
         } else {
             $lead = Lead::create([
                 'contact_id' => $data['contact_id'],
@@ -107,55 +113,20 @@ class LeadService extends BaseService
     }
 
 
-    public function update(int $id, LeadDTO $leadDTO)
+    public function update(int $id, array $data)
     {
-        // Find the lead by ID or fail if not found
-        $lead = $this->model->findOrFail($id);
-        // Update lead fields
-        $leadData = $leadDTO->toArray();
-        $lead->update($leadData);
-        // Handle industries relationship
-        if (!empty($leadDTO->industries)) {
-            $lead->industries()->sync($leadDTO->industries);
-        } else {
-            $lead->industries()->detach(); // Remove all industries if empty
-        }
-        // Handle services and categories
-        $servicesData = [];
-        if (!empty($leadDTO->services)) {
-            foreach ($leadDTO->services as $serviceId) {
-                if (is_numeric($serviceId) && $serviceId > 0) {
-                    $categoryId = $leadDTO->serviceCategories[$serviceId] ?? null;
-                    $servicesData[$serviceId] = ['category_id' => $categoryId];
-                }
-            }
-            $lead->services()->sync($servicesData);
-        } else {
-            $lead->services()->detach();
-        }
-        // Handle custom fields relationship
-        $customFieldsData = [];
-        if (!empty($leadDTO->customFields)) {
-            foreach ($leadDTO->customFields as $fieldId => $value) {
-                $customFieldsData[$fieldId] = ['value' => $value];
-            }
-            $lead->customFields()->sync($customFieldsData);
-        } else {
-            $lead->customFields()->detach();
-        }
-        if ($leadDTO->stage_id) {
-            // Mark the previous stage exit date
-            $previousStage = $lead->stages()->latest('pivot_created_at')->first();
-            if ($previousStage) {
-                $previousStage->pivot->update(['exit_date' => now()]);
-            }
-
-            // Attach new stage with start date
-            $lead->stages()->attach($leadDTO->stage_id, [
-                'start_date' => now(),
+        dd($data);
+        $lead = $this->findById($id);
+        $lead->update($data);
+        $lead->variants()->detach();
+        foreach ($data['variants'] as $variant) {
+            $lead->variants()->attach($variant['id'], [
+                'quantity' => $variant['quantity'],
+                'price' => $variant['price'],
             ]);
         }
-        return $lead;
+        $lead->load('variants.item');
+        return $lead->fresh();
     }
 
 

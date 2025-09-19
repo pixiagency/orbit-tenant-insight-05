@@ -34,42 +34,17 @@ class OpportunityController extends Controller
 
     public function index(Request $request)
     {
-        $query = Lead::query();
-
-        $filters = $request->only([
-            'status',
-            'assigned_to_id',
-            'stage_id',
-            'pipeline_id',
-            'deal_value',
-            'win_probability',
-            'expected_close_date',
-            'notes',
-            'description',
-            'status',
-            'notes',
-            'description',
-        ]);
-
-        // Remove empty values
-        $filters = array_filter($filters, function ($value) {
-            return $value !== null && $value !== '';
+        $filters = array_filter($request->all(), function ($value) {
+            return ($value !== null && $value !== false && $value !== '');
         });
-
-        $opportunityFilter = new OpportunityFilter($filters);
-        $query = $opportunityFilter->apply($query);
-
         if ($request->has('ddl')) {
-            $opportunities = $query->get();
+            $opportunities = $this->leadService->index($filters, ['contact', 'city', 'stage', 'variants.item', 'user']);
             $data = OpportunityDDLResource::collection($opportunities);
         } else {
-            // Paginate the results
-            $opportunities = $query->with('contact', 'city', 'stage', 'items', 'user')->paginate(per_page());
-            $data = OpportunityResource::collection($opportunities)->response()->getdata(true);
+            $opportunities = $this->leadService->index($filters, ['contact', 'city', 'stage', 'variants.item', 'user'], $filters['per_page'] ?? 10);
+            $data = OpportunityResource::collection($opportunities)->response()->getData(true);
         }
-
-
-        return ApiResponse($data, __('app.data added successfully'));
+        return ApiResponse(message: 'Opportunities retrieved successfully', code: 200, data: $data);
     }
 
     public function store(StoreOpportunityRequest $request)
@@ -88,7 +63,7 @@ class OpportunityController extends Controller
     public function show($id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user', 'variants.item')->findOrFail($id);
             return ApiResponse(new OpportunityResource($opportunity), 'Opportunity retrieved successfully');
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Opportunity not found', code: 404);
@@ -100,12 +75,22 @@ class OpportunityController extends Controller
     public function update(UpdateOpportunityRequest $request, $id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
+            DB::beginTransaction();
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user', 'variants.item')->findOrFail($id);
             $opportunity->update($request->validated());
+            $opportunity->variants()->detach();
+            foreach ($request->validated()['items'] as $item) {
+                $opportunity->variants()->attach($item['id'], [
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+            DB::commit();
             return ApiResponse(message: 'Opportunity updated successfully', code: 200);
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Opportunity not found', code: 404);
         } catch (Exception $e) {
+            DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
