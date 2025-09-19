@@ -32,6 +32,7 @@ class ContactSeeder extends Seeder
                 'phone_permission' => 1,
                 'whatsapp_permission' => 1,
                 'company_name' => 'Example Inc.',
+                'campaign_name' => 'Example Campaign',
                 'website' => 'https://example.com',
                 'industry' => IndustryStatus::TECHNOLOGY,
                 'company_size' => CompanySizes::LEVEL_1,

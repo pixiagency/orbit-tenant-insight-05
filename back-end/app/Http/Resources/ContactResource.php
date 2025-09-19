@@ -27,6 +27,7 @@ class ContactResource extends JsonResource
             'department' => $this->department,
             'status' => $this->status,
             'source' => $this->whenLoaded('source', fn() => new SourceResource($this->source)),
+            'campaign_name' => $this->campaign_name,
             'contact_method' => $this->contact_method,
             'email_permission' => $this->email_permission,
             'phone_permission' => $this->phone_permission,

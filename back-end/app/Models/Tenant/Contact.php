@@ -28,6 +28,7 @@ class Contact extends Model
         'phone_permission',
         'whatsapp_permission',
         'company_name',
+        'campaign_name',
         'website',
         'industry',
         'company_size',
