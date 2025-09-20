@@ -11,7 +11,7 @@ services:
 
   certbot:
     image: certbot/certbot:latest
-    container_name: laravel-certbot
+    container_name: crm-certbot
     depends_on:
       - nginx
     volumes:
