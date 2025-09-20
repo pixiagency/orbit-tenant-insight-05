@@ -2,10 +2,13 @@
 
 namespace App\Models\Tenant;
 
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
 
 class ItemVariant extends Model
 {
+    use Filterable;
+
     protected $fillable = ['item_id', 'sku', 'price', 'stock'];
 
     public function item()
@@ -27,5 +30,10 @@ class ItemVariant extends Model
             ->mapWithKeys(function ($attributeValue) {
                 return [$attributeValue->attribute->name => $attributeValue->value];
             });
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy("created_at");
     }
 }

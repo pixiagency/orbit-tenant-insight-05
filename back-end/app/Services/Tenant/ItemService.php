@@ -7,13 +7,11 @@ use App\Models\Tenant\Item;
 use Illuminate\Database\Eloquent\Builder;
 use App\DTO\Item\ItemDTO;
 use App\Enums\ItemType;
-use App\Http\Resources\ItemResource;
 use App\Models\Filters\ItemFilter;
 use App\Models\Tenant\ItemAttribute;
 use App\Models\Tenant\ItemAttributeValue;
 use App\Models\Tenant\ItemVariant;
 use App\Services\BaseService;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class ItemService extends BaseService
@@ -60,18 +58,15 @@ class ItemService extends BaseService
         return $query->get();
     }
 
-    public function store(ItemDTO $itemDTO): Item | array | bool
+    public function store(ItemDTO $itemDTO): ItemVariant | array | bool
     {
         if ($itemDTO->type == ItemType::SERVICE->value) {
-            $itemDTO->quantity = null;
-            $itemDTO->sku = null;
-            $item = $this->model->create($itemDTO->toArray());
+            $item = $this->model->create($itemDTO->toServiceArray());
         } elseif ($itemDTO->type == ItemType::PRODUCT->value) {
-            $itemDTO->duration = null;
-            $item = $this->model->create($itemDTO->toArray());
+            $item = $this->model->create($itemDTO->toProductArray());
         }
-
-        return  $item;
+        $variant = $item->variants()->create($itemDTO->toArrayVariant());
+        return $variant->load('item.category');
     }
 
     public function update(int $id, ItemDTO $itemDTO): Item
@@ -105,7 +100,7 @@ class ItemService extends BaseService
 
     public function getAttribute(string $attribute)
     {
-        return $this->itemAttribute->where('name', $attribute)->get();
+        return $this->itemAttribute->where('id', $attribute)->get();
     }
 
     public function storeAttributes(array $data)
@@ -115,7 +110,7 @@ class ItemService extends BaseService
 
     public function destroyAttributes(string $attribute)
     {
-        $attribute = $this->itemAttribute->where('name', $attribute)->first();
+        $attribute = $this->itemAttribute->where('id', $attribute)->first();
         if ($attribute->items()->exists()) {
             throw new GeneralException(__('app.cannot_delete_attribute_used_by_items_or_products'));
         }
@@ -124,9 +119,8 @@ class ItemService extends BaseService
 
     public function bulkStoreWithVariants(array $data)
     {
-        $validated = $data;
         $createdProducts = [];
-        foreach ($validated['products'] as $productData) {
+        foreach ($data['products'] as $productData) {
             $product = $this->createProductWithVariants($productData);
             $createdProducts[] = $product;
         }
@@ -136,25 +130,24 @@ class ItemService extends BaseService
     private function createProductWithVariants(array $productData): Item
     {
         // Create the base product
-        $product = Item::create([
+        $product = $this->model->create([
             'name' => $productData['name'],
-            'sku' => $productData['base_sku'],
+            'sku' => $productData['sku'],
             'description' => $productData['description'] ?? null,
             'category_id' => $productData['category_id'],
         ]);
 
         // Create variants
         foreach ($productData['variants'] as $variantData) {
-            $this->createVariant($product, $variantData);
+            $this->createOneVariant($product, $variantData);
         }
         return $product->load('variants.attributeValues.attribute');
     }
 
-    private function createVariant(Item $product, array $variantData): ItemVariant
+    private function createOneVariant(Item $product, array $variantData): ItemVariant
     {
         // Generate SKU for variant
         $variantSku = $this->generateVariantSku($product->sku, $variantData['attributes']);
-
         // Create variant
         $variant = ItemVariant::create([
             'item_id' => $product->id,
@@ -164,17 +157,16 @@ class ItemService extends BaseService
         ]);
 
         // Attach attribute values
-        foreach ($variantData['attributes'] as $attribute => $value) {
-            $attribute = ItemAttribute::where('name', $attribute)->firstOrFail();
+        foreach ($variantData['attributes'] as $attribute_id => $value_id) {
+            $attribute = ItemAttribute::where('id', $attribute_id)->firstOrFail();
             $attributeValue = ItemAttributeValue::where('item_attribute_id', $attribute->id)
-                ->where('value', $value)
+                ->where('id', $value_id)
                 ->firstOrFail();
 
             $variant->attributeValues()->attach($attributeValue->id, [
                 'item_attribute_id' => $attribute->id
             ]);
         }
-
         return $variant;
     }
 

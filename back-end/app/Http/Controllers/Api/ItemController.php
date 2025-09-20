@@ -8,6 +8,7 @@ use App\Http\Requests\Item\ItemBulkStoreWithVariantsRequest;
 use App\Http\Requests\Item\ItemStoreRequest;
 use App\Http\Requests\Item\ItemUpdateRequest;
 use App\Http\Resources\ItemResource;
+use App\Http\Resources\ItemVariantResource;
 use App\Services\Tenant\ItemService;
 use DB;
 use Exception;
@@ -39,10 +40,11 @@ class ItemController extends Controller
     {
         try {
             DB::beginTransaction();
-            $itemDTO = ItemDTO::fromRequest($request);
+            $object = ItemDTO::fromArray($request->validated());
+            $itemDTO = ItemDTO::fromRequest($object);
             $response = $this->itemService->store($itemDTO);
             DB::commit();
-            return ApiResponse(message: 'Item created successfully', data: new ItemResource($response), code: Response::HTTP_CREATED);
+            return ApiResponse(message: 'Item created successfully', data: new ItemVariantResource($response), code: Response::HTTP_CREATED);
         } catch (Exception $e) {
             DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
