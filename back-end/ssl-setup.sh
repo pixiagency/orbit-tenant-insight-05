@@ -18,6 +18,43 @@ create_directories() {
     echo "✅ Directories created"
 }
 
+# Update nginx SSL certificate paths
+update_nginx_ssl_paths() {
+    local CERT_DIR="$1"
+    local NGINX_CONF="./docker/nginx/default.prod.conf"
+
+    echo "🔧 Updating nginx configuration with certificate path: $CERT_DIR"
+
+    if [ ! -f "$NGINX_CONF" ]; then
+        echo "❌ Nginx configuration file not found: $NGINX_CONF"
+        return 1
+    fi
+
+    # Create backup of current config
+    cp "$NGINX_CONF" "$NGINX_CONF.backup.$(date +%Y%m%d_%H%M%S)"
+
+    # Update SSL certificate paths
+    sed -i "s|ssl_certificate /etc/letsencrypt/live/[^/]*/fullchain.pem;|ssl_certificate /etc/letsencrypt/live/$CERT_DIR/fullchain.pem;|g" "$NGINX_CONF"
+    sed -i "s|ssl_certificate_key /etc/letsencrypt/live/[^/]*/privkey.pem;|ssl_certificate_key /etc/letsencrypt/live/$CERT_DIR/privkey.pem;|g" "$NGINX_CONF"
+
+    echo "✅ Nginx configuration updated"
+    echo "📝 Certificate paths updated to:"
+    echo "   - /etc/letsencrypt/live/$CERT_DIR/fullchain.pem"
+    echo "   - /etc/letsencrypt/live/$CERT_DIR/privkey.pem"
+
+    # Show the changes
+    echo "🔍 Updated SSL lines in nginx config:"
+    grep -n "ssl_certificate" "$NGINX_CONF"
+}
+    echo "📁 Creating required directories..."
+    mkdir -p ./letsencrypt/www/.well-known/acme-challenge
+    mkdir -p ./letsencrypt/live
+    mkdir -p ./letsencrypt/archive
+    mkdir -p ./logs/nginx
+    mkdir -p ./logs/certbot
+    echo "✅ Directories created"
+}
+
 # Initialize SSL certificates (direct method - no container)
 init_ssl() {
     echo "🔧 Initializing SSL setup..."
@@ -182,8 +219,8 @@ get_real_certificates() {
 
     # Remove temporary certificates
     echo "🗑️  Removing temporary certificates..."
-    rm -rf "./letsencrypt/live/$DOMAIN"
-    rm -rf "./letsencrypt/archive/$DOMAIN"
+    rm -rf "./letsencrypt/live/$DOMAIN"*
+    rm -rf "./letsencrypt/archive/$DOMAIN"*
 
     # Try dry run first
     echo "🧪 Running certificate dry run..."
@@ -217,19 +254,31 @@ get_real_certificates() {
         if [ $? -eq 0 ]; then
             echo "🎉 Real certificates obtained!"
 
-            # Test nginx configuration
-            echo "🧪 Testing nginx configuration..."
-            if docker-compose $COMPOSE_FILES exec nginx nginx -t >/dev/null 2>&1; then
-                echo "🔄 Reloading nginx..."
-                docker-compose $COMPOSE_FILES exec nginx nginx -s reload
+            # Find the actual certificate directory (handles -0001 suffixes)
+            CERT_DIR=$(ls -1 "./letsencrypt/live/" | grep "^$DOMAIN" | head -1)
+            if [ -n "$CERT_DIR" ]; then
+                echo "📁 Certificate directory found: $CERT_DIR"
 
-                echo "✅ SSL setup complete!"
-                echo "🌐 Your site is now available at:"
-                echo "   https://$DOMAIN:8443"
-                echo "   https://$(curl -s ifconfig.me):8443"
+                # Update nginx configuration with correct certificate path
+                update_nginx_ssl_paths "$CERT_DIR"
+
+                # Test nginx configuration
+                echo "🧪 Testing nginx configuration..."
+                if docker-compose $COMPOSE_FILES exec nginx nginx -t >/dev/null 2>&1; then
+                    echo "🔄 Reloading nginx..."
+                    docker-compose $COMPOSE_FILES exec nginx nginx -s reload
+
+                    echo "✅ SSL setup complete!"
+                    echo "🌐 Your site is now available at:"
+                    echo "   https://$DOMAIN:8443"
+                    echo "   https://$(curl -s ifconfig.me):8443"
+                else
+                    echo "❌ Nginx configuration test failed"
+                    docker-compose $COMPOSE_FILES exec nginx nginx -t
+                fi
             else
-                echo "❌ Nginx configuration test failed"
-                docker-compose $COMPOSE_FILES exec nginx nginx -t
+                echo "❌ Could not find certificate directory"
+                ls -la "./letsencrypt/live/"
             fi
         else
             echo "❌ Failed to get real certificates"
@@ -264,26 +313,47 @@ show_status() {
     echo "📊 SSL Status for $DOMAIN"
     echo "========================"
 
-    if [ -f "./letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-        echo "📜 Certificate exists"
+    # Find certificate directory (handles -0001 suffixes)
+    CERT_DIR=$(ls -1 "./letsencrypt/live/" 2>/dev/null | grep "^$DOMAIN" | head -1)
+
+    if [ -n "$CERT_DIR" ] && [ -f "./letsencrypt/live/$CERT_DIR/fullchain.pem" ]; then
+        echo "📜 Certificate exists in directory: $CERT_DIR"
 
         # Check certificate details
         echo "🔍 Certificate details:"
-        openssl x509 -in "./letsencrypt/live/$DOMAIN/fullchain.pem" -text -noout | grep -E "(Subject:|Issuer:|Not Before:|Not After:)"
+        openssl x509 -in "./letsencrypt/live/$CERT_DIR/fullchain.pem" -text -noout | grep -E "(Subject:|Issuer:|Not Before:|Not After:)"
 
         # Check expiration
         echo ""
         echo "📅 Certificate expiration:"
-        openssl x509 -in "./letsencrypt/live/$DOMAIN/fullchain.pem" -noout -dates
+        openssl x509 -in "./letsencrypt/live/$CERT_DIR/fullchain.pem" -noout -dates
 
         # Check if it's self-signed
-        if openssl x509 -in "./letsencrypt/live/$DOMAIN/fullchain.pem" -text -noout | grep -q "Issuer: C = US, ST = State"; then
+        if openssl x509 -in "./letsencrypt/live/$CERT_DIR/fullchain.pem" -text -noout | grep -q "Issuer: C = US, ST = State"; then
             echo "⚠️  Certificate is SELF-SIGNED (temporary)"
         else
             echo "✅ Certificate is from Let's Encrypt"
         fi
+
+        # Check if nginx config matches
+        echo ""
+        echo "🔍 Nginx configuration check:"
+        if [ -f "./docker/nginx/default.prod.conf" ]; then
+            if grep -q "/etc/letsencrypt/live/$CERT_DIR/" "./docker/nginx/default.prod.conf"; then
+                echo "✅ Nginx config matches certificate directory"
+            else
+                echo "⚠️  Nginx config may not match certificate directory"
+                echo "Current nginx SSL paths:"
+                grep "ssl_certificate" "./docker/nginx/default.prod.conf"
+                echo "Expected path: /etc/letsencrypt/live/$CERT_DIR/"
+            fi
+        else
+            echo "❌ Nginx config file not found"
+        fi
     else
         echo "❌ No certificate found"
+        echo "Available certificate directories:"
+        ls -la "./letsencrypt/live/" 2>/dev/null || echo "No letsencrypt directory found"
     fi
 
     echo ""
@@ -363,25 +433,38 @@ case "$1" in
     "cleanup")
         cleanup
         ;;
+    "fix-paths")
+        echo "🔧 Fixing nginx SSL certificate paths..."
+        CERT_DIR=$(ls -1 "./letsencrypt/live/" 2>/dev/null | grep "^$DOMAIN" | head -1)
+        if [ -n "$CERT_DIR" ]; then
+            update_nginx_ssl_paths "$CERT_DIR"
+            echo "🔄 Restarting nginx..."
+            docker-compose $COMPOSE_FILES restart nginx
+            echo "✅ Nginx SSL paths fixed and restarted"
+        else
+            echo "❌ No certificate directory found for $DOMAIN"
+        fi
+        ;;
     "restart")
         echo "🔄 Restarting services..."
         docker-compose $COMPOSE_FILES restart
         echo "✅ Services restarted"
         ;;
     *)
-        echo "Usage: $0 {init|start|setup|test|get-certs|renew|status|logs|cleanup|restart}"
+        echo "Usage: $0 {init|start|setup|test|get-certs|renew|status|logs|cleanup|restart|fix-paths}"
         echo ""
         echo "Commands:"
-        echo "  init      - Initialize temporary SSL certificates"
-        echo "  start     - Start services"
-        echo "  setup     - Full setup (init + start + get real certificates)"
-        echo "  test      - Test ACME challenge accessibility"
-        echo "  get-certs - Get real Let's Encrypt certificates"
-        echo "  renew     - Renew existing certificates"
-        echo "  status    - Show certificate and service status"
-        echo "  logs      - Show recent logs"
-        echo "  cleanup   - Stop services and clean up"
-        echo "  restart   - Restart all services"
+        echo "  init       - Initialize temporary SSL certificates"
+        echo "  start      - Start services"
+        echo "  setup      - Full setup (init + start + get real certificates)"
+        echo "  test       - Test ACME challenge accessibility"
+        echo "  get-certs  - Get real Let's Encrypt certificates"
+        echo "  renew      - Renew existing certificates"
+        echo "  status     - Show certificate and service status"
+        echo "  logs       - Show recent logs"
+        echo "  cleanup    - Stop services and clean up"
+        echo "  restart    - Restart all services"
+        echo "  fix-paths  - Fix nginx SSL certificate paths (for -0001 suffixes)"
         echo ""
         echo "Quick start: $0 setup"
         echo ""
