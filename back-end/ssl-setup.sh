@@ -4,15 +4,15 @@ DOMAIN="pixicrm.barmagiat.com"
 EMAIL="tools@mijra.io"
 COMPOSE_FILES="-f docker-compose.yml -f docker-compose.prod.yml"
 
-echo "🔒 SSL Setup with DNS Challenge for $DOMAIN:8005"
+echo "🔒 SSL Setup with DNS Challenge for $DOMAIN:8443"
 echo "================================================"
 
 # Get certificates using DNS challenge (no port 80 needed)
 get_certificates_dns() {
     echo "🔐 Getting SSL certificates using DNS challenge..."
     echo "📋 This method doesn't require port 80"
-    echo "📋 Current setup: http://$DOMAIN:8005"
-    echo "🎯 Target setup: https://$DOMAIN:8005"
+    echo "📋 Current setup: http://$DOMAIN:8080"
+    echo "🎯 Target setup: https://$DOMAIN:8443"
 
     # Create directories
     mkdir -p ./letsencrypt/live
@@ -36,7 +36,7 @@ get_certificates_dns() {
 
     if [ $? -eq 0 ]; then
         echo "🎉 Certificates obtained successfully!"
-        setup_https_8005
+        setup_https_8443
     else
         echo "❌ Failed to get certificates"
     fi
@@ -69,7 +69,7 @@ get_certificates_via_proxy() {
     echo "    }"
     echo ""
     echo "    location / {"
-    echo "        return 301 https://\$host:8005\$request_uri;"
+    echo "        return 301 https://\$host:8443\$request_uri;"
     echo "    }"
     echo "}"
     echo ""
@@ -101,7 +101,7 @@ get_certificates_via_proxy() {
 
         if [ $? -eq 0 ]; then
             echo "🎉 Certificates obtained successfully!"
-            setup_https_8005
+            setup_https_8443
         else
             echo "❌ Failed to get certificates"
         fi
@@ -112,21 +112,70 @@ get_certificates_via_proxy() {
     fi
 }
 
-# Setup HTTPS on port 8005 after getting certificates
-setup_https_8005() {
+# Use webroot challenge with your existing nginx container
+get_certificates_webroot() {
+    echo "🔐 Getting SSL certificates using webroot challenge..."
+    echo "📋 This uses your existing nginx container on port 8080"
+
+    # Create ACME challenge directory
+    mkdir -p ./letsencrypt/www/.well-known/acme-challenge
+    mkdir -p ./letsencrypt/live
+    mkdir -p ./letsencrypt/archive
+
+    # Start nginx to serve ACME challenges
+    docker-compose $COMPOSE_FILES up -d nginx
+    sleep 10
+
+    echo "🧪 Testing ACME challenge endpoint..."
+    TEST_FILE="test-$(date +%s)"
+    echo "$TEST_FILE" > "./letsencrypt/www/.well-known/acme-challenge/$TEST_FILE"
+
+    sleep 3
+    if curl -f "http://$DOMAIN:8080/.well-known/acme-challenge/$TEST_FILE" 2>/dev/null | grep -q "$TEST_FILE"; then
+        echo "✅ ACME challenge test passed"
+        rm "./letsencrypt/www/.well-known/acme-challenge/$TEST_FILE"
+
+        # Get certificates using webroot
+        docker run --rm \
+            -v $(pwd)/letsencrypt:/etc/letsencrypt \
+            -v $(pwd)/letsencrypt/www:/var/www/certbot \
+            --network crm-network \
+            certbot/certbot \
+            certonly \
+            --webroot \
+            --webroot-path=/var/www/certbot \
+            --email $EMAIL \
+            --agree-tos \
+            --no-eff-email \
+            --expand \
+            -d $DOMAIN
+
+        if [ $? -eq 0 ]; then
+            echo "🎉 Certificates obtained successfully!"
+            setup_https_8443
+        else
+            echo "❌ Failed to get certificates"
+        fi
+    else
+        echo "❌ ACME challenge test failed"
+        echo "Make sure your nginx container is running and accessible on port 8080"
+        echo "Test manually: curl http://$DOMAIN:8080/.well-known/acme-challenge/$TEST_FILE"
+        rm -f "./letsencrypt/www/.well-known/acme-challenge/$TEST_FILE"
+    fi
+}
+
+# Setup HTTPS on port 8443 after getting certificates
+setup_https_8443() {
     # Find certificate directory
     CERT_DIR=$(ls -1 "./letsencrypt/live/" | grep "^$DOMAIN" | head -1)
     if [ -n "$CERT_DIR" ]; then
         echo "📁 Certificate directory: $CERT_DIR"
 
-        # Create nginx config for port 8005
-        create_nginx_config_8005 "$CERT_DIR"
-
-        # Update docker compose
-        update_docker_compose_8005
+        # Enable SSL stapling now that we have real certificates
+        enable_ssl_stapling
 
         # Restart services
-        echo "🚀 Restarting services with HTTPS on port 8005..."
+        echo "🚀 Restarting services with HTTPS on port 8443..."
         docker-compose $COMPOSE_FILES down
         docker-compose $COMPOSE_FILES up -d
 
@@ -134,214 +183,122 @@ setup_https_8005() {
 
         echo "✅ SSL setup complete!"
         echo "🌐 Your application is now available at:"
-        echo "   HTTPS: https://$DOMAIN:8005 ✅"
+        echo "   HTTP:  http://$DOMAIN:8080 (redirects to HTTPS)"
+        echo "   HTTPS: https://$DOMAIN:8443 ✅"
 
         # Test the setup
-        test_https_8005
+        test_https_8443
     else
         echo "❌ Certificate directory not found"
     fi
 }
 
-# Create nginx configuration for port 8005
-create_nginx_config_8005() {
-    local CERT_DIR="$1"
+# Enable SSL stapling in nginx config
+enable_ssl_stapling() {
     local NGINX_CONF="./docker/nginx/default.prod.conf"
 
-    echo "🔧 Creating nginx configuration for port 8005..."
+    echo "🔧 Enabling SSL stapling in nginx configuration..."
 
-    # Backup existing config
     if [ -f "$NGINX_CONF" ]; then
+        # Backup existing config
         cp "$NGINX_CONF" "$NGINX_CONF.backup.$(date +%Y%m%d_%H%M%S)"
+
+        # Uncomment SSL stapling lines
+        sed -i 's/# ssl_stapling on;/ssl_stapling on;/' "$NGINX_CONF"
+        sed -i 's/# ssl_stapling_verify on;/ssl_stapling_verify on;/' "$NGINX_CONF"
+
+        echo "✅ SSL stapling enabled"
     fi
-
-    # Create new nginx config for port 8005
-    cat > "$NGINX_CONF" << EOF
-# HTTPS server on port 8005
-server {
-    listen 8005 ssl http2;
-    server_name $DOMAIN _;
-    root /var/www/html/public;
-    index index.php index.html;
-
-    # SSL certificate paths
-    ssl_certificate /etc/letsencrypt/live/$CERT_DIR/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$CERT_DIR/privkey.pem;
-
-    # Modern SSL configuration
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
-    ssl_session_timeout 1d;
-    ssl_session_cache shared:SSL:50m;
-    ssl_stapling on;
-    ssl_stapling_verify on;
-
-    # Security headers
-    add_header Strict-Transport-Security "max-age=31536000" always;
-    add_header X-Frame-Options DENY;
-    add_header X-Content-Type-Options nosniff;
-    add_header X-XSS-Protection "1; mode=block";
-
-    # Health check
-    location /health {
-        access_log off;
-        return 200 "healthy\\n";
-        add_header Content-Type text/plain;
-    }
-
-    # Main application
-    location / {
-        try_files \$uri \$uri/ @php;
-    }
-
-    # PHP handling via proxy
-    location @php {
-        proxy_pass http://app_php:8005;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-Port 8005;
-
-        # Proxy timeouts
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
-    # Direct PHP file handling (if needed)
-    location ~ \\.php\$ {
-        fastcgi_pass app_php:9000;
-        fastcgi_index index.php;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        fastcgi_param HTTPS on;
-        fastcgi_param SERVER_PORT 8005;
-    }
-
-    # Security - deny access to hidden files
-    location ~ /\\. {
-        deny all;
-        access_log off;
-        log_not_found off;
-    }
-
-    # Deny access to sensitive files
-    location ~* \\.(env|log|ini)\$ {
-        deny all;
-        access_log off;
-        log_not_found off;
-    }
 }
 
-# Server block for ACME challenges on port 8080 (for renewals)
-server {
-    listen 8080;
-    server_name $DOMAIN _;
-
-    # ACME challenge location
-    location /.well-known/acme-challenge/ {
-        alias /var/www/certbot/;
-        try_files \$uri =404;
-    }
-
-    # Redirect everything else to HTTPS on port 8005
-    location / {
-        return 301 https://\$host:8005\$request_uri;
-    }
-}
-EOF
-
-    echo "✅ Nginx configuration created for HTTPS on port 8005"
-}
-
-# Update docker compose for port 8005
-update_docker_compose_8005() {
-    echo "🔧 Updating docker-compose for port 8005..."
-
-    # Update docker-compose.prod.yml
-    cat > docker-compose.prod.yml << EOF
-services:
-  nginx:
-    image: nginx:alpine
-    container_name: crm-nginx
-    restart: unless-stopped
-    depends_on:
-      app_php:
-        condition: service_started
-        required: true
-    ports:
-      - "8080:8080"  # For ACME challenges and HTTP redirect
-      - "8005:8005"  # Main HTTPS application port
-    volumes:
-      - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./letsencrypt:/etc/letsencrypt:ro
-      - ./letsencrypt/www:/var/www/certbot:ro
-      - ./public:/var/www/html/public:ro
-      - ./logs/nginx:/var/log/nginx
-    environment:
-      - TZ=UTC
-    networks:
-      - app-network
-
-  certbot:
-    image: certbot/certbot:latest
-    container_name: crm-certbot
-    restart: "no"
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./letsencrypt/www:/var/www/certbot
-    profiles:
-      - tools
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-    name: crm-network
-
-volumes:
-  letsencrypt:
-    driver: local
-EOF
-
-    echo "✅ Docker compose updated"
-}
-
-# Test HTTPS on port 8005
-test_https_8005() {
-    echo "🧪 Testing HTTPS setup on port 8005..."
+# Test HTTPS on port 8443
+test_https_8443() {
+    echo "🧪 Testing HTTPS setup on port 8443..."
 
     sleep 5
 
-    # Test HTTPS connectivity
-    echo -n "🔍 Testing HTTPS connectivity: "
-    if curl -k -s -I "https://$DOMAIN:8005" | grep -q "200\\|301\\|302"; then
+    # Test HTTP redirect
+    echo -n "🔍 Testing HTTP to HTTPS redirect: "
+    if curl -s -I "http://$DOMAIN:8080" | grep -q "301"; then
         echo "✅ PASSED"
     else
         echo "❌ FAILED"
     fi
 
+    # Test HTTPS connectivity
+    echo -n "🔍 Testing HTTPS connectivity: "
+    if curl -k -s -I "https://$DOMAIN:8443" | grep -q "200\|301\|302"; then
+        echo "✅ PASSED"
+    else
+        echo "❌ FAILED"
+        echo "Troubleshooting tips:"
+        echo "- Check if nginx container is running: docker-compose ps"
+        echo "- Check nginx logs: docker-compose logs nginx"
+        echo "- Verify certificate files exist: ls -la ./letsencrypt/live/$DOMAIN/"
+    fi
+
     # Test certificate
     echo "🔍 SSL Certificate info:"
-    echo | openssl s_client -connect $DOMAIN:8005 -servername $DOMAIN 2>/dev/null | openssl x509 -noout -subject -dates
+    echo | openssl s_client -connect $DOMAIN:8443 -servername $DOMAIN 2>/dev/null | openssl x509 -noout -subject -dates
+
+    # Test security headers
+    echo "🔍 Security headers test:"
+    curl -s -I "https://$DOMAIN:8443" | grep -i "strict-transport-security\|x-frame-options\|x-content-type-options"
 }
 
-# Show current port 80 usage
-show_port_80_usage() {
-    echo "🔍 Checking what's using port 80..."
-    echo "================================="
+# Show current port usage
+show_port_usage() {
+    echo "🔍 Checking port usage..."
+    echo "=========================="
 
-    if sudo netstat -tlnp | grep ':80 ' >/dev/null; then
-        echo "Port 80 is in use by:"
-        sudo netstat -tlnp | grep ':80 '
-        echo ""
-        echo "Docker containers with port 80:"
-        docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Image}}" | grep ":80"
+    echo "Port 80:"
+    if sudo netstat -tlnp 2>/dev/null | grep ':80 ' >/dev/null; then
+        sudo netstat -tlnp 2>/dev/null | grep ':80 '
     else
         echo "Port 80 is not in use"
+    fi
+
+    echo ""
+    echo "Port 8080:"
+    if sudo netstat -tlnp 2>/dev/null | grep ':8080 ' >/dev/null; then
+        sudo netstat -tlnp 2>/dev/null | grep ':8080 '
+    else
+        echo "Port 8080 is not in use"
+    fi
+
+    echo ""
+    echo "Port 8443:"
+    if sudo netstat -tlnp 2>/dev/null | grep ':8443 ' >/dev/null; then
+        sudo netstat -tlnp 2>/dev/null | grep ':8443 '
+    else
+        echo "Port 8443 is not in use"
+    fi
+
+    echo ""
+    echo "Docker containers:"
+    docker ps --format "table {{.Names}}\t{{.Ports}}\t{{.Status}}" | grep -E "(crm|nginx|certbot)"
+}
+
+# Certificate renewal function
+renew_certificates() {
+    echo "🔄 Renewing SSL certificates..."
+
+    docker run --rm \
+        -v $(pwd)/letsencrypt:/etc/letsencrypt \
+        -v $(pwd)/letsencrypt/www:/var/www/certbot \
+        --network crm-network \
+        certbot/certbot \
+        renew \
+        --webroot \
+        --webroot-path=/var/www/certbot \
+        --quiet
+
+    if [ $? -eq 0 ]; then
+        echo "🎉 Certificates renewed successfully!"
+        echo "🚀 Reloading nginx..."
+        docker-compose $COMPOSE_FILES exec nginx nginx -s reload
+    else
+        echo "❌ Certificate renewal failed"
     fi
 }
 
@@ -354,26 +311,36 @@ case "$1" in
         echo "🏁 Setting up HTTPS via reverse proxy..."
         get_certificates_via_proxy
         ;;
-    "check-port")
-        show_port_80_usage
+    "webroot")
+        echo "🏁 Setting up HTTPS using webroot challenge..."
+        get_certificates_webroot
+        ;;
+    "check-ports")
+        show_port_usage
         ;;
     "test")
-        test_https_8005
+        test_https_8443
+        ;;
+    "renew")
+        renew_certificates
         ;;
     *)
-        echo "Usage: $0 {dns|proxy|check-port|test}"
+        echo "Usage: $0 {dns|proxy|webroot|check-ports|test|renew}"
         echo ""
-        echo "🔐 HTTPS Setup Methods for Port 8005:"
-        echo "  dns        - Use DNS challenge (recommended - no port 80 needed)"
+        echo "🔐 HTTPS Setup Methods for Port 8443:"
+        echo "  dns        - Use DNS challenge (recommended - no port conflicts)"
         echo "  proxy      - Use existing reverse proxy for ACME challenges"
-        echo "  check-port - Check what's using port 80"
+        echo "  webroot    - Use webroot challenge with your nginx container"
+        echo "  check-ports- Check port usage"
         echo "  test       - Test HTTPS functionality"
+        echo "  renew      - Renew existing certificates"
         echo ""
-        echo "📋 Target Configuration:"
+        echo "📋 Current Configuration:"
         echo "   Domain: $DOMAIN"
-        echo "   Current: http://$DOMAIN:8005"
-        echo "   Target:  https://$DOMAIN:8005"
+        echo "   HTTP:   http://$DOMAIN:8080 (redirects)"
+        echo "   HTTPS:  https://$DOMAIN:8443"
         echo ""
-        echo "💡 Recommended: ./ssl-setup.sh dns"
+        echo "💡 Recommended for your setup: ./ssl-setup.sh webroot"
+        echo "💡 If that fails, try: ./ssl-setup.sh dns"
         ;;
 esac
