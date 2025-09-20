@@ -32,15 +32,14 @@ class StageService extends BaseService
 
     public function queryGet(array $filters = [], array $withRelations = []): Builder
     {
-        $industries = $this->model->with($withRelations)->orderBy('id', 'desc');
-        return $industries->filter(new StageFilters($filters));
+        $query = $this->model->with($withRelations)->orderBy('id', 'desc');
+        return $query->filter(new StageFilters($filters));
     }
 
     public function datatable(array $filters = [], array $withRelations = [])
     {
-
-        $industries = $this->getQuery()->with($withRelations);
-        return $industries->filter(new StageFilters($filters));
+        $query = $this->getQuery()->with($withRelations);
+        return $query->filter(new StageFilters($filters));
     }
 
     public function index(array $filters = [], array $withRelations = [], ?int $perPage = 10, $pipelineId)

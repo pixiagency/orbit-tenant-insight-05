@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tenant\Lead;
 use App\Models\Tenant\Pipeline;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Stage extends Model
 {
     use Filterable;
-    protected $fillable = ['name', 'probability', 'seq_number', 'pipeline_id'];
+    protected $fillable = ['name', 'probability', 'seq_number'];
 
     public function pipeline()
     {
@@ -18,8 +19,6 @@ class Stage extends Model
 
     public function leads()
     {
-        return $this->belongsToMany(Lead::class, 'lead_stage')
-            ->withPivot('start_date', 'exit_date', 'pipeline_id')
-            ->withTimestamps();
+        return $this->hasMany(Lead::class, 'stage_id');
     }
 }
