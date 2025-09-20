@@ -46,14 +46,6 @@ update_nginx_ssl_paths() {
     echo "🔍 Updated SSL lines in nginx config:"
     grep -n "ssl_certificate" "$NGINX_CONF"
 }
-    echo "📁 Creating required directories..."
-    mkdir -p ./letsencrypt/www/.well-known/acme-challenge
-    mkdir -p ./letsencrypt/live
-    mkdir -p ./letsencrypt/archive
-    mkdir -p ./logs/nginx
-    mkdir -p ./logs/certbot
-    echo "✅ Directories created"
-}
 
 # Initialize SSL certificates (direct method - no container)
 init_ssl() {
@@ -433,6 +425,11 @@ case "$1" in
     "cleanup")
         cleanup
         ;;
+    "restart")
+        echo "🔄 Restarting services..."
+        docker-compose $COMPOSE_FILES restart
+        echo "✅ Services restarted"
+        ;;
     "fix-paths")
         echo "🔧 Fixing nginx SSL certificate paths..."
         CERT_DIR=$(ls -1 "./letsencrypt/live/" 2>/dev/null | grep "^$DOMAIN" | head -1)
@@ -444,11 +441,6 @@ case "$1" in
         else
             echo "❌ No certificate directory found for $DOMAIN"
         fi
-        ;;
-    "restart")
-        echo "🔄 Restarting services..."
-        docker-compose $COMPOSE_FILES restart
-        echo "✅ Services restarted"
         ;;
     *)
         echo "Usage: $0 {init|start|setup|test|get-certs|renew|status|logs|cleanup|restart|fix-paths}"
