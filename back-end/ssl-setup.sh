@@ -2,181 +2,250 @@
 
 DOMAIN="pixicrm.barmagiat.com"
 EMAIL="tools@mijra.io"
+COMPOSE_FILES="-f docker-compose.yml -f docker-compose.prod.yml"
 
-echo "🔒 SSL Setup for $DOMAIN"
+echo "🔒 SSL Management for $DOMAIN (Production)"
+echo "============================================="
 
-# Create directories
-mkdir -p ./letsencrypt/www
-mkdir -p ./letsencrypt/live/$DOMAIN
-
-# Function to create dummy SSL certificates (needed for nginx to start)
-create_dummy_certs() {
-    echo "🔧 Creating temporary SSL certificates..."
-    openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-        -keyout "./letsencrypt/live/$DOMAIN/privkey.pem" \
-        -out "./letsencrypt/live/$DOMAIN/fullchain.pem" \
-        -subj "/CN=$DOMAIN"
-    echo "✅ Temporary certificates created"
+# Create required directories
+create_directories() {
+    echo "📁 Creating required directories..."
+    mkdir -p ./letsencrypt/www/.well-known/acme-challenge
+    mkdir -p ./letsencrypt/live
+    mkdir -p ./letsencrypt/archive
+    mkdir -p ./logs/nginx
+    mkdir -p ./logs/certbot
+    mkdir -p ./scripts
+    echo "✅ Directories created"
 }
 
-# Function to test ACME challenge accessibility
-test_acme_challenge() {
-    echo "🧪 Testing ACME challenge accessibility..."
+# Initialize SSL certificates
+init_ssl() {
+    echo "🔧 Initializing SSL setup..."
+    create_directories
 
-    # Create a test file
-    echo "test" > "./letsencrypt/www/test-challenge"
+    # Copy init script
+    cat > ./scripts/init-ssl.sh << 'EOF'
+#!/bin/sh
+DOMAIN="pixicrm.barmagiat.com"
+CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
+mkdir -p "$CERT_DIR"
+openssl genrsa -out "$CERT_DIR/privkey.pem" 4096
+openssl req -new -x509 -key "$CERT_DIR/privkey.pem" \
+    -out "$CERT_DIR/fullchain.pem" -days 30 \
+    -subj "/C=US/ST=State/L=City/O=Temp/CN=$DOMAIN"
+chmod 644 "$CERT_DIR/fullchain.pem"
+chmod 600 "$CERT_DIR/privkey.pem"
+echo "Temporary certificates created for $DOMAIN"
+EOF
 
-    # Wait a moment for nginx to pick up the file
-    sleep 5
+    chmod +x ./scripts/init-ssl.sh
 
-    # Test if the file is accessible
-    if curl -f "http://$DOMAIN/.well-known/acme-challenge/test-challenge" >/dev/null 2>&1; then
-        echo "✅ ACME challenge path is accessible"
-        rm "./letsencrypt/www/test-challenge"
-        return 0
+    # Run SSL initialization
+    docker-compose $COMPOSE_FILES --profile init up ssl-init
+
+    if [ $? -eq 0 ]; then
+        echo "✅ SSL initialization complete"
     else
-        echo "❌ ACME challenge path is NOT accessible"
-        echo "🔍 Checking nginx status..."
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs nginx | tail -10
-        rm "./letsencrypt/www/test-challenge"
+        echo "❌ SSL initialization failed"
         return 1
     fi
 }
 
-# Function to get real SSL certificates
-get_real_certs() {
-    echo "🚀 Getting real SSL certificates..."
+# Start services
+start_services() {
+    echo "🚀 Starting services..."
+    docker-compose $COMPOSE_FILES up -d nginx app_php
 
-    # Test ACME challenge first
-    if ! test_acme_challenge; then
-        echo "❌ ACME challenge test failed. Please check nginx configuration and DNS settings."
+    if [ $? -eq 0 ]; then
+        echo "✅ Services started successfully"
+        echo "🌐 Application accessible at:"
+        echo "   HTTP:  http://$(curl -s ifconfig.me):8080"
+        echo "   HTTPS: https://$(curl -s ifconfig.me):8443 (self-signed)"
+    else
+        echo "❌ Failed to start services"
+        return 1
+    fi
+}
+
+# Test ACME challenge
+test_acme() {
+    echo "🧪 Testing ACME challenge accessibility..."
+
+    # Create test file
+    TEST_TOKEN="test-$(date +%s)"
+    echo "$TEST_TOKEN" > "./letsencrypt/www/.well-known/acme-challenge/test-challenge"
+
+    sleep 3
+
+    # Test locally first
+    if curl -f "http://localhost:8080/.well-known/acme-challenge/test-challenge" 2>/dev/null | grep -q "$TEST_TOKEN"; then
+        echo "✅ Local ACME challenge test passed"
+    else
+        echo "❌ Local ACME challenge test failed"
+        echo "🔍 Checking nginx logs..."
+        docker-compose $COMPOSE_FILES logs --tail=10 nginx
+        rm -f "./letsencrypt/www/.well-known/acme-challenge/test-challenge"
+        return 1
+    fi
+
+    # Test via domain (if accessible)
+    SERVER_IP=$(curl -s ifconfig.me)
+    if curl -f "http://$SERVER_IP:8080/.well-known/acme-challenge/test-challenge" 2>/dev/null | grep -q "$TEST_TOKEN"; then
+        echo "✅ External ACME challenge test passed"
+    else
+        echo "⚠️  External ACME challenge test failed (may need port forwarding)"
+        echo "ℹ️  For Let's Encrypt to work, port 80 must be accessible from internet"
+    fi
+
+    # Clean up test file
+    rm -f "./letsencrypt/www/.well-known/acme-challenge/test-challenge"
+}
+
+# Get real SSL certificates
+get_real_certificates() {
+    echo "🔐 Getting real SSL certificates..."
+
+    # First test if ACME challenge works
+    if ! test_acme; then
+        echo "❌ ACME challenge test failed. Cannot proceed with certificate generation."
         return 1
     fi
 
     # Remove temporary certificates
+    echo "🗑️  Removing temporary certificates..."
     rm -rf "./letsencrypt/live/$DOMAIN"
+    rm -rf "./letsencrypt/archive/$DOMAIN"
 
     # Get real certificates
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm certbot \
-        certonly --webroot \
+    echo "📞 Requesting certificates from Let's Encrypt..."
+    docker-compose $COMPOSE_FILES run --rm certbot \
+        certonly \
+        --webroot \
         --webroot-path=/var/www/certbot \
         --email $EMAIL \
         --agree-tos \
         --no-eff-email \
-        --force-renewal \
+        --keep-until-expiring \
+        --expand \
         -d $DOMAIN \
         --dry-run
 
     if [ $? -eq 0 ]; then
         echo "✅ Dry run successful! Getting real certificates..."
 
-        # Now get the real certificates
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm certbot \
-            certonly --webroot \
+        docker-compose $COMPOSE_FILES run --rm certbot \
+            certonly \
+            --webroot \
             --webroot-path=/var/www/certbot \
             --email $EMAIL \
             --agree-tos \
             --no-eff-email \
-            --force-renewal \
+            --keep-until-expiring \
+            --expand \
             -d $DOMAIN
 
         if [ $? -eq 0 ]; then
-            echo "✅ Real certificates obtained!"
-            echo "🔍 Checking certificate files..."
+            echo "🎉 Real certificates obtained!"
+            echo "🔄 Reloading nginx..."
+            docker-compose $COMPOSE_FILES exec nginx nginx -s reload
 
-            # Find the actual certificate directory
-            CERT_DIR=$(ls -1 "./letsencrypt/live/" | grep "$DOMAIN" | head -1)
-            if [ -n "$CERT_DIR" ]; then
-                echo "📁 Certificate directory: $CERT_DIR"
-                ls -la "./letsencrypt/live/$CERT_DIR/"
-
-                # Test nginx configuration
-                echo "🧪 Testing nginx configuration..."
-                docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx nginx -t
-
-                if [ $? -eq 0 ]; then
-                    echo "🔄 Reloading nginx..."
-                    docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx nginx -s reload
-                    echo "✅ SSL setup complete!"
-                else
-                    echo "❌ Nginx configuration test failed"
-                fi
-            fi
+            echo "✅ SSL setup complete!"
+            echo "🌐 Your site is now available at: https://$DOMAIN:8443"
         else
             echo "❌ Failed to get real certificates"
+            echo "🔄 Restoring temporary certificates..."
+            init_ssl
         fi
     else
-        echo "❌ Dry run failed - please check configuration"
+        echo "❌ Dry run failed"
     fi
 }
 
-# Function to renew certificates
-renew_certs() {
+# Renew certificates
+renew_certificates() {
     echo "🔄 Renewing certificates..."
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm certbot certbot renew
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx nginx -s reload
-}
+    docker-compose $COMPOSE_FILES run --rm certbot renew
 
-# Function to check prerequisites
-check_prerequisites() {
-    echo "🔍 Checking prerequisites..."
-
-    # Check if domain resolves to current server
-    DOMAIN_IP=$(dig +short $DOMAIN)
-    echo "Domain $DOMAIN resolves to: $DOMAIN_IP"
-
-    # Check if port 80 is accessible
-    if nc -z -w5 $DOMAIN 80; then
-        echo "✅ Port 80 is accessible"
+    if [ $? -eq 0 ]; then
+        echo "✅ Certificates renewed"
+        docker-compose $COMPOSE_FILES exec nginx nginx -s reload
     else
-        echo "❌ Port 80 is NOT accessible - check firewall settings"
-    fi
-
-    # Check if docker compose files exist
-    if [ -f "docker-compose.yml" ] && [ -f "docker-compose.prod.yml" ]; then
-        echo "✅ Docker compose files found"
-    else
-        echo "❌ Docker compose files missing"
+        echo "❌ Certificate renewal failed"
     fi
 }
 
-# Main command handling
+# Show status
+show_status() {
+    echo "📊 SSL Status for $DOMAIN"
+    echo "========================"
+
+    if [ -f "./letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+        echo "📜 Certificate exists"
+
+        # Check certificate details
+        echo "🔍 Certificate details:"
+        openssl x509 -in "./letsencrypt/live/$DOMAIN/fullchain.pem" -text -noout | grep -E "(Subject:|Issuer:|Not Before:|Not After:)"
+
+        # Check if it's self-signed
+        if openssl x509 -in "./letsencrypt/live/$DOMAIN/fullchain.pem" -text -noout | grep -q "Issuer: C = US, ST = State"; then
+            echo "⚠️  Certificate is SELF-SIGNED (temporary)"
+        else
+            echo "✅ Certificate is from Let's Encrypt"
+        fi
+    else
+        echo "❌ No certificate found"
+    fi
+
+    echo ""
+    echo "🐳 Container status:"
+    docker-compose $COMPOSE_FILES ps
+}
+
+# Main menu
 case "$1" in
-    "setup")
-        echo "🏁 Initial SSL setup starting..."
-        check_prerequisites
-        create_dummy_certs
-        echo "🚀 Starting services..."
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-        sleep 15
-        get_real_certs
+    "init")
+        init_ssl
         ;;
-    "renew")
-        renew_certs
+    "start")
+        start_services
+        ;;
+    "setup")
+        echo "🏁 Full SSL setup..."
+        init_ssl && start_services && sleep 10 && get_real_certificates
         ;;
     "test")
-        test_acme_challenge
+        test_acme
         ;;
-    "debug")
-        echo "🔍 Debugging certificate setup..."
-        echo "Host certificates:"
-        ls -la "./letsencrypt/live/$DOMAIN/" 2>/dev/null || echo "No certificates on host"
-        echo ""
-        echo "Nginx container certificates:"
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx ls -la "/etc/letsencrypt/live/$DOMAIN/" 2>/dev/null || echo "No certificates in nginx container"
-        echo ""
-        echo "Certbot container certificates:"
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm certbot ls -la "/etc/letsencrypt/live/$DOMAIN/" 2>/dev/null || echo "No certificates in certbot container"
-        echo ""
-        echo "Nginx status:"
-        docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec nginx nginx -t
+    "renew")
+        renew_certificates
+        ;;
+    "status")
+        show_status
+        ;;
+    "get-certs")
+        get_real_certificates
+        ;;
+    "logs")
+        echo "📋 Recent logs:"
+        echo "--- Nginx logs ---"
+        docker-compose $COMPOSE_FILES logs --tail=20 nginx
+        echo "--- Certbot logs ---"
+        docker-compose $COMPOSE_FILES logs --tail=20 certbot
         ;;
     *)
-        echo "Usage: $0 {setup|renew|test|debug}"
+        echo "Usage: $0 {init|start|setup|test|get-certs|renew|status|logs}"
         echo ""
-        echo "  setup  - First time SSL setup"
-        echo "  renew  - Renew existing certificates"
-        echo "  test   - Test ACME challenge accessibility"
-        echo "  debug  - Check certificate status"
+        echo "Commands:"
+        echo "  init      - Initialize temporary SSL certificates"
+        echo "  start     - Start services"
+        echo "  setup     - Full setup (init + start + get real certificates)"
+        echo "  test      - Test ACME challenge accessibility"
+        echo "  get-certs - Get real Let's Encrypt certificates"
+        echo "  renew     - Renew existing certificates"
+        echo "  status    - Show certificate and service status"
+        echo "  logs      - Show recent logs"
+        echo ""
+        echo "Quick start: $0 setup"
         ;;
 esac
