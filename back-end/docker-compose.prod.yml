@@ -35,7 +35,7 @@ services:
 
   certbot:
     image: certbot/certbot:latest
-    container_name: laravel-certbot
+    container_name: crm-certbot
     volumes:
       - ./letsencrypt:/etc/letsencrypt
       - ./letsencrypt/www:/var/www/certbot
