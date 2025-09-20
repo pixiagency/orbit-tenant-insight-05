@@ -43,21 +43,6 @@ services:
     networks:
       - app-network
 
-  # SSL certificate initializer service
-  ssl-init:
-    image: alpine:latest
-    container_name: crm-ssl-init
-    restart: "no"
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./scripts:/scripts:ro
-    working_dir: /scripts
-    command: sh -c "apk add --no-cache openssl && ./init-ssl.sh"
-    profiles:
-      - init
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge
