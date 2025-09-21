@@ -17,7 +17,7 @@ class Item extends Model
         'description',
         'price',
         'sku',
-        'quantity',
+        'stock',
         'category_id',
         'duration',
         'service_type',
@@ -30,7 +30,7 @@ class Item extends Model
         'duration' => ServiceDuration::class,
         'type' => ItemType::class,
         'service_type' => ServiceType::class,
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
     ];
 
     // Generate SKU for variant

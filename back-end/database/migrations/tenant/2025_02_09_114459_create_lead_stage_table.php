@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('lead_id')->constrained('leads')->onDelete('cascade');
             $table->foreignId('stage_id')->constrained('stages')->onDelete('cascade');
-            // $table->foreignId('pipline_id')->nullable()->constrained('piplines')->onDelete('cascade');
             $table->timestamp('start_date')->nullable();
             $table->timestamp('exit_date')->nullable();
             $table->timestamps();

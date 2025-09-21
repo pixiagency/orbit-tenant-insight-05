@@ -31,6 +31,11 @@ class AuthService extends BaseService
             throw new NotFoundException(__('app.login_failed'));
         }
 
+        // Check if user is active
+        if (!$user->is_active) {
+            throw new NotFoundException(__('app.account_deactivated'));
+        }
+
         return $user;
     }
 

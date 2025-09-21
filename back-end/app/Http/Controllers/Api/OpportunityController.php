@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\Lead\LeadDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Opportunity\StoreOpportunityRequest;
-use App\Http\Requests\Opportunity\UpdateOpportunityRequest;
+use App\Http\Requests\Opportunity\OpportunityRequest;
 use App\Http\Resources\AuditOpportunityResource;
 use App\Http\Resources\Opportunity\OpportunityResource;
 use App\Http\Resources\Tenant\Opportunity\OpportunityDDLResource;
+use App\Http\Resources\Tenant\Stage\StageWithOpportunityResource;
 use App\Models\Filters\OpportunityFilter;
 use App\Models\Tenant\Lead;
 use App\Services\LeadService;
@@ -47,7 +48,13 @@ class OpportunityController extends Controller
         return ApiResponse(message: 'Opportunities retrieved successfully', code: 200, data: $data);
     }
 
-    public function store(StoreOpportunityRequest $request)
+    public function kanbanList()
+    {
+        $stagesWithAuthUserLeads = $this->leadService->kanbanList();
+        return ApiResponse(message: 'Opportunities kanban list retrieved successfully', code: 200, data: StageWithOpportunityResource::collection($stagesWithAuthUserLeads));
+    }
+
+    public function store(OpportunityRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -63,7 +70,7 @@ class OpportunityController extends Controller
     public function show($id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user', 'variants.item')->findOrFail($id);
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
             return ApiResponse(new OpportunityResource($opportunity), 'Opportunity retrieved successfully');
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Opportunity not found', code: 404);
@@ -72,20 +79,11 @@ class OpportunityController extends Controller
         }
     }
 
-    public function update(UpdateOpportunityRequest $request, $id)
+    public function update(OpportunityRequest $request, $id)
     {
         try {
-            DB::beginTransaction();
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user', 'variants.item')->findOrFail($id);
+            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
             $opportunity->update($request->validated());
-            $opportunity->variants()->detach();
-            foreach ($request->validated()['items'] as $item) {
-                $opportunity->variants()->attach($item['id'], [
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-            }
-            DB::commit();
             return ApiResponse(message: 'Opportunity updated successfully', code: 200);
         } catch (ModelNotFoundException $e) {
             return ApiResponse(message: 'Opportunity not found', code: 404);

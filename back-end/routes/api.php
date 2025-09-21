@@ -19,9 +19,9 @@ use \App\Http\Controllers\Api\Deals\{
 };
 use \App\Http\Controllers\Api\Users\{
     DepartmentController,
+    RoleController,
     UserController
 };
-use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -152,12 +152,15 @@ Route::middleware([
         Route::put('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'update']);
         Route::delete('/{attribute}/values/{value}', [ItemAttributeValueController::class, 'destroy']);
     });
-    Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
-    Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
-    Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
+
     Route::prefix('items')->group(function () {
         Route::post('/bulk-with-variants', [\App\Http\Controllers\Api\ItemController::class, 'bulkStoreWithVariants']);
     });
+    Route::get('items/all', [\App\Http\Controllers\Api\ItemVariantController::class, 'getAll']);
+    Route::delete('items/variants/{id}', [\App\Http\Controllers\Api\ItemVariantController::class, 'destroyVariant']);
+    Route::apiResource('items', \App\Http\Controllers\Api\ItemController::class);
+    Route::apiResource('item-categories', \App\Http\Controllers\Api\ItemCategoryController::class);
+    Route::apiResource('item-statuses', \App\Http\Controllers\Api\ItemStatusController::class);
     Route::prefix('items/{item}/variants')->group(function () {
         Route::get('/', [ItemVariantController::class, 'index']);
         Route::post('/', [ItemVariantController::class, 'store']); // Create single variant
@@ -173,7 +176,11 @@ Route::middleware([
         });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', UserController::class);
+        Route::post('users/{id}/change-active', [UserController::class, 'toggleStatus']);
         Route::get('departments', [DepartmentController::class, 'index']);
+
+        Route::apiResource('roles', RoleController::class);
+
         Route::apiResource('tasks', TaskController::class);
         Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
         Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);
@@ -226,11 +233,12 @@ Route::middleware([
     Route::apiResource('deals', DealController::class);
     Route::get('deals/get/statistics', [DealController::class, 'statistics']);
 
+    Route::get('/opportunities/kanban-list', [\App\Http\Controllers\Api\OpportunityController::class, 'kanbanList']);
     Route::get('/opportunities/statistics', [\App\Http\Controllers\Api\OpportunityController::class, 'statistics']);
     Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
     Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
-    Route::get('/roles', [RoleController::class, 'index']);
+
 
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);
@@ -295,6 +303,4 @@ Route::middleware([
         Route::post('/', [App\Http\Controllers\Api\FcmTokenController::class, 'store']);
         Route::delete('/', [App\Http\Controllers\Api\FcmTokenController::class, 'destroy']);
     });
-
-    
 });

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\QueryFilters;
+namespace App\QueryFilters\Tenant;
 
 use App\Abstracts\QueryFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,38 +21,30 @@ class UsersFilters extends QueryFilter
     {
         return $this->builder->where('phone', $term);
     }
-    public function status($term)
+    public function is_active($term)
     {
-        return $this->builder->where('status', $term);
-    }
-    public function type($term)
-    {
-        return $this->builder->where('type', $term);
+        return $this->builder->where('is_active', $term);
     }
 
-    public function city_id($term)
-    {
-        return $this->builder->where('city_id', $term);
-    }
-
-    public function area_id($term)
-    {
-        return $this->builder->where('area_id', $term);
-    }
-
-    public function keyword($term)
-    {
-        return $this->builder->search($term);
-    }
 
     public function role($term)
     {
         return $this->builder->role($term);
     }
 
-    
     public function department_id($term)
     {
         return $this->builder->where('department_id', $term);
     }
+
+    public function search($term)
+    {
+        return $this->builder->where(function ($query) use ($term) {
+            $query->where('first_name', 'LIKE', "%{$term}%")
+                  ->orWhere('last_name', 'LIKE', "%{$term}%")
+                  ->orWhere('email', 'LIKE', "%{$term}%")
+                  ->orWhere('phone', 'LIKE', "%{$term}%");
+        });
+    }
+
 }

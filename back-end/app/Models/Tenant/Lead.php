@@ -8,11 +8,9 @@ use App\Models\CustomField;
 use App\Models\Industry;
 use App\Models\Reason;
 use App\Models\Service;
-use App\Models\Source;
 use App\Models\Stage;
 use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Arr;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -68,12 +66,6 @@ class Lead extends Model implements Auditable
         return $data;
     }
 
-    // public function sourceContact(): HasOneThrough
-    // {
-    //     return $this->through('contact')->has('source');
-    // }
-
-
     // Lead belongs to a User (Sales Representative)
     public function user()
     {
@@ -114,8 +106,6 @@ class Lead extends Model implements Auditable
     {
         return $this->belongsToMany(ItemVariant::class, 'leads_variants', 'lead_id', 'item_variant_id')->withPivot('quantity', 'price');
     }
-
-
     // Lead has many Stages (Many-to-Many)
     public function stages()
     {

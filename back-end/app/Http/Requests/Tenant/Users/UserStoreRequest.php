@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Users;
 
-use App\DTO\User\UserDTO;
+use App\DTO\Tenant\UserDTO;
 use App\Enums\UserType;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rules\Enum;

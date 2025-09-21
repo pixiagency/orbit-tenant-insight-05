@@ -25,7 +25,7 @@ class ItemSeeder extends Seeder
                 'description' => 'Item 1 description',
                 'sku' => 'ITEM1',
                 'price' => 100,
-                'quantity' => 10,
+                'stock' => 10,
                 'category_id' => $category_id_product,
                 'type' => ItemType::PRODUCT->value,
             ]);
@@ -34,7 +34,7 @@ class ItemSeeder extends Seeder
                 'description' => 'Item 2 description',
                 'sku' => 'ITEM2',
                 'price' => 200,
-                'quantity' => 20,
+                'stock' => 20,
                 'category_id' => $category_id_service,
                 'type' => ItemType::SERVICE->value,
             ]);
@@ -43,7 +43,7 @@ class ItemSeeder extends Seeder
                 'description' => 'Item 3 description',
                 'sku' => 'ITEM3',
                 'price' => 300,
-                'quantity' => 30,
+                'stock' => 30,
                 'category_id' => $category_id_service,
                 'type' => ItemType::SERVICE->value,
             ]);

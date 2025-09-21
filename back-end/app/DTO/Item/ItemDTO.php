@@ -10,14 +10,15 @@ class ItemDTO extends BaseDTO
 
     /**
      * @param string $name,
-     * @param string $description,
+     * @param ?string $description,
      * @param float $price,
-     * @param ?string $quantity,
+     * @param ?int $quantity,
      * @param ?string $sku,
      * @param int $category_id,
      * @param string $type,
      * @param ?string $duration,
      * @param ?string $service_type,
+     * @param ?int $quantity,
      */
     public function __construct(
         public string $name,
@@ -43,6 +44,7 @@ class ItemDTO extends BaseDTO
             duration: $request->duration,
             quantity: $request->quantity,
             service_type: $request->service_type ?? null,
+
         );
     }
 
@@ -69,7 +71,7 @@ class ItemDTO extends BaseDTO
     /**
      * @return array
      */
-    public function toArray(): array
+    public function toProductArray(): array
     {
         return [
             'name' => $this->name,
@@ -78,9 +80,50 @@ class ItemDTO extends BaseDTO
             'sku' => $this->sku,
             'category_id' => $this->category_id,
             'type' => $this->type,
+            'stock' => $this->quantity
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function toServiceArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'description' => $this->description,
+            'price' => $this->price,
+            'category_id' => $this->category_id,
+            'type' => $this->type,
             'duration' => $this->duration,
+            'service_type' => $this->service_type,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function toArrayVariant(): array
+    {
+        return [
+            'price' => $this->price,
+            'stock' => $this->quantity,
+            'sku' => $this->sku,
+        ];
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'description' => $this->description,
+            'price' => $this->price,
+            'category_id' => $this->category_id,
+            'type' => $this->type,
+            'duration' => $this->duration,
+            'service_type' => $this->service_type,
+            'sku' => $this->sku,
             'quantity' => $this->quantity,
-            'service_type' => $this->service_type ?? null,
         ];
     }
 }

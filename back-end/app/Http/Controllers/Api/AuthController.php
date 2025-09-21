@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\SignupRequest;
 use App\Http\Resources\Tenant\Users\UserResource;
 use App\Services\AuthService;
+use App\Services\Tenant\Users\UserService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    public function __construct(private AuthService $authService) {}
+    public function __construct(private AuthService $authService, private UserService $userService) {}
 
     /**
      * Handle user signup.
@@ -54,6 +55,9 @@ class AuthController extends Controller
             // Generate token
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            // Update last login timestamp
+            $this->userService->updateLastLoginAt($user->id);
+
             return apiResponse([
                 'token' => $token,
                 'token_type' => 'Bearer',
@@ -62,7 +66,7 @@ class AuthController extends Controller
                 'permissions' => $user->getAllPermissions()->pluck('name'),
             ], trans('app.login_successfully'), 200);
         } catch (NotFoundException $e) {
-            return apiResponse(null, $e->getMessage(), 401);
+            return apiResponse(null, $e->getMessage(), 400);
         } catch (Exception $e) {
             return apiResponse(null, $e->getMessage(), 500);
         }

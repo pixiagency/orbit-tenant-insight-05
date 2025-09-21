@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\Tenant\Users;
 
-use App\DTO\User\UserDTO;
+use App\DTO\Tenant\UserDTO;
 use App\Enums\RolesEnum;
 use App\Enums\UserType;
 use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
-class AddUserRequest extends BaseRequest
+class UserRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,12 +20,14 @@ class AddUserRequest extends BaseRequest
 
     public function rules(): array
     {
+        $userId = $this->id ?? $this->user;
+
         return [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'required|numeric|unique:users,phone',
+            'email' => ['required','email',Rule::unique('users', 'email')->ignore($userId)],
+            'password' => ['nullable','string','min:6',Rule::requiredIf($this->isMethod('POST'))],
+            'phone' => ['required','numeric',Rule::unique('users', 'phone')->ignore($userId)],
             'department_id' => 'required|exists:departments,id,is_active,1',
             'role' => ['required', Rule::exists('roles','name')],
         ];

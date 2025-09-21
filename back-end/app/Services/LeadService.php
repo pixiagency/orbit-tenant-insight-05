@@ -9,12 +9,14 @@ use App\DTO\Lead\LeadDTO;
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\Lead;
+use Auth;
 
 class LeadService extends BaseService
 {
     public function __construct(
         public Lead $model,
         public Item $itemModel,
+        public StageService $stageService,
     ) {}
 
     public function getModel(): Lead
@@ -115,7 +117,6 @@ class LeadService extends BaseService
 
     public function update(int $id, array $data)
     {
-        dd($data);
         $lead = $this->findById($id);
         $lead->update($data);
         $lead->variants()->detach();
@@ -129,9 +130,21 @@ class LeadService extends BaseService
         return $lead->fresh();
     }
 
-
     public function delete(int $id)
     {
         return $this->getQuery()->where('id', $id)->delete();
+    }
+
+    public function kanbanList()
+    {
+        return $this->stageService->queryGet(
+            withRelations: [
+                'leads' => function ($query) {
+                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'items']);
+                },
+                'pipeline'
+            ],
+            filters: ['assigned_to_id' => Auth::user()->id]
+        )->get();
     }
 }

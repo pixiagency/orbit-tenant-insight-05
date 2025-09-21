@@ -39,7 +39,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
                 'min:2',
                 'max:255'
             ],
-            'products.*.base_sku' => [
+            'products.*.sku' => [
                 'required',
                 'string',
                 'min:2',
@@ -48,7 +48,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
                 function ($attribute, $value, $fail) {
                     // Check if SKU exists in database
                     if (Item::where('sku', $value)->exists()) {
-                        $fail("The base SKU '{$value}' already exists.");
+                        $fail("The SKU '{$value}' already exists.");
                     }
                 }
             ],
@@ -79,7 +79,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
             ],
             'products.*.variants.*.attributes.*' => [
                 'required',
-                'string',
+                'integer',
                 'min:1',
                 'max:100'
             ],
@@ -116,10 +116,10 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
             'products.*.name.min' => 'Product name must be at least 2 characters.',
             'products.*.name.max' => 'Product name cannot exceed 255 characters.',
 
-            'products.*.base_sku.required' => 'Base SKU is required.',
-            'products.*.base_sku.min' => 'Base SKU must be at least 2 characters.',
-            'products.*.base_sku.max' => 'Base SKU cannot exceed 100 characters.',
-            'products.*.base_sku.regex' => 'Base SKU can only contain letters, numbers, hyphens, and underscores.',
+            'products.*.sku.required' => 'SKU is required.',
+            'products.*.sku.min' => 'SKU must be at least 2 characters.',
+            'products.*.sku.max' => 'SKU cannot exceed 100 characters.',
+            'products.*.sku.regex' => 'SKU can only contain letters, numbers, hyphens, and underscores.',
 
             'products.*.description.max' => 'Description cannot exceed 1000 characters.',
 
@@ -155,6 +155,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
      */
     public function withValidator($validator): void
     {
+
         $validator->after(function ($validator) {
             $this->validateUniqueSkusInRequest($validator);
             $this->validateAttributesExist($validator);
@@ -178,8 +179,8 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
                 $products[$productIndex]['name'] = trim($product['name']);
             }
 
-            if (isset($product['base_sku'])) {
-                $products[$productIndex]['base_sku'] = strtoupper(trim($product['base_sku']));
+            if (isset($product['sku'])) {
+                $products[$productIndex]['sku'] = strtoupper(trim($product['sku']));
             }
 
             if (isset($product['description'])) {
@@ -216,13 +217,13 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
         $skus = [];
 
         foreach ($products as $productIndex => $product) {
-            $sku = $product['base_sku'] ?? null;
+            $sku = $product['sku'] ?? null;
 
             if ($sku) {
                 if (in_array($sku, $skus)) {
                     $validator->errors()->add(
-                        "products.{$productIndex}.base_sku",
-                        "Duplicate base SKU '{$sku}' found in the request."
+                        "products.{$productIndex}.sku",
+                        "Duplicate SKU '{$sku}' found in the request."
                     );
                 } else {
                     $skus[] = $sku;
@@ -249,8 +250,8 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
         }
 
         // Get existing attributes
-        $existingAttributes = ItemAttribute::whereIn('name', $allAttributes->unique())
-            ->pluck('name')
+        $existingAttributes = ItemAttribute::whereIn('id', $allAttributes->unique())
+            ->pluck('id')
             ->toArray();
 
         // Check for missing attributes
@@ -277,20 +278,19 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
 
         foreach ($products as $productIndex => $product) {
             foreach ($product['variants'] ?? [] as $variantIndex => $variant) {
-                foreach ($variant['attributes'] ?? [] as $attributeSlug => $valueSlug) {
+                foreach ($variant['attributes'] ?? [] as $attribute_id => $value_id) {
                     // Get the attribute
-                    $attribute = ItemAttribute::where('name', $attributeSlug)->first();
-
+                    $attribute = ItemAttribute::where('id', $attribute_id)->first();
                     if ($attribute) {
                         // Check if the value exists for this attribute
                         $attributeValue = ItemAttributeValue::where('item_attribute_id', $attribute->id)
-                            ->where('value', $valueSlug)
+                            ->where('id', $value_id)
                             ->first();
 
                         if (!$attributeValue) {
                             $validator->errors()->add(
-                                "products.{$productIndex}.variants.{$variantIndex}.attributes.{$attributeSlug}",
-                                "Value '{$valueSlug}' does not exist for attribute '{$attribute->name}'."
+                                "products.{$productIndex}.variants.{$variantIndex}.attributes.{$attribute_id}",
+                                "Value '{$value_id}' does not exist for attribute '{$attribute->id}'."
                             );
                         }
                     }
@@ -342,7 +342,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
 
         // Get all required attributes
         $requiredAttributes = ItemAttribute::where('is_required', true)
-            ->pluck('slug')
+            ->pluck('id')
             ->toArray();
 
         if (empty($requiredAttributes)) {
@@ -355,8 +355,8 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
                 $missingAttributes = array_diff($requiredAttributes, $providedAttributes);
 
                 foreach ($missingAttributes as $missingAttribute) {
-                    $attribute = ItemAttribute::where('slug', $missingAttribute)->first();
-                    $attributeName = $attribute ? $attribute->name : $missingAttribute;
+                    $attribute = ItemAttribute::where('id', $missingAttribute)->first();
+                    $attributeName = $attribute ? $attribute->id : $missingAttribute;
 
                     $validator->errors()->add(
                         "products.{$productIndex}.variants.{$variantIndex}.attributes.{$missingAttribute}",
@@ -377,7 +377,7 @@ class ItemBulkStoreWithVariantsRequest extends BaseRequest
 
         foreach ($products as $productIndex => $product) {
             $attributes["products.{$productIndex}.name"] = "product #" . ($productIndex + 1) . " name";
-            $attributes["products.{$productIndex}.base_sku"] = "product #" . ($productIndex + 1) . " base SKU";
+            $attributes["products.{$productIndex}.sku"] = "product #" . ($productIndex + 1) . " SKU";
             $attributes["products.{$productIndex}.description"] = "product #" . ($productIndex + 1) . " description";
 
             foreach ($product['variants'] ?? [] as $variantIndex => $variant) {

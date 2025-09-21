@@ -225,6 +225,7 @@ return array(
   'locations' => 'Locations',
   'login_failed' => 'Login failed email/phone and password incorrect',
   'login_successfully' => 'Login successfully',
+  'account_deactivated' => 'Your account has been deactivated. Please contact administrator.',
   'map_url' => 'Map Url',
   'menu' => 'Menu',
   'name' => 'Name',

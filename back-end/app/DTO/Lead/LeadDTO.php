@@ -9,38 +9,30 @@ class LeadDTO extends BaseDTO
 {
     public function __construct(
         public ?int $contact_id,
-        public ?int $reason_id,
-        public ?int $stage_id,
-        public ?int $user_id,
-        public ?float $value,
         public ?string $status,
-        public ?array $industries = null,
-        public ?array $services = null,
-        public ?array $serviceCategories = null,
-        public ?array $customFields = null,
+        public ?int $stage_id,
+        public ?float $deal_value,
+        public ?float $win_probability,
+        public ?string $expected_close_date,
+        public ?int $assigned_to_id,
+        public ?string $notes,
+        public ?string $description,
+        public ?array $items,
     ) {}
 
     public static function fromRequest($request): BaseDTO
     {
-        $services = $request->input('services', []);
-
-        // This collects the service_id => category_id pairs out of the nested array
-        $serviceCategories = [];
-        foreach ($services as $serviceId => $nestedData) {
-            $serviceCategories[$serviceId] = $nestedData['category_id'] ?? null;
-        }
         return new self(
             contact_id: $request->contact_id,
-            reason_id: $request->reason_id,
-            user_id: $request->user_id,
             stage_id: $request->stage_id,
-            value: $request->value,
+            deal_value: $request->deal_value,
+            win_probability: $request->win_probability,
+            expected_close_date: $request->expected_close_date,
             status: $request->status,
-            industries: $request->input('industry'),
-            services: array_keys($services),  // Extract only the IDs
-            serviceCategories: $serviceCategories,
-            customFields: $request->input('custom_fields'),
-
+            assigned_to_id: $request->assigned_to_id,
+            notes: $request->notes,
+            description: $request->description,
+            items: $request->items,
         );
     }
 
@@ -48,15 +40,14 @@ class LeadDTO extends BaseDTO
     {
         return [
             'contact_id' => $this->contact_id,
-            'reason_id' => $this->reason_id,
-            'user_id' => $this->user_id,
+            'assigned_to_id' => $this->assigned_to_id,
+            'notes' => $this->notes,
+            'description' => $this->description,
             'stage_id' => $this->stage_id,
-            'value' => $this->value,
+            'deal_value' => $this->deal_value,
+            'win_probability' => $this->win_probability,
+            'expected_close_date' => $this->expected_close_date,
             'status' => $this->status,
-            'industries' => $this->industries,
-            'services' => $this->services,
-            'serviceCategories'=> $this->serviceCategories,
-            'customFields' => $this->customFields,
         ];
     }
 
@@ -64,14 +55,15 @@ class LeadDTO extends BaseDTO
     {
         return new self(
             contact_id: Arr::get($data, 'contact_id'),
-            reason_id: Arr::get($data, 'reason_id'),
             stage_id: Arr::get($data, 'stage_id'),
-            user_id: Arr::get($data, 'user_id'),
-            value: Arr::get($data, 'addrvalueess'),
+            assigned_to_id: Arr::get($data, 'assigned_to_id'),
+            notes: Arr::get($data, 'notes'),
+            description: Arr::get($data, 'description'),
+            deal_value: Arr::get($data, 'deal_value'),
+            win_probability: Arr::get($data, 'win_probability'),
+            expected_close_date: Arr::get($data, 'expected_close_date'),
             status: Arr::get($data, 'status'),
-            industries: Arr::get($data, 'industries'),
-            services: Arr::get($data, 'services'),
-            customFields: Arr::get($data, 'customFields'),
+            items: Arr::get($data, 'items'),
         );
     }
 }

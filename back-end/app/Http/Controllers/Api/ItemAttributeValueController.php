@@ -3,11 +3,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\GeneralException;
 use App\Models\Tenant\ItemAttribute;
 use App\Models\Tenant\ItemAttributeValue;
 use App\Http\Requests\Item\Attribute\CreateAttributeValueRequest;
 use App\Http\Resources\Tenant\Items\Attribute\ItemAttributeValueResource;
 use App\Http\Controllers\Controller;
+use DB;
 use Illuminate\Http\Response;
 
 class ItemAttributeValueController extends Controller
@@ -26,7 +28,17 @@ class ItemAttributeValueController extends Controller
 
     public function destroy(ItemAttribute $attribute, ItemAttributeValue $value)
     {
-        $value->delete();
-        return ApiResponse(message: 'Attribute value deleted successfully', code: Response::HTTP_OK);
+        try {
+            DB::beginTransaction();
+            if ($value->variants()->exists()) {
+                throw new GeneralException(__('app.cannot_delete_item_attribute_value_used_by_variants'));
+            }
+            $value->delete();
+            DB::commit();
+            return ApiResponse(message: 'Attribute value deleted successfully', code: Response::HTTP_OK);
+        } catch (GeneralException $e) {
+            DB::rollBack();
+            return ApiResponse(message: $e->getMessage(), code: $e->getCode());
+        }
     }
 }

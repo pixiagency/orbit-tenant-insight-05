@@ -14,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property Carbon $updated_at
  * @property mixed $roles
  */
-class UserResource extends JsonResource
+class UserShowResource extends JsonResource
 {
 
     /**
@@ -26,10 +26,11 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
             'email' => $this->email,
-            'department' => $this->department?->localized_name,
-            'last_login_at' => $this->last_login_at?->translatedFormat('Y-m-d g:i a'),
+            'phone' => $this->phone,
+            'department_id' => $this->department_id,
             'is_active' => $this->is_active,
             'role' => $this->whenLoaded('roles', fn() => $this->roles->first()?->name),
         ];

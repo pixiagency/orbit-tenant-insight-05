@@ -8,8 +8,8 @@ use App\Services\Tenant\Users\UserService;
 use App\DataTables\UsersDatatable;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserStoreRequest;
-use App\Http\Requests\Users\UserUpdateRequest;
+use App\Http\Requests\Central\Users\UserUpdateRequest;
+use App\Http\Requests\Central\Users\UserStoreRequest;
 use App\Http\Requests\Users\UserUpdateProfileRequest;
 
 class UsersController extends Controller
