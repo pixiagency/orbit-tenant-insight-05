@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DTO\Lead\LeadDTO;
+use App\DTO\Tenant\LeadDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Opportunity\OpportunityRequest;
+use App\Http\Requests\Tenant\Opportunity\OpportunityRequest;
 use App\Http\Resources\AuditOpportunityResource;
 use App\Http\Resources\Opportunity\OpportunityResource;
 use App\Http\Resources\Tenant\Opportunity\OpportunityDDLResource;
 use App\Http\Resources\Tenant\Stage\StageWithOpportunityResource;
-use App\Models\Filters\OpportunityFilter;
 use App\Models\Tenant\Lead;
 use App\Services\LeadService;
 use DB;
@@ -70,10 +69,8 @@ class OpportunityController extends Controller
     public function show($id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
+            $opportunity = $this->leadService->show($id);
             return ApiResponse(new OpportunityResource($opportunity), 'Opportunity retrieved successfully');
-        } catch (ModelNotFoundException $e) {
-            return ApiResponse(message: 'Opportunity not found', code: 404);
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);
         }
@@ -82,11 +79,11 @@ class OpportunityController extends Controller
     public function update(OpportunityRequest $request, $id)
     {
         try {
-            $opportunity = Lead::with('contact', 'city', 'stage', 'user')->findOrFail($id);
-            $opportunity->update($request->validated());
-            return ApiResponse(message: 'Opportunity updated successfully', code: 200);
-        } catch (ModelNotFoundException $e) {
-            return ApiResponse(message: 'Opportunity not found', code: 404);
+            DB::beginTransaction();
+            $opportunityDTO = LeadDTO::fromRequest($request);
+            $opportunity = $this->leadService->update($id, $opportunityDTO);
+            DB::commit();
+            return ApiResponse(message: 'Opportunity updated successfully', data: new OpportunityResource($opportunity));
         } catch (Exception $e) {
             DB::rollBack();
             return ApiResponse(message: $e->getMessage(), code: 500);

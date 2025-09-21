@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-
+use App\DTO\Tenant\LeadDTO;
 use App\QueryFilters\LeadFilters;
 use Illuminate\Database\Eloquent\Builder;
-use App\DTO\Lead\LeadDTO;
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\Lead;
@@ -114,11 +113,31 @@ class LeadService extends BaseService
         return $lead;
     }
 
-
-    public function update(int $id, array $data)
+    public function show(int $id)
     {
         $lead = $this->findById($id);
-        $lead->update($data);
+        return $lead->load('contact', 'city', 'stage', 'user', 'variants.item');
+    }
+
+
+    public function update(int $id, LeadDTO $leadDTO)
+    {
+        $lead = $this->findById($id);
+        $lead->update($leadDTO->toArray());
+
+        // dd($leadDTO->items);
+        $map = collect($leadDTO->items)->mapWithKeys(function ($row) {
+            return [
+                (int) $row['id'] => [
+                    'price'    => (float) $row['price'],
+                    'quantity' => (int) $row['quantity'],
+                ],
+            ];
+        })->all();
+        dd($map);
+
+
+        $lead->tags()->sync([$tagId => ['note' => $note, 'active' => true]], false);
         $lead->variants()->detach();
         foreach ($data['variants'] as $variant) {
             $lead->variants()->attach($variant['id'], [
@@ -140,7 +159,7 @@ class LeadService extends BaseService
         return $this->stageService->queryGet(
             withRelations: [
                 'leads' => function ($query) {
-                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'items']);
+                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'variants.item']);
                 },
                 'pipeline'
             ],
