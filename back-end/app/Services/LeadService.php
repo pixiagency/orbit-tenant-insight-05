@@ -69,48 +69,25 @@ class LeadService extends BaseService
         $item->save();
     }
 
-    public function store(array $data)
+    public function store(LeadDTO $leadDTO)
     {
-        if ($data['items']) {
-            $deal_value = 0;
-            foreach ($data['items'] as $item) {
-                $deal_value += $item['price'] * $item['quantity'];
-            }
-            $lead = Lead::create([
-                'contact_id' => $data['contact_id'],
-                'stage_id' => $data['stage_id'],
-                'status' => $data['status'],
-                'deal_value' => $deal_value,
-                'win_probability' => $data['win_probability'],
-                'expected_close_date' => $data['expected_close_date'],
-                'assigned_to_id' => $data['assigned_to_id'],
-                'notes' => $data['notes'],
-                'description' => $data['description'],
-            ]);
-
-            foreach ($data['items'] as $item) {
-                $lead->variants()->attach($item['id'], [
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-            }
-
-            $lead->load('variants.item');
-        } else {
-            $lead = Lead::create([
-                'contact_id' => $data['contact_id'],
-                'stage_id' => $data['stage_id'],
-                'status' => $data['status'],
-                'deal_value' => $data['deal_value'],
-                'win_probability' => $data['win_probability'],
-                'expected_close_date' => $data['expected_close_date'],
-                'assigned_to_id' => $data['assigned_to_id'],
-                'notes' => $data['notes'],
-                'description' => $data['description'],
-            ]);
+        if ($leadDTO->items) {
+            $leadDTO->deal_value = 0;
+            $map = collect($leadDTO->items)->mapWithKeys(function ($row) use ($leadDTO) {
+                $leadDTO->deal_value += $row['price'] * $row['quantity'];
+                return [
+                    (int) $row['id'] => [
+                        'price'    => (float) $row['price'],
+                        'quantity' => (int) $row['quantity'],
+                    ],
+                ];
+            })->all();
         }
-
-        return $lead;
+        $lead = $this->model->create($leadDTO->toArray());
+        if ($leadDTO->items) {
+            $lead->variants()->sync($map, false);
+        }
+        return $lead->load('variants.item');
     }
 
     public function show(int $id)
@@ -123,35 +100,28 @@ class LeadService extends BaseService
     public function update(int $id, LeadDTO $leadDTO)
     {
         $lead = $this->findById($id);
-        $lead->update($leadDTO->toArray());
-
-        // dd($leadDTO->items);
-        $map = collect($leadDTO->items)->mapWithKeys(function ($row) {
-            return [
-                (int) $row['id'] => [
-                    'price'    => (float) $row['price'],
-                    'quantity' => (int) $row['quantity'],
-                ],
-            ];
-        })->all();
-        dd($map);
-
-
-        $lead->tags()->sync([$tagId => ['note' => $note, 'active' => true]], false);
-        $lead->variants()->detach();
-        foreach ($data['variants'] as $variant) {
-            $lead->variants()->attach($variant['id'], [
-                'quantity' => $variant['quantity'],
-                'price' => $variant['price'],
-            ]);
+        if ($leadDTO->items) {
+            $leadDTO->deal_value = 0;
+            $map = collect($leadDTO->items)->mapWithKeys(function ($row) use ($leadDTO) {
+                $leadDTO->deal_value += $row['price'] * $row['quantity'];
+                return [
+                    (int) $row['id'] => [
+                        'price'    => (float) $row['price'],
+                        'quantity' => (int) $row['quantity'],
+                    ],
+                ];
+            })->all();
+            $lead->variants()->sync($map, false);
         }
-        $lead->load('variants.item');
-        return $lead->fresh();
+        $lead->update($leadDTO->toArray());
+        return $lead->load('variants.item');
     }
 
     public function delete(int $id)
     {
-        return $this->getQuery()->where('id', $id)->delete();
+        $lead = $this->findById($id);
+        $lead->variants()->detach();
+        return $lead->delete();
     }
 
     public function kanbanList()

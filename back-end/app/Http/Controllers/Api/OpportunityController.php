@@ -15,6 +15,7 @@ use DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class OpportunityController extends Controller
 {
@@ -38,10 +39,10 @@ class OpportunityController extends Controller
             return ($value !== null && $value !== false && $value !== '');
         });
         if ($request->has('ddl')) {
-            $opportunities = $this->leadService->index($filters, ['contact', 'city', 'stage', 'variants.item', 'user']);
+            $opportunities = $this->leadService->index($filters, ['contact.contactPhones', 'city', 'stage', 'variants.item', 'user']);
             $data = OpportunityDDLResource::collection($opportunities);
         } else {
-            $opportunities = $this->leadService->index($filters, ['contact', 'city', 'stage', 'variants.item', 'user'], $filters['per_page'] ?? 10);
+            $opportunities = $this->leadService->index($filters, ['contact.contactPhones', 'city', 'stage', 'variants.item', 'user'], $filters['per_page'] ?? 10);
             $data = OpportunityResource::collection($opportunities)->response()->getData(true);
         }
         return ApiResponse(message: 'Opportunities retrieved successfully', code: 200, data: $data);
@@ -57,12 +58,13 @@ class OpportunityController extends Controller
     {
         try {
             DB::beginTransaction();
-            $lead = $this->leadService->store($request->validated());
+            $leadDTO = LeadDTO::fromRequest($request);
+            $lead = $this->leadService->store($leadDTO);
             DB::commit();
-            return ApiResponse(message: 'Opportunity created successfully', code: 201, data: new OpportunityResource($lead));
+            return ApiResponse(message: 'Opportunity created successfully', code: Response::HTTP_CREATED, data: new OpportunityResource($lead));
         } catch (Exception $e) {
             DB::rollBack();
-            return ApiResponse(message: $e->getMessage(), code: 500);
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -93,11 +95,10 @@ class OpportunityController extends Controller
     public function destroy($id)
     {
         try {
-            $opportunity = Lead::findOrFail($id);
-            $opportunity->delete();
-            return ApiResponse(message: 'Opportunity deleted successfully', code: 200);
-        } catch (ModelNotFoundException $e) {
-            return ApiResponse(message: 'Opportunity not found', code: 404);
+            $this->leadService->delete($id);
+            return ApiResponse(message: 'Opportunity deleted successfully');
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
