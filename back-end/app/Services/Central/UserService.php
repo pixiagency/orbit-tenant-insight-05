@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Services\Tenant\Users;
+namespace App\Services\Central;
 
-use App\DTO\Tenant\UserDTO;
+use App\DTO\Central\UserDTO;
 use App\Models\Tenant\User;
 use App\QueryFilters\Tenant\UsersFilters;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Spatie\Permission\Models\Role;
 
 class UserService extends BaseService
 {
@@ -23,13 +24,6 @@ class UserService extends BaseService
     {
         $user = $this->findById($userId);
         $user->update(['last_login_at' => now()]);
-        return true;
-    }
-
-    public function toggleStatus(int $userId): bool
-    {
-        $user = $this->findById($userId);
-        $user->update(['is_active' => !$user->is_active]);
         return true;
     }
 
@@ -85,18 +79,21 @@ class UserService extends BaseService
         $data = $userDTO->toArray();
 
         // Remove role from data before updating user
-        $role = $data['role'] ?? null;
+        $roleId = $data['role'] ?? null;
+        unset($data['role']);
 
         if (!isset($data['password']))
-            $user->update(Arr::except($data, ['password','role']));
+            $user->update(Arr::except($data, ['password']));
         else
-            $user->update(Arr::except($data, ['role']));
+            $user->update($data);
 
         // Handle role assignment
+        if ($roleId) {
+            $role = Role::find($roleId);
             if ($role) {
                 // Remove existing roles and assign new one
-                $user->syncRoles([$role]);
-        
+                $user->syncRoles([$role->name]);
+            }
         }
 
         return true;
@@ -122,9 +119,11 @@ class UserService extends BaseService
     public function destroy($id)
     {
         $user = $this->findById($id);
-        // $user->deleteAttachments();
+        $user->deleteAttachments();
         $user->roles()->detach();
-    
+        if (count($user->locations) > 0) {
+            $user->locations()->detach();
+        }
         $user->delete();
         return true;
     }

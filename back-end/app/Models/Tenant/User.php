@@ -29,8 +29,14 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
-        'address',
+        'last_login_at',
         'department_id',
+        'is_active',
+    ];
+
+    protected $casts = [
+
+        'last_login_at' => 'date',
     ];
 
     /**

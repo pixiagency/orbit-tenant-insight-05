@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use App\DTO\Team\TeamDTO;
-use App\DTO\User\UserDTO;
+use App\DTO\Tenant\UserDTO;
 use App\Models\Team;
-use App\Models\User;
-use App\QueryFilters\UsersFilters;
+use App\QueryFilters\Tenant\UsersFilters;
 use App\Services\BaseService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;

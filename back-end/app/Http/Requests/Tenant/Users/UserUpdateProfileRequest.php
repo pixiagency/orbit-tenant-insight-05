@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Users;
+namespace App\Http\Requests\Tenant\Users;
 
-use App\DTO\User\UserDTO;
 use App\Http\Requests\BaseRequest;
 
-class UserUpdateRequest extends BaseRequest
+class UserUpdateProfileRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,16 +23,10 @@ class UserUpdateRequest extends BaseRequest
     {
         return [
             'name' => 'required|string',
-            'email' => 'required|email|unique:users,email,'.$this->user,
+            'email' => 'required|email|unique:users,email,'.auth()->user()->id,
             'password' => 'nullable|string|min:6|confirmed',
-            'phone' => 'required|numeric|unique:users,phone,'.$this->user,
-            'profile_image' => 'nullable|image|mimes:jpg,png,jpeg,gif,svg',
+            'phone' => 'required|numeric|unique:users,phone,'.auth()->user()->id,
         ];
     }
 
-
-    public function toUserDTO(): UserDTO
-    {
-        return UserDTO::fromRequest($this);
-    }
 }

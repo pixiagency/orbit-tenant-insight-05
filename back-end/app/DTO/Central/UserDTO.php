@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\User;
+namespace App\DTO\Central;
 
 use App\DTO\BaseDTO;
 use Illuminate\Support\Arr;
@@ -15,7 +15,6 @@ class UserDTO extends BaseDTO
      * @param string $phone',
      * @param ?string $role',
      * @param ?int $department_id',
-     * @param ?string $lang',
      */
     
     public function __construct(
@@ -26,6 +25,7 @@ class UserDTO extends BaseDTO
         public readonly string $phone,
         public readonly ?string $role,
         public readonly ?int $department_id,
+        public readonly ?int $last_login_at,
         public readonly ?string $lang,
     ) {}
 
@@ -39,6 +39,7 @@ class UserDTO extends BaseDTO
             phone: $request->phone,
             role: $request->role,
             department_id: $request->department_id,
+            last_login_at: $request->last_login_at,
             lang: $request->lang
         );
     }
@@ -57,6 +58,7 @@ class UserDTO extends BaseDTO
             phone: Arr::get($data, 'phone'),
             role: Arr::get($data, 'role'),
             department_id: Arr::get($data, 'department_id'),
+            last_login_at: Arr::get($data, 'last_login_at'),
             lang: Arr::get($data, 'lang')
         );
     }
@@ -74,6 +76,7 @@ class UserDTO extends BaseDTO
             'phone' => $this->phone,
             'role' => $this->role,
             'department_id' => $this->department_id,
+            'last_login_at' => $this->last_login_at,
             'lang' => $this->lang
         ];
     }
