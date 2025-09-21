@@ -41,6 +41,7 @@ return array(
   'data deleted successfully' => 'تم حذف البيانات بنجاح',
   'not_found' => 'غير موجود',
   'data not found' => 'البيانات غير موجوده',
+  'account_deactivated' => 'تم إلغاء تفعيل حسابك. يرجى الاتصال بالمدير.',
 
   // Task Escalation Notifications
   'task_escalation_subject' => 'تصعيد المهمة',

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Teams;
 
-use App\DTO\User\UserDTO;
+use App\DTO\Tenant\UserDTO;
 use App\Http\Requests\BaseRequest;
 use App\Rules\UserIsLeader;
 use App\Rules\UserIsSales;

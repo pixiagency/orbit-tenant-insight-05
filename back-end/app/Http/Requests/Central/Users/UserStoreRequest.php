@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Central\Users;
 
-use App\DTO\User\UserDTO;
+use App\DTO\Tenant\UserDTO;
 use App\Http\Requests\BaseRequest;
 
 class UserStoreRequest extends BaseRequest

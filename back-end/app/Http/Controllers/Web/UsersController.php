@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Web;
 
 use Exception;
 use Illuminate\Http\Request;
-use App\Services\Tenant\Users\UserService;
+
 use App\DataTables\UsersDatatable;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserStoreRequest;
-use App\Http\Requests\Users\UserUpdateRequest;
+use App\Http\Requests\Central\Users\UserUpdateRequest;
+use App\Http\Requests\Central\Users\UserStoreRequest;
 use App\Http\Requests\Users\UserUpdateProfileRequest;
+use App\Services\Central\UserService;
 
 class UsersController extends Controller
 {

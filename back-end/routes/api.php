@@ -19,9 +19,9 @@ use \App\Http\Controllers\Api\Deals\{
 };
 use \App\Http\Controllers\Api\Users\{
     DepartmentController,
+    RoleController,
     UserController
 };
-use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\CoreController;
 use App\Http\Controllers\Api\ItemAttributeController;
 use App\Http\Controllers\Api\ItemAttributeValueController;
@@ -173,7 +173,11 @@ Route::middleware([
         });
         // Route::middleware('role:admin')->group(function () {
         Route::apiResource('users', UserController::class);
+        Route::post('users/{id}/change-active', [UserController::class, 'toggleStatus']);
         Route::get('departments', [DepartmentController::class, 'index']);
+
+        Route::apiResource('roles', RoleController::class);
+
         Route::apiResource('tasks', TaskController::class);
         Route::get('/tasks/get/statistics', [TaskController::class, 'statistics']);
         Route::post('/tasks/{id}/change-status', [TaskController::class, 'changeStatus']);
@@ -230,7 +234,7 @@ Route::middleware([
     Route::patch('opportunities/{opportunity}/change-stage', [\App\Http\Controllers\Api\OpportunityController::class, 'changeStage']);
     Route::get('opportunities/{opportunity}/activities-list', [\App\Http\Controllers\Api\OpportunityController::class, 'getActivitiesList']);
     Route::apiResource('opportunities', \App\Http\Controllers\Api\OpportunityController::class);
-    Route::get('/roles', [RoleController::class, 'index']);
+
 
     Route::apiResource('teams', \App\Http\Controllers\Api\TeamsController::class);
     Route::apiResource('clients', \App\Http\Controllers\Api\ClientController::class);

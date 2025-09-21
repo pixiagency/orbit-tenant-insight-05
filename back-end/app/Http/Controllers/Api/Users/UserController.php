@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\Users;
 
-use App\DTO\User\UserDTO;
-use App\Http\Requests\Users\AddUserRequest;
+use App\DTO\Tenant\UserDTO;
 
 use Exception;
 use Illuminate\Http\JsonResponse;
 use App\Services\Tenant\Users\UserService;
 use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Users\UserUpdateRequest;
-use App\Http\Requests\Users\UserUpdateProfileRequest;
+use App\Http\Requests\Tenant\Users\UserRequest;
+use App\Http\Requests\Tenant\Users\UserUpdateProfileRequest;
 use App\Http\Resources\Tenant\Users\UserDDLResource;
 use App\Http\Resources\Tenant\Users\UserResource;
+use App\Http\Resources\Tenant\Users\UserShowResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -48,7 +48,7 @@ class UserController extends Controller
      * @return JsonResponse
      * @throws Throwable
      */
-    public function store(AddUserRequest $request): JsonResponse
+    public function store(UserRequest $request): JsonResponse
     {
         try {
             $userDTO = UserDTO::fromRequest($request);
@@ -69,15 +69,14 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = $this->userService->findById(id: $id);
-            return view('layouts.dashboard.users.show', compact('user'));
+            $user = $this->userService->getModel()->with(['roles'])->find($id);
+            if (!$user) {
+                return apiResponse(message: trans('app.data not found'), code: 404);
+            }
+            $data = new UserShowResource($user);
+            return apiResponse($data, trans('app.data displayed successfully'));
         } catch (Exception $e) {
-            $toast = [
-                'type' => 'error',
-                'title' => 'error',
-                'message' => trans('app.there_is_an_error')
-            ];
-            return back()->with('toast', $toast);
+            return apiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
@@ -88,10 +87,14 @@ class UserController extends Controller
     public function edit($id)
     {
         try {
-            $user = $this->userService->findById(id: $id);
-            return view('layouts.dashboard.users.edit', compact('user'));
+            $user = $this->userService->getModel()->with(['roles'])->find($id);
+            if (!$user) {
+                return apiResponse(message: trans('app.data not found'), code: 404);
+            }
+            $data = new UserShowResource($user);
+            return apiResponse($data, trans('app.data displayed successfully'));
         } catch (Exception $e) {
-            return redirect()->back();
+            return apiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
@@ -100,25 +103,18 @@ class UserController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UserUpdateRequest $request, $id)
+    public function update(UserRequest $request,$id): JsonResponse
     {
         try {
-            $userDTO = $request->toUserDTO();
-            $this->userService->update($userDTO, $id);
-            $toast = [
-                'type' => 'success',
-                'title' => 'success',
-                'message' => trans('app.user_updated_successfully')
-            ];
-            return to_route('users.index')->with('toast', $toast);
+            $userDTO = UserDTO::fromRequest($request);
+            DB::beginTransaction();
+            $user = $this->userService->update($userDTO,$id);
+         
+            DB::commit();
+            return ApiResponse([], 'User updated successfully');
         } catch (Exception $e) {
-            dd($e);
-            $toast = [
-                'type' => 'error',
-                'title' => 'error',
-                'message' => trans('app.there_is_an_error')
-            ];
-            return back()->with('toast', $toast);
+            DB::rollBack();
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 
@@ -152,11 +148,31 @@ class UserController extends Controller
     {
         try {
             $this->userService->destroy(id: $id);
-            return apiResponse(message: trans('lang.success_operation'));
+            return apiResponse(message: trans('app.data deleted successfully'));
         } catch (NotFoundException $e) {
             return apiResponse(message: $e->getMessage(), code: 422);
         } catch (Exception $e) {
             return apiResponse(message: trans('lang.something_went_wrong'), code: 422);
+        }
+    }
+
+    /**
+     * Toggle user status (activate/deactivate)
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function toggleStatus($id): JsonResponse
+    {
+        try {
+            $this->userService->toggleStatus($id);
+            $user = $this->userService->findById($id);
+            $status = $user->is_active ? 'activated' : 'deactivated';
+            return ApiResponse([], "User {$status} successfully");
+        } catch (NotFoundException $e) {
+            return ApiResponse(message: $e->getMessage(), code: 404);
+        } catch (Exception $e) {
+            return ApiResponse(message: $e->getMessage(), code: 500);
         }
     }
 }
