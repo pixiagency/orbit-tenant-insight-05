@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-
+use App\DTO\Tenant\LeadDTO;
 use App\QueryFilters\LeadFilters;
 use Illuminate\Database\Eloquent\Builder;
-use App\DTO\Lead\LeadDTO;
 use App\Exceptions\GeneralException;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\Lead;
@@ -51,6 +50,15 @@ class LeadService extends BaseService
         return $leads->filter(new LeadFilters($filters));
     }
 
+    public function index(array $filters = [], array $withRelations = [], ?int $perPage = null)
+    {
+        $query = $this->queryGet(filters: $filters, withRelations: $withRelations);
+        if ($perPage) {
+            return $query->paginate($perPage);
+        }
+        return $query->get();
+    }
+
     private function checkItemQuantityThenUpdate(int $itemId, int $quantity)
     {
         $item = $this->itemModel->find($itemId);
@@ -61,67 +69,59 @@ class LeadService extends BaseService
         $item->save();
     }
 
-    public function store(array $data)
+    public function store(LeadDTO $leadDTO)
     {
-        if ($data['items']) {
-            $deal_value = 0;
-            foreach ($data['items'] as $item) {
-                $this->checkItemQuantityThenUpdate($item['id'], $item['quantity']);
-
-                $deal_value += $item['price'] * $item['quantity'];
-            }
-
-            $lead = Lead::create([
-                'contact_id' => $data['contact_id'],
-                'stage_id' => $data['stage_id'],
-                'status' => $data['status'],
-                'deal_value' => $deal_value,
-                'win_probability' => $data['win_probability'],
-                'expected_close_date' => $data['expected_close_date'],
-                'assigned_to_id' => $data['assigned_to_id'],
-                'notes' => $data['notes'],
-                'description' => $data['description'],
-            ]);
-
-            foreach ($data['items'] as $item) {
-                $lead->items()->attach($item['id'], [
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-            }
-
-            $lead->load('items');
-        } else {
-            $lead = Lead::create([
-                'contact_id' => $data['contact_id'],
-                'stage_id' => $data['stage_id'],
-                'status' => $data['status'],
-                'deal_value' => $data['deal_value'],
-                'win_probability' => $data['win_probability'],
-                'expected_close_date' => $data['expected_close_date'],
-                'assigned_to_id' => $data['assigned_to_id'],
-                'notes' => $data['notes'],
-                'description' => $data['description'],
-            ]);
+        if ($leadDTO->items) {
+            $leadDTO->deal_value = 0;
+            $map = collect($leadDTO->items)->mapWithKeys(function ($row) use ($leadDTO) {
+                $leadDTO->deal_value += $row['price'] * $row['quantity'];
+                return [
+                    (int) $row['id'] => [
+                        'price'    => (float) $row['price'],
+                        'quantity' => (int) $row['quantity'],
+                    ],
+                ];
+            })->all();
         }
+        $lead = $this->model->create($leadDTO->toArray());
+        if ($leadDTO->items) {
+            $lead->variants()->sync($map, false);
+        }
+        return $lead->load('variants.item');
+    }
 
-        return $lead;
+    public function show(int $id)
+    {
+        $lead = $this->findById($id);
+        return $lead->load('contact', 'city', 'stage', 'user', 'variants.item');
     }
 
 
     public function update(int $id, LeadDTO $leadDTO)
     {
         $lead = $this->findById($id);
+        if ($leadDTO->items) {
+            $leadDTO->deal_value = 0;
+            $map = collect($leadDTO->items)->mapWithKeys(function ($row) use ($leadDTO) {
+                $leadDTO->deal_value += $row['price'] * $row['quantity'];
+                return [
+                    (int) $row['id'] => [
+                        'price'    => (float) $row['price'],
+                        'quantity' => (int) $row['quantity'],
+                    ],
+                ];
+            })->all();
+            $lead->variants()->sync($map, false);
+        }
         $lead->update($leadDTO->toArray());
-        // if ($leadDTO->items) {
-        //     $lead->items()->sync($leadDTO->items);
-        // }
-        return $lead->load('items'); 
+        return $lead->load('variants.item');
     }
 
     public function delete(int $id)
     {
-        return $this->getQuery()->where('id', $id)->delete();
+        $lead = $this->findById($id);
+        $lead->variants()->detach();
+        return $lead->delete();
     }
 
     public function kanbanList()
@@ -129,7 +129,7 @@ class LeadService extends BaseService
         return $this->stageService->queryGet(
             withRelations: [
                 'leads' => function ($query) {
-                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'items']);
+                    $query->where('assigned_to_id', Auth::user()->id)->with(['user', 'contact', 'variants.item']);
                 },
                 'pipeline'
             ],

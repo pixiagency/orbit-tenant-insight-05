@@ -49,10 +49,8 @@ class ContactService extends BaseService
 
     public function store(ContactDTO $contactDTO)
     {
-        $contactData = $contactDTO->toArray();
-
         // Create the contact
-        $contact = $this->model->create($contactData);
+        $contact = $this->model->create($contactDTO->toArray());
         $this->contactPhoneService->store($contactDTO->contact_phones, $contact->id);
 
         $contact->load('country', 'city', 'user', 'source', 'contactPhones');

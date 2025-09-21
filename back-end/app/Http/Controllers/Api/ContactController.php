@@ -40,8 +40,13 @@ class ContactController extends Controller
                 return ($value !== null && $value !== false && $value !== '');
             });
             $withRelations = ['country', 'city', 'user', 'source', 'contactPhones'];
-            $contacts = $this->contactService->index($filters, $withRelations);
-            $data = ContactResource::collection($contacts)->response()->getData(true);
+            if ($request->has('ddl')) {
+                $contacts = $this->contactService->index($filters, $withRelations);
+                $data = ContactResource::collection($contacts);
+            } else {
+                $contacts = $this->contactService->index($filters, $withRelations, $filters['per_page'] ?? 10);
+                $data = ContactResource::collection($contacts)->response()->getData(true);
+            }
             return apiResponse($data, 'Contacts retrieved successfully');
         } catch (Exception $e) {
             return ApiResponse(message: $e->getMessage(), code: 500);

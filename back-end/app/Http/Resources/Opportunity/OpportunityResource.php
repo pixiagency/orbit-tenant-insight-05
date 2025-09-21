@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Opportunity;
 
 use App\Http\Resources\ContactResource;
+use App\Http\Resources\ItemProductVariantResource;
 use App\Http\Resources\StageResource;
 use App\Http\Resources\Tenant\Items\ItemPovitResource;
 use App\Http\Resources\Tenant\Users\UserResource;
@@ -18,6 +19,8 @@ class OpportunityResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
+        // dd($this->variants);
         return [
             'id' => $this->id,
             'status' => $this->status,
@@ -29,7 +32,7 @@ class OpportunityResource extends JsonResource
             'description' => $this->description,
             'contact' => $this->whenLoaded('contact', fn() => new ContactResource($this->contact)),
             'stage' => $this->whenLoaded('stage', fn() => new StageResource($this->stage)),
-            'items' => $this->whenLoaded('items', fn() => ItemPovitResource::collection($this->items)),
+            'items' => $this->whenLoaded('variants', fn() => ItemProductVariantResource::collection($this->variants)),
         ];
     }
 }

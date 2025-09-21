@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Opportunity;
+namespace App\Http\Requests\Tenant\Opportunity;
 
 use App\Enums\OpportunityStatus;
 use Illuminate\Foundation\Http\FormRequest;
@@ -15,6 +15,7 @@ class OpportunityRequest extends FormRequest
 
     public function rules(): array
     {
+
         $required = $this->isMethod('put') ? 'sometimes' : 'required';
         return [
             'contact_id' => $required . '|exists:contacts,id',
@@ -26,9 +27,9 @@ class OpportunityRequest extends FormRequest
             'assigned_to_id' => $required . '|exists:users,id',
             'notes' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:255',
-            'items' => $required . '|array',
-            'items.*.id' => 'required|exists:items,id',
-            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'items' => 'nullable|array',
+            'items.*.id' => 'required|exists:item_variants,id',
+            'items.*.quantity' => ['nullable', 'integer', 'min:1'],
             'items.*.price' => 'nullable|numeric',
         ];
     }

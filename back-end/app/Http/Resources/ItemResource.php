@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Http\Resources\landloardLocation\CityResource;
-use App\Http\Resources\landloardLocation\CountryResource;
 use App\Http\Resources\Tenant\ItemCategory\ItemCategoryDDLResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

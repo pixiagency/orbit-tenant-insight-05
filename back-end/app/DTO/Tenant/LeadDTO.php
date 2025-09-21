@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\Lead;
+namespace App\DTO\Tenant;
 
 use App\DTO\BaseDTO;
 use Illuminate\Support\Arr;
@@ -24,11 +24,11 @@ class LeadDTO extends BaseDTO
     {
         return new self(
             contact_id: $request->contact_id,
+            status: $request->status,
             stage_id: $request->stage_id,
             deal_value: $request->deal_value,
             win_probability: $request->win_probability,
             expected_close_date: $request->expected_close_date,
-            status: $request->status,
             assigned_to_id: $request->assigned_to_id,
             notes: $request->notes,
             description: $request->description,

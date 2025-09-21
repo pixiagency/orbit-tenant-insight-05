@@ -38,7 +38,8 @@ class ContactRequest extends FormRequest
             'department' => 'nullable|string|max:255',
             'status' => ['nullable', Rule::enum(ContactStatus::class)],
             'source_id' => 'nullable|exists:sources,id',
-
+            'campaign_name' => 'nullable|string|max:255',
+            
             // communication preferences
             'contact_method' => ['nullable', Rule::enum(ContactMethods::class)],
             'email_permission' => 'nullable|boolean',

@@ -102,8 +102,15 @@ class Lead extends Model implements Auditable
         return $this->belongsTo(Stage::class);
     }
 
-    public function items()
+    public function variants()
     {
-        return $this->belongsToMany(Item::class, 'leads_items', 'lead_id', 'item_id')->withPivot('quantity', 'price');
+        return $this->belongsToMany(ItemVariant::class, 'leads_variants', 'lead_id', 'item_variant_id')->withPivot('quantity', 'price');
+    }
+    // Lead has many Stages (Many-to-Many)
+    public function stages()
+    {
+        return $this->belongsToMany(Stage::class, 'lead_stage')
+            ->withPivot('start_date', 'exit_date', 'pipline_id')
+            ->withTimestamps();
     }
 }

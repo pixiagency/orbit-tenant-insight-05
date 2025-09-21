@@ -31,6 +31,7 @@ return new class extends Migration
             $table->boolean('phone_permission')->nullable()->default(0);
             $table->boolean('whatsapp_permission')->nullable()->default(0);
             $table->string('company_name')->nullable();
+            $table->string('campaign_name')->nullable();
             $table->string('website')->nullable();
             $table->enum('industry', IndustryStatus::values())->nullable();
             $table->enum('company_size', CompanySizes::values())->nullable();
@@ -64,6 +65,7 @@ return new class extends Migration
             $table->boolean('phone_permission')->nullable()->default(0);
             $table->boolean('whatsapp_permission')->nullable()->default(0);
             $table->string('company_name')->nullable();
+            $table->string('campaign_name')->nullable();
             $table->string('website')->nullable();
             $table->enum('industry', IndustryStatus::values())->nullable();
             $table->enum('company_size', CompanySizes::values())->nullable();
